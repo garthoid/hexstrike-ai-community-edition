@@ -981,18 +981,6 @@ TOOLS: Dict[str, dict] = {
         "optional": {"channel": 6, "auth_mode": "", "attack_type": "", "negotiate": "", "cert_path": ""},
         "effectiveness": 0.88,
     },
-    "aircrack-ng": {
-        "desc": "Crack WPA/WPA2 PSK from captured handshake files using a wordlist.",
-        "endpoint": "/api/tools/wifi_pentest/aircrack_ng",
-        "method": "POST",
-        "category": "wifi_pentest",
-        "params": {
-            "capture_files": {"required": True},
-            "wordlist":      {"required": True},
-        },
-        "optional": {"bssid": ""},
-        "effectiveness": 0.91,
-    },
     "airmon-ng": {
         "desc": "Enable or disable monitor mode on a wireless interface.",
         "endpoint": "/api/tools/wifi_pentest/airmon_ng",
