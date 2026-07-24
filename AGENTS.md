@@ -8,7 +8,7 @@
 - Primary entrypoints: `nyxstrike_server.py`, `nyxstrike_mcp.py`
 - Config helpers: `config.py`, `core/config_core.py`
 - Tools registry: `tool_registry.py`
-- Tests directory exists but is currently empty of test modules.
+- Tests directory contains 20 files with 509 tests, collects cleanly under pytest.
 
 ## Build, lint, test commands
 
@@ -34,10 +34,9 @@ nyxstrike-env/bin/python3 nyxstrike_mcp.py --server http://localhost:8888
 
 ### Tests
 
-This repo appears to use pytest (there is a `.pytest_cache`), but no test files are
-present under `tests/` right now. If you add tests, prefer pytest.
+This repo uses pytest. `tests/` has 20 files and 509 tests.
 
-Run all tests (if any are added):
+Run all tests:
 
 ```bash
 pytest

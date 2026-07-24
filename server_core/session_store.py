@@ -2,8 +2,8 @@
 Session Store — JSON file persistence for scan sessions.
 
 Saves scan sessions to disk so they survive server restarts.
-Implements checkpoint/resume pattern
-from skills/autonomous-mode/autonomous-agent-patterns and durable execution from skills/workflow-automation.
+Implements a checkpoint/resume pattern for durable execution, in the same
+spirit as the patterns under skills/ (e.g. web-vuln, exploitation).
 
 Design notes (senior-engineering/architecture):
   - SRP: this module only handles disk I/O for sessions
