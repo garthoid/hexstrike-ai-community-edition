@@ -932,7 +932,7 @@ TOOLS: Dict[str, dict] = {
         "method": "POST",
         "category": "osint",
         "params": {"domain": {"required": True}},
-        "optional": {"additional_args": ""},
+        "optional": {"dns_server": "", "additional_args": ""},
         "effectiveness": 0.75,
     },
     "dnsenum": {
@@ -941,7 +941,7 @@ TOOLS: Dict[str, dict] = {
         "method": "POST",
         "category": "osint",
         "params": {"domain": {"required": True}},
-        "optional": {"additional_args": ""},
+        "optional": {"dns_server": "", "wordlist": "", "additional_args": ""},
         "effectiveness": 0.78,
     },
     "gau": {

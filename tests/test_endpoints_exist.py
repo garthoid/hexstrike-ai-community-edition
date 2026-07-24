@@ -406,6 +406,14 @@ class TestNetworkLookup:
         r = _post(client, "/api/tools/whois")
         assert_route_exists(r, "/api/tools/whois")
 
+    def test_dig(self, client):
+        r = _post(client, "/api/tools/dig")
+        assert_route_exists(r, "/api/tools/dig")
+
+    def test_http_headers(self, client):
+        r = _post(client, "/api/tools/http-headers")
+        assert_route_exists(r, "/api/tools/http-headers")
+
 
 # ===========================================================================
 # Reconnaissance

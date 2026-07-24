@@ -170,9 +170,7 @@ TOOL_PROFILES = {
 
     #Tools for network information gathering and lookups (e.g., WHOIS).
     "net_lookup": [
-        lambda mcp, client, logger: register_whois(mcp, client, logger),
-        lambda mcp, client, logger: register_http_headers(mcp, client, logger),
-        lambda mcp, client, logger: register_dig(mcp, client, logger),
+        lambda mcp, client, logger: register_net_lookup_tools(mcp, client, logger),
     ],
 
     #Tools for reconnaissance and enumeration (e.g., BBot).
@@ -281,8 +279,7 @@ TOOL_PROFILES = {
 
     #Tools for DNS enumeration and subdomain takeover detection (e.g., Fierce, DNSenum).
     "dns_enum": [
-        lambda mcp, client, logger: register_fierce_tool(mcp, client, logger),
-        lambda mcp, client, logger: register_dnsenum_tool(mcp, client, logger),
+        lambda mcp, client, logger: register_dns_enum_tools(mcp, client, logger),
     ],
     
     #Tools for error handling and statistics collection to improve reliability and debugging.

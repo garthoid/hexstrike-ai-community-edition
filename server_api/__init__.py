@@ -19,7 +19,7 @@ from .credential_harvest import *
 from .crypto_attack import *
 from .data_processing import *
 from .db_query import *
-from .dns_enum import *
+from . import dns_enum
 from .error_handling import *
 from .exploit_framework import *
 from .file_carving import *
@@ -28,7 +28,7 @@ from .iac_scan import *
 from .k8s_scan import *
 from .memory_forensics import *
 from .metadata_extract import *
-from .net_lookup import *
+from . import net_lookup
 from .net_scan import *
 from .ops import *
 from .param_discovery import *
@@ -220,9 +220,9 @@ def register_blueprints(app):
   # WAF Detection
   app.register_blueprint(api_waf_detect_wafw00f_bp)
 
-  # DNS Enumeration
-  app.register_blueprint(api_dns_enum_fierce_bp)
-  app.register_blueprint(api_dns_enum_dnsenum_bp)
+  # DNS Enumeration (ToolSpec-driven — see server_core/tool_specs/dns_enum.py)
+  for bp in dns_enum.BLUEPRINTS:
+    app.register_blueprint(bp)
 
   # AI Payload
   app.register_blueprint(api_ai_payload_generate_payload_bp)
@@ -252,10 +252,9 @@ def register_blueprints(app):
   app.register_blueprint(api_net_scan_masscan_bp)
   app.register_blueprint(api_net_scan_nmap_advanced_bp)
 
-  # Network Lookup
-  app.register_blueprint(api_net_lookup_whois_bp)
-  app.register_blueprint(api_net_lookup_http_headers_bp)
-  app.register_blueprint(api_net_lookup_dig_bp)
+  # Network Lookup (ToolSpec-driven — see server_core/tool_specs/net_lookup.py)
+  for bp in net_lookup.BLUEPRINTS:
+    app.register_blueprint(bp)
 
   # Credential Harvesting
   app.register_blueprint(api_credential_harvest_responder_bp)
