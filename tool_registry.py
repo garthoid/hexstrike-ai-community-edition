@@ -1617,7 +1617,7 @@ TOOLS: Dict[str, dict] = {
         "method": "POST",
         "category": "api",
         "params": {"base_url": {"required": True}},
-        "optional": {"method": "GET", "wordlist": "/usr/share/wordlists/dirb/common.txt", "endpoints": []},
+        "optional": {"endpoints": [], "methods": ["GET", "POST", "PUT", "DELETE"], "wordlist": "/usr/share/wordlists/api/api-endpoints.txt"},
         "effectiveness": 0.80,
         "parent_tool": "ffuf",
     },

@@ -6,7 +6,7 @@ from .settings import *
 from .ctf import *
 from .process import *
 from .api_audit import *
-from .api_fuzz import *
+from . import api_fuzz
 from .api_scan import *
 from .binary_analysis import *
 from .binary_debug import *
@@ -17,7 +17,7 @@ from .cloud_visual import *
 from .container_scan import *
 from .credential_harvest import *
 from .crypto_attack import *
-from .data_processing import *
+from . import data_processing
 from .db_query import *
 from . import dns_enum
 from .error_handling import *
@@ -31,7 +31,7 @@ from .metadata_extract import *
 from . import net_lookup
 from .net_scan import *
 from .ops import *
-from .param_discovery import *
+from . import param_discovery
 from .param_fuzz import *
 from .password_cracking import *
 from .recon import *
@@ -209,10 +209,9 @@ def register_blueprints(app):
   # URL Filter
   app.register_blueprint(api_url_filter_uro_bp)
 
-  # Parameter Discovery
-  app.register_blueprint(api_param_discovery_arjun_bp)
-  app.register_blueprint(api_param_discovery_paramspider_bp)
-  app.register_blueprint(api_param_discovery_x8_bp)
+  # Parameter Discovery (ToolSpec-driven — see server_core/tool_specs/param_discovery.py)
+  for bp in param_discovery.BLUEPRINTS:
+    app.register_blueprint(bp)
 
   # Parameter Fuzzing
   app.register_blueprint(api_param_fuzz_qsreplace_bp)
@@ -228,9 +227,9 @@ def register_blueprints(app):
   app.register_blueprint(api_ai_payload_generate_payload_bp)
   app.register_blueprint(api_ai_payload_test_payload_bp)
 
-  # API Fuzzing
-  app.register_blueprint(api_api_fuzz_api_fuzzer_bp)
-  app.register_blueprint(api_api_fuzz_schemathesis_bp)
+  # API Fuzzing (ToolSpec-driven — see server_core/tool_specs/api_fuzz.py)
+  for bp in api_fuzz.BLUEPRINTS:
+    app.register_blueprint(bp)
 
   # API Scanning
   app.register_blueprint(api_api_scan_graphql_scanner_bp)
@@ -276,9 +275,9 @@ def register_blueprints(app):
   # Crypto Attack
   app.register_blueprint(api_crypto_attack_hashpump_bp)
 
-  # Data Processing
-  app.register_blueprint(api_data_processing_anew_bp)
-  app.register_blueprint(api_data_processing_hurl_bp)
+  # Data Processing (ToolSpec-driven — see server_core/tool_specs/data_processing.py)
+  for bp in data_processing.BLUEPRINTS:
+    app.register_blueprint(bp)
 
   # Container Scanning
   app.register_blueprint(api_container_scan_trivy_bp)

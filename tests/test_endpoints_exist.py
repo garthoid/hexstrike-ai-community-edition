@@ -654,6 +654,10 @@ class TestAPIFuzzingAndScanning:
         r = _post(client, "/api/tools/api_fuzzer")
         assert_route_exists(r, "/api/tools/api_fuzzer")
 
+    def test_schemathesis(self, client):
+        r = _post(client, "/api/tools/api_fuzz/schemathesis")
+        assert_route_exists(r, "/api/tools/api_fuzz/schemathesis")
+
     def test_graphql_scanner(self, client):
         r = _post(client, "/api/tools/graphql_scanner")
         assert_route_exists(r, "/api/tools/graphql_scanner")

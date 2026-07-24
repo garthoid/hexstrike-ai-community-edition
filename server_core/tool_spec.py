@@ -31,7 +31,20 @@ class ToolSpec:
     postprocess: Optional[Callable[[Any, Dict[str, Any]], dict]] = None
     use_cache: bool = True
     timeout: Optional[int] = None
+    timeout_param: Optional[str] = None
     use_recovery: bool = False
+
+
+class ToolValidationError(Exception):
+    """Raised by a build_command to signal a 400 response richer than the plain
+    "<param> parameter is required" check the blueprint factory does automatically
+    (e.g. an invalid enum value, or a required external binary that isn't installed).
+    """
+
+    def __init__(self, error: str, **extra: Any):
+        super().__init__(error)
+        self.error = error
+        self.extra = extra
 
 
 def to_tool_definition(spec: ToolSpec) -> dict:

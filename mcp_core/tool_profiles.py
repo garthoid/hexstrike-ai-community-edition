@@ -64,8 +64,7 @@ TOOL_PROFILES = {
 
     #Tools for API fuzzing and endpoint discovery (e.g., API Fuzzer with intelligent parameter discovery).
     "api_fuzz": [
-        lambda mcp, client, logger: register_api_fuzzer_tool(mcp, client, logger),
-        lambda mcp, client, logger: register_api_fuzz_schemathesis_tool(mcp, client, logger),
+        lambda mcp, client, logger: register_api_fuzz_tools(mcp, client, logger),
     ],
 
     #Tools for API scanning (e.g., GraphQL Scanner with enhanced security testing).
@@ -245,9 +244,7 @@ TOOL_PROFILES = {
 
     #Tools for parameter discovery and fuzzing (e.g., Arju0n, ParamSpider, x8).
     "param_discovery": [
-        lambda mcp, client, logger: register_arjun_tool(mcp, client, logger),
-        lambda mcp, client, logger: register_paramspider_tool(mcp, client, logger),
-        lambda mcp, client, logger: register_x8_tool(mcp, client, logger),
+        lambda mcp, client, logger: register_param_discovery_tools(mcp, client, logger),
     ],
 
     #Tools for query string parameter replacement (e.g., qsreplace).
@@ -257,8 +254,7 @@ TOOL_PROFILES = {
 
     #Tools for data processing and unique line filtering (e.g., anew).
     "data_processing": [
-        lambda mcp, client, logger: register_anew_tool(mcp, client, logger),
-        lambda mcp, client, logger: register_hurl_tool(mcp, client, logger),
+        lambda mcp, client, logger: register_data_processing_tools(mcp, client, logger),
     ],
 
     #Tools for URL filtering and duplicate removal (e.g., uro).

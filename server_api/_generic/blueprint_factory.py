@@ -10,7 +10,7 @@ import logging
 from flask import Blueprint, jsonify, request
 
 from server_core.command_executor import execute_command
-from server_core.tool_spec import ToolSpec
+from server_core.tool_spec import ToolSpec, ToolValidationError
 
 logger = logging.getLogger(__name__)
 
@@ -29,12 +29,19 @@ def make_blueprint(spec: ToolSpec) -> Blueprint:
                     return jsonify({"error": f"{p.name} parameter is required"}), 400
                 params[p.name] = value
 
+            timeout = spec.timeout
+            if spec.timeout_param:
+                try:
+                    timeout = int(params[spec.timeout_param])
+                except (KeyError, TypeError, ValueError):
+                    timeout = spec.timeout
+
             commands = spec.build_command(params)
             if isinstance(commands, str):
                 raw = execute_command(
                     commands,
                     use_cache=spec.use_cache,
-                    timeout=spec.timeout,
+                    timeout=timeout,
                     use_recovery=spec.use_recovery,
                 )
             else:
@@ -42,7 +49,7 @@ def make_blueprint(spec: ToolSpec) -> Blueprint:
                     execute_command(
                         cmd,
                         use_cache=spec.use_cache,
-                        timeout=spec.timeout,
+                        timeout=timeout,
                         use_recovery=spec.use_recovery,
                     )
                     for cmd in commands
@@ -50,6 +57,8 @@ def make_blueprint(spec: ToolSpec) -> Blueprint:
 
             result = spec.postprocess(raw, params) if spec.postprocess else raw
             return jsonify(result)
+        except ToolValidationError as e:
+            return jsonify({"error": e.error, **e.extra}), 400
         except Exception as e:
             logger.error(f"💥 Error in {spec.name} endpoint: {e}")
             return jsonify({"error": f"Server error: {e}"}), 500

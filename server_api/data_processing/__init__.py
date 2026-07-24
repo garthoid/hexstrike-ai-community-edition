@@ -1,2 +1,4 @@
-from .anew import *
-from .hurl import *
+from server_core.tool_specs.data_processing import SPECS
+from server_api._generic.blueprint_factory import make_blueprint
+
+BLUEPRINTS = [make_blueprint(spec) for spec in SPECS]
