@@ -1321,7 +1321,7 @@ TOOLS: Dict[str, dict] = {
         "method": "POST",
         "category": "web_vuln",
         "params": {"endpoint": {"required": True}},
-        "optional": {"introspection": True, "query_depth": 10, "mutations": True},
+        "optional": {"introspection": True, "query_depth": 10, "test_mutations": True},
         "effectiveness": 0.85,
     },
     "jwt-analyzer": {
@@ -1960,6 +1960,15 @@ TOOLS: Dict[str, dict] = {
     "aircrack-ng": {
         "desc": "WiFi password cracking tool for WEP/WPA/WPA2 handshakes",
         "endpoint": "/api/tools/password_cracking/aircrack_ng",
+        "method": "POST",
+        "category": "wifi_pentest",
+        "params": {"capture_files": {"required": True}, "wordlist": {"required": True}},
+        "optional": {"bssid": ""},
+        "effectiveness": 0.85,
+    },
+    "aircrack-ng-wifi": {
+        "desc": "WiFi password cracking tool for WEP/WPA/WPA2 handshakes (wifi_pentest endpoint variant)",
+        "endpoint": "/api/tools/wifi_pentest/aircrack_ng",
         "method": "POST",
         "category": "wifi_pentest",
         "params": {"capture_files": {"required": True}, "wordlist": {"required": True}},

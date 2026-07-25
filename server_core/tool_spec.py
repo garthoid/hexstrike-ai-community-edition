@@ -61,3 +61,16 @@ def to_tool_definition(spec: ToolSpec) -> dict:
         "params": {p.name: {"required": True} for p in spec.params if p.required},
         "optional": {p.name: p.default for p in spec.params if not p.required},
     }
+
+
+def iter_all_specs():
+    """Yield every ToolSpec across all server_core/tool_specs/<category>.py modules.
+    """
+    import importlib
+    import pkgutil
+
+    import server_core.tool_specs as _tool_specs_pkg
+
+    for _, module_name, _ in pkgutil.iter_modules(_tool_specs_pkg.__path__):
+        module = importlib.import_module(f"server_core.tool_specs.{module_name}")
+        yield from getattr(module, "SPECS", None) or []
