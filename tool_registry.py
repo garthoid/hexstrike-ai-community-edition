@@ -1355,6 +1355,33 @@ TOOLS: Dict[str, dict] = {
         "optional": {"whitelist": "", "blacklist": "", "additional_args": ""},
         "effectiveness": 0.75,
     },
+    "api_schema_analyzer": {
+        "desc": "Analyze API schemas (OpenAPI/Swagger) for missing auth and sensitive parameter exposure",
+        "endpoint": "/api/tools/api_schema_analyzer",
+        "method": "POST",
+        "category": "api",
+        "params": {"schema_url": {"required": True}},
+        "optional": {"schema_type": "openapi"},
+        "effectiveness": 0.80,
+    },
+    "graphql_scanner": {
+        "desc": "GraphQL security scanning — introspection, query depth, and batch query testing",
+        "endpoint": "/api/tools/graphql_scanner",
+        "method": "POST",
+        "category": "api",
+        "params": {"endpoint": {"required": True}},
+        "optional": {"introspection": True, "query_depth": 10, "test_mutations": True},
+        "effectiveness": 0.83,
+    },
+    "jwt_analyzer": {
+        "desc": "JWT token analysis — algorithm/expiration checks and none-algorithm attack testing",
+        "endpoint": "/api/tools/jwt_analyzer",
+        "method": "POST",
+        "category": "api",
+        "params": {"jwt_token": {"required": True}},
+        "optional": {"target_url": ""},
+        "effectiveness": 0.83,
+    },
 
     # ---- SMB Enumeration (extended) ----
     "nbtscan": {

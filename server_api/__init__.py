@@ -7,7 +7,7 @@ from .ctf import *
 from .process import *
 from .api_audit import *
 from . import api_fuzz
-from .api_scan import *
+from . import api_scan
 from .binary_analysis import *
 from .binary_debug import *
 from .bugbounty_workflow import *
@@ -16,7 +16,7 @@ from .cloud_exploit import *
 from .cloud_visual import *
 from .container_scan import *
 from . import credential_harvest
-from .crypto_attack import *
+from . import crypto_attack
 from . import data_processing
 from .db_query import *
 from . import dns_enum
@@ -39,7 +39,7 @@ from .recon_bot import *
 from .runtime_monitor import *
 from .smb_enum import *
 from .stego_analysis import *
-from .url_filter import *
+from . import url_filter
 from .url_recon import *
 from .vuln_intel import *
 from . import vuln_scan
@@ -203,8 +203,9 @@ def register_blueprints(app):
   app.register_blueprint(api_url_recon_waybackurls_bp)
   app.register_blueprint(api_web_probe_waymore_bp)
 
-  # URL Filter
-  app.register_blueprint(api_url_filter_uro_bp)
+  # URL Filter (ToolSpec-driven — see server_core/tool_specs/url_filter.py)
+  for bp in url_filter.BLUEPRINTS:
+    app.register_blueprint(bp)
 
   # Parameter Discovery (ToolSpec-driven — see server_core/tool_specs/param_discovery.py)
   for bp in param_discovery.BLUEPRINTS:
@@ -230,10 +231,9 @@ def register_blueprints(app):
   for bp in api_fuzz.BLUEPRINTS:
     app.register_blueprint(bp)
 
-  # API Scanning
-  app.register_blueprint(api_api_scan_graphql_scanner_bp)
-  app.register_blueprint(api_api_scan_jwt_analyzer_bp)
-  app.register_blueprint(api_api_scan_api_schema_analyzer_bp)
+  # API Scanning (ToolSpec-driven — see server_core/tool_specs/api_scan.py)
+  for bp in api_scan.BLUEPRINTS:
+    app.register_blueprint(bp)
 
   # SMB Enumeration
   app.register_blueprint(api_smb_enum_nbtscan_bp)
@@ -271,8 +271,9 @@ def register_blueprints(app):
   # Metadata Extraction
   app.register_blueprint(api_metadata_extract_exiftool_bp)
 
-  # Crypto Attack
-  app.register_blueprint(api_crypto_attack_hashpump_bp)
+  # Crypto Attack (ToolSpec-driven — see server_core/tool_specs/crypto_attack.py)
+  for bp in crypto_attack.BLUEPRINTS:
+    app.register_blueprint(bp)
 
   # Data Processing (ToolSpec-driven — see server_core/tool_specs/data_processing.py)
   for bp in data_processing.BLUEPRINTS:

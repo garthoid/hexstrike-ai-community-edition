@@ -1,1 +1,7 @@
-from .uro import *
+from server_core.tool_specs.url_filter import SPECS
+from mcp_tools._generic.registrar import register_tool_from_spec
+
+
+def register_url_filter_tools(mcp, api_client, logger):
+    for spec in SPECS:
+        register_tool_from_spec(mcp, api_client, logger, spec)

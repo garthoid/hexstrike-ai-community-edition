@@ -51,7 +51,7 @@ TOOL_PROFILES = {
 
     #Tools for cryptographic attacks (e.g., HashPump).
     "crypto_attack": [
-        lambda mcp, client, logger: register_hashpump_tool(mcp, client, logger),
+        lambda mcp, client, logger: register_crypto_attack_tools(mcp, client, logger),
     ],
 
     #Tools for file carving and data recovery (e.g., Foremost).
@@ -66,9 +66,7 @@ TOOL_PROFILES = {
 
     #Tools for API scanning (e.g., GraphQL Scanner with enhanced security testing).
     "api_scan": [
-        lambda mcp, client, logger: register_graphql_scanner_tool(mcp, client, logger),
-        lambda mcp, client, logger: register_jwt_analyzer_tool(mcp, client, logger),
-        lambda mcp, client, logger: register_api_schema_analyzer(mcp, client, logger),
+        lambda mcp, client, logger: register_api_scan_tools(mcp, client, logger),
     ],
 
     #Tools for binary debugging
@@ -252,7 +250,7 @@ TOOL_PROFILES = {
 
     #Tools for URL filtering and duplicate removal (e.g., uro).
     "url_filter": [
-        lambda mcp, client, logger: register_uro_tool(mcp, client, logger),
+        lambda mcp, client, logger: register_url_filter_tools(mcp, client, logger),
     ],
 
     #Tools for web application security testing frameworks (e.g., HTTP Framework, Browser Agent).
