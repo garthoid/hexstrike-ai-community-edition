@@ -12,7 +12,7 @@ api_net_scan_nmap_bp = Blueprint("api_net_scan_nmap", __name__)
 def nmap():
     """Execute nmap scan with enhanced logging, caching, and intelligent error handling"""
     try:
-        params = request.json
+        params = request.get_json(silent=True) or {}
         target = params.get("target", "")
         scan_type = params.get("scan_type", "-sCV")
         ports = params.get("ports", "")
