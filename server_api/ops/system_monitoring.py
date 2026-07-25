@@ -78,7 +78,8 @@ def _probe_binary(check_type: str, binary: str) -> bool:
     paths_ovrrides = config_core.get("PATHS", {})
     GO_PATH = paths_ovrrides.get("GO_BINARYS", "{HOME}/go/bin/")
     GO_BINARYS = GO_PATH.replace("{HOME}", home_path)
-    
+    binary_path_overrides = config_core.get("BINARY_PATH_OVERRIDES", {})
+
     if check_type == "builtin":
         return True
     try:
@@ -107,6 +108,10 @@ def _probe_binary(check_type: str, binary: str) -> bool:
             )
             return binary in r.stdout
         elif check_type == "go":
+            override = binary_path_overrides.get(binary, "")
+            if override:
+                resolved = override.replace("{HOME}", home_path)
+                return os.path.isfile(resolved) and os.access(resolved, os.X_OK)
             r = subprocess.run(
                 ["go", "version", "-m", GO_BINARYS],
                 stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, text=True,
