@@ -1,2 +1,4 @@
-from .checkov import *
-from .terrascan import *
+from server_core.tool_specs.iac_scan import SPECS
+from server_api._generic.blueprint_factory import make_blueprint
+
+BLUEPRINTS = [make_blueprint(spec) for spec in SPECS]

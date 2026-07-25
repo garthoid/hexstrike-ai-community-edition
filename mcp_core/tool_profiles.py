@@ -308,8 +308,7 @@ TOOL_PROFILES = {
 
     #Tools for infrastructure as code security scanning (e.g., Checkov, Terrascan).
     "iac_scan": [
-        lambda mcp, client, logger: register_checkov_tool(mcp, client, logger),
-        lambda mcp, client, logger: register_terrascan_tool(mcp, client, logger),
+        lambda mcp, client, logger: register_iac_scan_tools(mcp, client, logger),
     ],
 
     #Tools for container scanning and vulnerability assessment (e.g., Trivy, Docker Bench, Clair).

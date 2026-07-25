@@ -24,7 +24,7 @@ from .error_handling import *
 from .exploit_framework import *
 from .file_carving import *
 from .gadget_search import *
-from .iac_scan import *
+from . import iac_scan
 from .k8s_scan import *
 from .memory_forensics import *
 from .metadata_extract import *
@@ -299,9 +299,9 @@ def register_blueprints(app):
   # Runtime Monitoring
   app.register_blueprint(api_runtime_monitor_falco_bp)
 
-  # IaC Scanning
-  app.register_blueprint(api_iac_scan_checkov_bp)
-  app.register_blueprint(api_iac_scan_terrascan_bp)
+  # IaC Scanning (ToolSpec-driven — see server_core/tool_specs/iac_scan.py)
+  for bp in iac_scan.BLUEPRINTS:
+    app.register_blueprint(bp)
 
   # Vulnerability Scanning
   app.register_blueprint(api_vuln_scan_nuclei_bp)
