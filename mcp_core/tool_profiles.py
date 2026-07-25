@@ -46,7 +46,7 @@ TOOL_PROFILES = {
 
     #Tools for metadata extraction (e.g., ExifTool).
     "metadata_extract": [
-        lambda mcp, client, logger: register_exiftool_tool(mcp, client, logger),
+        lambda mcp, client, logger: register_metadata_extract_tools(mcp, client, logger),
     ],
 
     #Tools for cryptographic attacks (e.g., HashPump).
@@ -56,7 +56,7 @@ TOOL_PROFILES = {
 
     #Tools for file carving and data recovery (e.g., Foremost).
     "file_carving": [
-        lambda mcp, client, logger: register_foremost_tool(mcp, client, logger),
+        lambda mcp, client, logger: register_file_carving_tools(mcp, client, logger),
     ],
 
     #Tools for API fuzzing and endpoint discovery (e.g., API Fuzzer with intelligent parameter discovery).
@@ -309,7 +309,7 @@ TOOL_PROFILES = {
 
     #Tools for runtime monitoring and anomaly detection (e.g., Falco).
     "runtime_monitor": [
-        lambda mcp, client, logger: register_falco_runtime_monitoring_tool(mcp, client, logger),
+        lambda mcp, client, logger: register_runtime_monitor_tools(mcp, client, logger),
     ],
 
     #Tools for database querying and interaction (e.g., SQLite, MySQL, PostgreSQL).

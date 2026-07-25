@@ -22,12 +22,12 @@ from .db_query import *
 from . import dns_enum
 from .error_handling import *
 from .exploit_framework import *
-from .file_carving import *
+from . import file_carving
 from .gadget_search import *
 from . import iac_scan
 from . import k8s_scan
 from . import memory_forensics
-from .metadata_extract import *
+from . import metadata_extract
 from . import net_lookup
 from .net_scan import *
 from .ops import *
@@ -36,7 +36,7 @@ from . import param_fuzz
 from .password_cracking import *
 from .recon import *
 from .recon_bot import *
-from .runtime_monitor import *
+from . import runtime_monitor
 from .smb_enum import *
 from .stego_analysis import *
 from . import url_filter
@@ -262,14 +262,16 @@ def register_blueprints(app):
   for bp in memory_forensics.BLUEPRINTS:
     app.register_blueprint(bp)
 
-  # File Carving
-  app.register_blueprint(api_file_carving_foremost_bp)
+  # File Carving (ToolSpec-driven — see server_core/tool_specs/file_carving.py)
+  for bp in file_carving.BLUEPRINTS:
+    app.register_blueprint(bp)
 
   # Steganography Analysis
   app.register_blueprint(api_stego_analysis_steghide_bp)
 
-  # Metadata Extraction
-  app.register_blueprint(api_metadata_extract_exiftool_bp)
+  # Metadata Extraction (ToolSpec-driven — see server_core/tool_specs/metadata_extract.py)
+  for bp in metadata_extract.BLUEPRINTS:
+    app.register_blueprint(bp)
 
   # Crypto Attack (ToolSpec-driven — see server_core/tool_specs/crypto_attack.py)
   for bp in crypto_attack.BLUEPRINTS:
@@ -296,8 +298,9 @@ def register_blueprints(app):
   for bp in k8s_scan.BLUEPRINTS:
     app.register_blueprint(bp)
 
-  # Runtime Monitoring
-  app.register_blueprint(api_runtime_monitor_falco_bp)
+  # Runtime Monitoring (ToolSpec-driven — see server_core/tool_specs/runtime_monitor.py)
+  for bp in runtime_monitor.BLUEPRINTS:
+    app.register_blueprint(bp)
 
   # IaC Scanning (ToolSpec-driven — see server_core/tool_specs/iac_scan.py)
   for bp in iac_scan.BLUEPRINTS:
