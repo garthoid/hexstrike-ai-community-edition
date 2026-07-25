@@ -1113,7 +1113,7 @@ TOOLS: Dict[str, dict] = {
         "method": "POST",
         "category": "cloud",
         "params": {},
-        "optional": {"additional_args": ""},
+        "optional": {"target": "", "remote": "", "cidr": "", "interface": "", "active": False, "report": "json", "additional_args": ""},
         "effectiveness": 0.82,
     },
     # ---- Bots and AI-driven tools ----

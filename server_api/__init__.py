@@ -25,7 +25,7 @@ from .exploit_framework import *
 from .file_carving import *
 from .gadget_search import *
 from . import iac_scan
-from .k8s_scan import *
+from . import k8s_scan
 from .memory_forensics import *
 from .metadata_extract import *
 from . import net_lookup
@@ -292,9 +292,9 @@ def register_blueprints(app):
   app.register_blueprint(api_cloud_exploit_cloudmapper_bp)
   app.register_blueprint(api_cloud_exploit_pacu_bp)
 
-  # Kubernetes Scanning
-  app.register_blueprint(api_k8s_scan_kube_hunter_bp)
-  app.register_blueprint(api_k8s_scan_kube_bench_bp)
+  # Kubernetes Scanning (ToolSpec-driven — see server_core/tool_specs/k8s_scan.py)
+  for bp in k8s_scan.BLUEPRINTS:
+    app.register_blueprint(bp)
 
   # Runtime Monitoring
   app.register_blueprint(api_runtime_monitor_falco_bp)

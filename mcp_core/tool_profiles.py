@@ -301,8 +301,7 @@ TOOL_PROFILES = {
 
     #Tools for Kubernetes scanning and penetration testing (e.g., kube-hunter, kube-bench).
     "k8s_scan": [
-        lambda mcp, client, logger: register_kube_hunter_tool(mcp, client, logger),
-        lambda mcp, client, logger: register_kube_bench_tool(mcp, client, logger),
+        lambda mcp, client, logger: register_k8s_scan_tools(mcp, client, logger),
     ],
 
     #Tools for infrastructure as code security scanning (e.g., Checkov, Terrascan).
