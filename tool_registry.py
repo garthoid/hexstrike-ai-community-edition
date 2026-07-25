@@ -1404,6 +1404,15 @@ TOOLS: Dict[str, dict] = {
         "optional": {"profile": "", "additional_args": ""},
         "effectiveness": 0.88,
     },
+    "volatility3": {
+        "desc": "Memory forensics framework v3 — analyse RAM dumps",
+        "endpoint": "/api/tools/volatility3",
+        "method": "POST",
+        "category": "forensics",
+        "params": {"memory_file": {"required": True}, "plugin": {"required": True}},
+        "optional": {"output_file": "", "additional_args": ""},
+        "effectiveness": 0.88,
+    },
     "foremost": {
         "desc": "File carving — recover files from disk images by file headers",
         "endpoint": "/api/tools/foremost",

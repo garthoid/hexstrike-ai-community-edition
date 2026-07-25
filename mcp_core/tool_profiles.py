@@ -108,8 +108,7 @@ TOOL_PROFILES = {
 
     #Tools for memory forensics analysis (e.g., Volatility, Volatility3).
     "memory_forensics": [
-        lambda mcp, client, logger: register_volatility_tool(mcp, client, logger),
-        lambda mcp, client, logger: register_volatility3(mcp, client, logger),
+        lambda mcp, client, logger: register_memory_forensics_tools(mcp, client, logger),
     ],
 
     #Tools for brute-forcing and cracking password hashes (e.g., Hydra, John, Hashcat, Medusa, Patator, HashId, Ophcrack, Aircrack-ng).

@@ -26,7 +26,7 @@ from .file_carving import *
 from .gadget_search import *
 from . import iac_scan
 from . import k8s_scan
-from .memory_forensics import *
+from . import memory_forensics
 from .metadata_extract import *
 from . import net_lookup
 from .net_scan import *
@@ -259,9 +259,9 @@ def register_blueprints(app):
   app.register_blueprint(api_credential_harvest_responder_bp)
   app.register_blueprint(api_credential_harvest_vaultrip_bp)
 
-  # Memory Forensics
-  app.register_blueprint(api_memory_forensics_volatility_bp)
-  app.register_blueprint(api_memory_forensics_volatility3_bp)
+  # Memory Forensics (ToolSpec-driven — see server_core/tool_specs/memory_forensics.py)
+  for bp in memory_forensics.BLUEPRINTS:
+    app.register_blueprint(bp)
 
   # File Carving
   app.register_blueprint(api_file_carving_foremost_bp)
