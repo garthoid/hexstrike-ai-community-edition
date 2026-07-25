@@ -1,3 +1,4 @@
+from server_api._generic.autoload import register_all_toolspec_blueprints
 from .ai_assist import *
 from .ai_payload import *
 from .tools_catalog import *
@@ -6,56 +7,37 @@ from .settings import *
 from .ctf import *
 from .process import *
 from .api_audit import *
-from . import api_fuzz
-from . import api_scan
 from .binary_analysis import *
 from .binary_debug import *
 from .bugbounty_workflow import *
-from . import cloud_audit
 from .cloud_exploit import *
 from .cloud_visual import *
 from .container_scan import *
-from . import credential_harvest
-from . import crypto_attack
-from . import data_processing
 from .db_query import *
-from . import dns_enum
 from .error_handling import *
 from .exploit_framework import *
-from . import file_carving
 from .gadget_search import *
-from . import iac_scan
-from . import k8s_scan
-from . import memory_forensics
-from . import metadata_extract
-from . import net_lookup
 from .net_scan import *
 from .ops import *
-from . import param_discovery
-from . import param_fuzz
 from .password_cracking import *
 from .recon import *
 from .recon_bot import *
-from . import runtime_monitor
 from .smb_enum import *
 from .stego_analysis import *
-from . import url_filter
 from .url_recon import *
 from .vuln_intel import *
-from . import vuln_scan
-from . import waf_detect
-from . import web_crawl
 from .web_framework import *
 from .web_fuzz import *
 from .web_probe import *
 from .web_scan import *
 from .wifi_pentest import *
 from .active_directory import *
-from . import osint
 from .burp_agent import *
 
 def register_blueprints(app):
   """Register all API blueprints with the Flask app."""
+
+  register_all_toolspec_blueprints(app)
 
   # OPS — System Monitoring & File Ops
   app.register_blueprint(api_system_monitoring_bp)
@@ -69,10 +51,6 @@ def register_blueprints(app):
   app.register_blueprint(api_session_reports_bp)
   app.register_blueprint(api_credentials_bp)
   app.register_blueprint(api_loot_bp)
-
-  #OSINT (ToolSpec-driven — see server_core/tool_specs/osint.py)
-  for bp in osint.BLUEPRINTS:
-    app.register_blueprint(bp)
 
   # Database
   app.register_blueprint(api_database_bp)
@@ -186,10 +164,6 @@ def register_blueprints(app):
   app.register_blueprint(api_web_scan_stingxss_bp)
   app.register_blueprint(api_web_scan_phaseaccess_bp)
 
-  # Web Crawl (ToolSpec-driven — see server_core/tool_specs/web_crawl.py)
-  for bp in web_crawl.BLUEPRINTS:
-    app.register_blueprint(bp)
-
   # Web Probe
   app.register_blueprint(api_web_probe_httpx_bp)
   app.register_blueprint(api_web_probe_testssl_bp)
@@ -203,37 +177,9 @@ def register_blueprints(app):
   app.register_blueprint(api_url_recon_waybackurls_bp)
   app.register_blueprint(api_web_probe_waymore_bp)
 
-  # URL Filter (ToolSpec-driven — see server_core/tool_specs/url_filter.py)
-  for bp in url_filter.BLUEPRINTS:
-    app.register_blueprint(bp)
-
-  # Parameter Discovery (ToolSpec-driven — see server_core/tool_specs/param_discovery.py)
-  for bp in param_discovery.BLUEPRINTS:
-    app.register_blueprint(bp)
-
-  # Parameter Fuzzing (ToolSpec-driven — see server_core/tool_specs/param_fuzz.py)
-  for bp in param_fuzz.BLUEPRINTS:
-    app.register_blueprint(bp)
-
-  # WAF Detection (ToolSpec-driven — see server_core/tool_specs/waf_detect.py)
-  for bp in waf_detect.BLUEPRINTS:
-    app.register_blueprint(bp)
-
-  # DNS Enumeration (ToolSpec-driven — see server_core/tool_specs/dns_enum.py)
-  for bp in dns_enum.BLUEPRINTS:
-    app.register_blueprint(bp)
-
   # AI Payload
   app.register_blueprint(api_ai_payload_generate_payload_bp)
   app.register_blueprint(api_ai_payload_test_payload_bp)
-
-  # API Fuzzing (ToolSpec-driven — see server_core/tool_specs/api_fuzz.py)
-  for bp in api_fuzz.BLUEPRINTS:
-    app.register_blueprint(bp)
-
-  # API Scanning (ToolSpec-driven — see server_core/tool_specs/api_scan.py)
-  for bp in api_scan.BLUEPRINTS:
-    app.register_blueprint(bp)
 
   # SMB Enumeration
   app.register_blueprint(api_smb_enum_nbtscan_bp)
@@ -250,65 +196,17 @@ def register_blueprints(app):
   app.register_blueprint(api_net_scan_masscan_bp)
   app.register_blueprint(api_net_scan_nmap_advanced_bp)
 
-  # Network Lookup (ToolSpec-driven — see server_core/tool_specs/net_lookup.py)
-  for bp in net_lookup.BLUEPRINTS:
-    app.register_blueprint(bp)
-
-  # Credential Harvesting (ToolSpec-driven — see server_core/tool_specs/credential_harvest.py)
-  for bp in credential_harvest.BLUEPRINTS:
-    app.register_blueprint(bp)
-
-  # Memory Forensics (ToolSpec-driven — see server_core/tool_specs/memory_forensics.py)
-  for bp in memory_forensics.BLUEPRINTS:
-    app.register_blueprint(bp)
-
-  # File Carving (ToolSpec-driven — see server_core/tool_specs/file_carving.py)
-  for bp in file_carving.BLUEPRINTS:
-    app.register_blueprint(bp)
-
   # Steganography Analysis
   app.register_blueprint(api_stego_analysis_steghide_bp)
-
-  # Metadata Extraction (ToolSpec-driven — see server_core/tool_specs/metadata_extract.py)
-  for bp in metadata_extract.BLUEPRINTS:
-    app.register_blueprint(bp)
-
-  # Crypto Attack (ToolSpec-driven — see server_core/tool_specs/crypto_attack.py)
-  for bp in crypto_attack.BLUEPRINTS:
-    app.register_blueprint(bp)
-
-  # Data Processing (ToolSpec-driven — see server_core/tool_specs/data_processing.py)
-  for bp in data_processing.BLUEPRINTS:
-    app.register_blueprint(bp)
 
   # Container Scanning
   app.register_blueprint(api_container_scan_trivy_bp)
   app.register_blueprint(api_container_scan_docker_bench_bp)
   app.register_blueprint(api_container_scan_clair_bp)
 
-  # Cloud Audit (ToolSpec-driven — see server_core/tool_specs/cloud_audit.py)
-  for bp in cloud_audit.BLUEPRINTS:
-    app.register_blueprint(bp)
-
   # Cloud Exploitation
   app.register_blueprint(api_cloud_exploit_cloudmapper_bp)
   app.register_blueprint(api_cloud_exploit_pacu_bp)
-
-  # Kubernetes Scanning (ToolSpec-driven — see server_core/tool_specs/k8s_scan.py)
-  for bp in k8s_scan.BLUEPRINTS:
-    app.register_blueprint(bp)
-
-  # Runtime Monitoring (ToolSpec-driven — see server_core/tool_specs/runtime_monitor.py)
-  for bp in runtime_monitor.BLUEPRINTS:
-    app.register_blueprint(bp)
-
-  # IaC Scanning (ToolSpec-driven — see server_core/tool_specs/iac_scan.py)
-  for bp in iac_scan.BLUEPRINTS:
-    app.register_blueprint(bp)
-
-  # Vulnerability Scanning (ToolSpec-driven — see server_core/tool_specs/vuln_scan.py)
-  for bp in vuln_scan.BLUEPRINTS:
-    app.register_blueprint(bp)
 
   # Vulnerability Intelligence
   app.register_blueprint(api_vulnerability_intelligence_bp)

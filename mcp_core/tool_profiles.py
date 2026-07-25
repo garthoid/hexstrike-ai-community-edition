@@ -1,5 +1,6 @@
 from mcp_core.cli_colors import CliColors
 from mcp_tools import *
+from mcp_tools._generic.registrar import register_toolspec_category
 
 def resolve_profile_dependencies(profiles):
     resolved = set()
@@ -35,8 +36,7 @@ TOOL_PROFILES = {
 
     #OSINT tools for information gathering and reconnaissance e.g. Sherlock)
     "osint": [
-        lambda mcp, client, logger: register_osint_tools(mcp, client, logger),
-        lambda mcp, client, logger: register_osint_joomscan_tool(mcp, client, logger),
+        lambda mcp, client, logger: register_toolspec_category(mcp, client, logger, "osint"),
     ],
 
     #Tools for steganography analysis (e.g., Steghide).
@@ -46,27 +46,27 @@ TOOL_PROFILES = {
 
     #Tools for metadata extraction (e.g., ExifTool).
     "metadata_extract": [
-        lambda mcp, client, logger: register_metadata_extract_tools(mcp, client, logger),
+        lambda mcp, client, logger: register_toolspec_category(mcp, client, logger, "metadata_extract"),
     ],
 
     #Tools for cryptographic attacks (e.g., HashPump).
     "crypto_attack": [
-        lambda mcp, client, logger: register_crypto_attack_tools(mcp, client, logger),
+        lambda mcp, client, logger: register_toolspec_category(mcp, client, logger, "crypto_attack"),
     ],
 
     #Tools for file carving and data recovery (e.g., Foremost).
     "file_carving": [
-        lambda mcp, client, logger: register_file_carving_tools(mcp, client, logger),
+        lambda mcp, client, logger: register_toolspec_category(mcp, client, logger, "file_carving"),
     ],
 
     #Tools for API fuzzing and endpoint discovery (e.g., API Fuzzer with intelligent parameter discovery).
     "api_fuzz": [
-        lambda mcp, client, logger: register_api_fuzz_tools(mcp, client, logger),
+        lambda mcp, client, logger: register_toolspec_category(mcp, client, logger, "api_fuzz"),
     ],
 
     #Tools for API scanning (e.g., GraphQL Scanner with enhanced security testing).
     "api_scan": [
-        lambda mcp, client, logger: register_api_scan_tools(mcp, client, logger),
+        lambda mcp, client, logger: register_toolspec_category(mcp, client, logger, "api_scan"),
     ],
 
     #Tools for binary debugging
@@ -97,12 +97,12 @@ TOOL_PROFILES = {
 
     #Tools for credential harvesting and network poisoning (e.g., Responder, VaultRip).
     "credential_harvest": [
-        lambda mcp, client, logger: register_credential_harvest_tools(mcp, client, logger),
+        lambda mcp, client, logger: register_toolspec_category(mcp, client, logger, "credential_harvest"),
     ],
 
     #Tools for memory forensics analysis (e.g., Volatility, Volatility3).
     "memory_forensics": [
-        lambda mcp, client, logger: register_memory_forensics_tools(mcp, client, logger),
+        lambda mcp, client, logger: register_toolspec_category(mcp, client, logger, "memory_forensics"),
     ],
 
     #Tools for brute-forcing and cracking password hashes (e.g., Hydra, John, Hashcat, Medusa, Patator, HashId, Ophcrack, Aircrack-ng).
@@ -162,7 +162,7 @@ TOOL_PROFILES = {
 
     #Tools for network information gathering and lookups (e.g., WHOIS).
     "net_lookup": [
-        lambda mcp, client, logger: register_net_lookup_tools(mcp, client, logger),
+        lambda mcp, client, logger: register_toolspec_category(mcp, client, logger, "net_lookup"),
     ],
 
     #Tools for reconnaissance and enumeration (e.g., BBot).
@@ -183,7 +183,7 @@ TOOL_PROFILES = {
 
     #Tools for web crawling and spidering (e.g., Katana, Hakrawler).
     "web_crawl": [
-        lambda mcp, client, logger: register_web_crawl_tools(mcp, client, logger),
+        lambda mcp, client, logger: register_toolspec_category(mcp, client, logger, "web_crawl"),
     ],
 
     #Tools for web vulnerability scanning and assessment (e.g., Nikto, WPScan, SQLMap, Jaeles, Dalfox, ZAP, Burp Suite, XSSer).
@@ -200,6 +200,7 @@ TOOL_PROFILES = {
         lambda mcp, client, logger: register_breachsql_tool(mcp, client, logger),
         lambda mcp, client, logger: register_stingxss_tool(mcp, client, logger),
         lambda mcp, client, logger: register_phaseaccess_tool(mcp, client, logger),
+        lambda mcp, client, logger: register_joomscan_tool(mcp, client, logger),
     ],
 
     "fingerprint": [
@@ -214,7 +215,7 @@ TOOL_PROFILES = {
 
     #Tools for vulnerability scanning and assessment (e.g., Nuclei).
     "vuln_scan": [
-        lambda mcp, client, logger: register_vuln_scan_tools(mcp, client, logger),
+        lambda mcp, client, logger: register_toolspec_category(mcp, client, logger, "vuln_scan"),
     ],
 
     #Tools for automated exploitation and attack frameworks (e.g., Metasploit, MSFVenom, Pwninit, Pwntools, exploit-db).
@@ -235,22 +236,22 @@ TOOL_PROFILES = {
 
     #Tools for parameter discovery and fuzzing (e.g., Arju0n, ParamSpider, x8).
     "param_discovery": [
-        lambda mcp, client, logger: register_param_discovery_tools(mcp, client, logger),
+        lambda mcp, client, logger: register_toolspec_category(mcp, client, logger, "param_discovery"),
     ],
 
     #Tools for query string parameter replacement (e.g., qsreplace).
     "param_fuzz": [
-        lambda mcp, client, logger: register_param_fuzz_tools(mcp, client, logger),
+        lambda mcp, client, logger: register_toolspec_category(mcp, client, logger, "param_fuzz"),
     ],
 
     #Tools for data processing and unique line filtering (e.g., anew).
     "data_processing": [
-        lambda mcp, client, logger: register_data_processing_tools(mcp, client, logger),
+        lambda mcp, client, logger: register_toolspec_category(mcp, client, logger, "data_processing"),
     ],
 
     #Tools for URL filtering and duplicate removal (e.g., uro).
     "url_filter": [
-        lambda mcp, client, logger: register_url_filter_tools(mcp, client, logger),
+        lambda mcp, client, logger: register_toolspec_category(mcp, client, logger, "url_filter"),
     ],
 
     #Tools for web application security testing frameworks (e.g., HTTP Framework, Browser Agent).
@@ -261,12 +262,12 @@ TOOL_PROFILES = {
 
     #Tools for WAF detection and fingerprinting (e.g., wafw00f).
     "waf_detect": [
-        lambda mcp, client, logger: register_waf_detect_tools(mcp, client, logger),
+        lambda mcp, client, logger: register_toolspec_category(mcp, client, logger, "waf_detect"),
     ],
 
     #Tools for DNS enumeration and subdomain takeover detection (e.g., Fierce, DNSenum).
     "dns_enum": [
-        lambda mcp, client, logger: register_dns_enum_tools(mcp, client, logger),
+        lambda mcp, client, logger: register_toolspec_category(mcp, client, logger, "dns_enum"),
     ],
     
     #Tools for error handling and statistics collection to improve reliability and debugging.
@@ -277,7 +278,7 @@ TOOL_PROFILES = {
 
     #Tools for cloud assessment and auditing (e.g., Prowler, Scout Suite).
     "cloud_audit": [
-        lambda mcp, client, logger: register_cloud_audit_tools(mcp, client, logger),
+        lambda mcp, client, logger: register_toolspec_category(mcp, client, logger, "cloud_audit"),
     ],
 
     #Tools for cloud infrastructure visualization and mapping (e.g., CloudMapper).
@@ -292,12 +293,12 @@ TOOL_PROFILES = {
 
     #Tools for Kubernetes scanning and penetration testing (e.g., kube-hunter, kube-bench).
     "k8s_scan": [
-        lambda mcp, client, logger: register_k8s_scan_tools(mcp, client, logger),
+        lambda mcp, client, logger: register_toolspec_category(mcp, client, logger, "k8s_scan"),
     ],
 
     #Tools for infrastructure as code security scanning (e.g., Checkov, Terrascan).
     "iac_scan": [
-        lambda mcp, client, logger: register_iac_scan_tools(mcp, client, logger),
+        lambda mcp, client, logger: register_toolspec_category(mcp, client, logger, "iac_scan"),
     ],
 
     #Tools for container scanning and vulnerability assessment (e.g., Trivy, Docker Bench, Clair).
@@ -309,7 +310,7 @@ TOOL_PROFILES = {
 
     #Tools for runtime monitoring and anomaly detection (e.g., Falco).
     "runtime_monitor": [
-        lambda mcp, client, logger: register_runtime_monitor_tools(mcp, client, logger),
+        lambda mcp, client, logger: register_toolspec_category(mcp, client, logger, "runtime_monitor"),
     ],
 
     #Tools for database querying and interaction (e.g., SQLite, MySQL, PostgreSQL).

@@ -1,7 +1,7 @@
 from typing import Dict, Any
 import asyncio
 
-def register_osint_joomscan_tool(mcp, api_client, logger):
+def register_joomscan_tool(mcp, api_client, logger):
     @mcp.tool()
     async def joomscan_analyze(url: str, additional_args: str = "") -> Dict[str, Any]:
         """

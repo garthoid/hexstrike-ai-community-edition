@@ -14,6 +14,7 @@ uses internally to generate __init__.
 """
 
 import asyncio
+import importlib
 from typing import Any, Dict
 
 from server_core.tool_spec import ToolSpec
@@ -66,3 +67,11 @@ def register_tool_from_spec(mcp, api_client, logger, spec: ToolSpec):
     exec(compile(src, f"<toolspec:{spec.name}>", "exec"), namespace)
     fn = namespace[spec.mcp_tool_name]
     return mcp.tool()(fn)
+
+
+def register_toolspec_category(mcp, api_client, logger, category: str):
+    """Auto-load server_core.tool_specs.<category> and register every tool in it.
+    """
+    module = importlib.import_module(f"server_core.tool_specs.{category}")
+    for spec in module.SPECS:
+        register_tool_from_spec(mcp, api_client, logger, spec)
