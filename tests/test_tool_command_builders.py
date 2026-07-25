@@ -99,7 +99,7 @@ class TestNmapCommandBuilder:
 # hydra
 # ---------------------------------------------------------------------------
 
-_HYDRA_PATCH = "server_api.password_cracking.hydra.execute_command"
+_HYDRA_PATCH = "server_api._generic.blueprint_factory.execute_command"
 
 
 class TestHydraCommandBuilder:
@@ -163,7 +163,7 @@ class TestHydraCommandBuilder:
 # hashcat
 # ---------------------------------------------------------------------------
 
-_HASHCAT_PATCH = "server_api.password_cracking.hashcat.execute_command"
+_HASHCAT_PATCH = "server_api._generic.blueprint_factory.execute_command"
 
 
 class TestHashcatCommandBuilder:

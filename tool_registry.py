@@ -340,7 +340,7 @@ TOOLS: Dict[str, dict] = {
         "method": "POST",
         "category": "web_recon",
         "params": {"url": {"required": True}},
-        "optional": {"additional_args": ""},
+        "optional": {"extensions": "php,html,js,txt,xml,json", "wordlist": "", "threads": 30, "recursive": False, "additional_args": ""},
         "effectiveness": 0.87,
     },
     "wafw00f": {
@@ -606,7 +606,7 @@ TOOLS: Dict[str, dict] = {
         "method": "POST",
         "category": "web_recon",
         "params": {"target": {"required": True}},
-        "optional": {"additional_args": ""},
+        "optional": {"module": "http", "additional_args": ""},
         "effectiveness": 0.78,
     },
     "jaeles": {
@@ -663,7 +663,7 @@ TOOLS: Dict[str, dict] = {
         "method": "POST",
         "category": "essential",
         "params": {"hash_file": {"required": True}},
-        "optional": {"wordlist": "/usr/share/wordlists/rockyou.txt", "format_type": "", "additional_args": ""},
+        "optional": {"wordlist": "/usr/share/wordlists/rockyou.txt", "format": "", "additional_args": ""},
         "effectiveness": 0.80,
     },
     "medusa": {
@@ -896,8 +896,9 @@ TOOLS: Dict[str, dict] = {
         "endpoint": "/api/tools/massdns",
         "method": "POST",
         "category": "osint",
-        "params": {"domainlist": {"required": True}},
+        "params": {},
         "optional": {
+            "domainlist": "",
             "bindto": "",
             "busy_poll": False,
             "resolve_count": 50,
@@ -1079,7 +1080,7 @@ TOOLS: Dict[str, dict] = {
         "endpoint": "/api/tools/radare2",
         "method": "POST",
         "category": "binary",
-        "params": {"file": {"required": True}},
+        "params": {"binary": {"required": True}},
         "optional": {"commands": "", "additional_args": ""},
         "effectiveness": 0.88,
     },
@@ -1225,6 +1226,15 @@ TOOLS: Dict[str, dict] = {
         "optional": {"commands": "", "script_file": "", "additional_args": ""},
         "effectiveness": 0.88,
     },
+    "gdb-peda": {
+        "desc": "GDB with PEDA for enhanced debugging and exploitation",
+        "endpoint": "/api/tools/gdb-peda",
+        "method": "POST",
+        "category": "binary",
+        "params": {},
+        "optional": {"binary": "", "commands": "", "attach_pid": 0, "core_file": "", "additional_args": ""},
+        "effectiveness": 0.85,
+    },
     # ---- Exploitation (extended) ----
     "pwntools": {
         "desc": "Run a pwntools exploit script against a local or remote target",
@@ -1270,6 +1280,15 @@ TOOLS: Dict[str, dict] = {
         "params": {"target": {"required": True}},
         "optional": {"output_dir": "/tmp/autorecon", "port_scans": "top-100-ports", "service_scans": "default", "heartbeat": 60, "timeout": 300, "additional_args": ""},
         "effectiveness": 0.88,
+    },
+    "theharvester": {
+        "desc": "Passive information gathering — emails, subdomains, hosts from OSINT sources",
+        "endpoint": "/api/tools/recon/theharvester",
+        "method": "POST",
+        "category": "osint",
+        "params": {"domain": {"required": True}},
+        "optional": {"additional_args": ""},
+        "effectiveness": 0.82,
     },
     "wfuzz": {
         "desc": "Web fuzzer for directories, parameters, and authentication",
@@ -1946,7 +1965,7 @@ TOOLS: Dict[str, dict] = {
         "method": "POST",
         "category": "wifi_pentest",
         "params": {"interface": {"required": True}},
-        "optional": {"mode": "", "target_bssid": "", "caplet": ""},
+        "optional": {"mode": "", "target_bssid": "", "deauth_all": False, "channel_hop": True, "caplet": ""},
         "effectiveness": 0.88,
     },
     "hcxdumptool": {
@@ -1964,7 +1983,7 @@ TOOLS: Dict[str, dict] = {
         "method": "POST",
         "category": "wifi_pentest",
         "params": {"interface": {"required": True}},
-        "optional": {"target_essid": "", "target_bssid": "attack_wps", "attack_pmkid": True, "attack_handshake": True, "wordlist": "", "timeout": 300},
+        "optional": {"target_essid": "", "target_bssid": "", "attack_wps": False, "attack_pmkid": True, "attack_handshake": True, "wordlist": ""},
         "effectiveness": 0.85,
     },
     "mdk4": {
@@ -1972,10 +1991,10 @@ TOOLS: Dict[str, dict] = {
         "endpoint": "/api/tools/wifi_pentest/mdk4",
         "method": "POST",
         "category": "wifi_pentest",
-        "params": {"interface": {"required": True}, "attack_mode": {"required": True}, "target_bssid": {"required": True}},
-        "optional": {"ssid_wordlist": "", "burst_rate": 50},
+        "params": {"interface": {"required": True}, "attack_mode": {"required": True}},
+        "optional": {"target_bssid": "", "ssid_wordlist": "", "burst_rate": 50},
         "effectiveness": 0.80,
-    },  
+    },
     "hcxpcapngtool": {
         "desc": "Convert and filter 802.11 capture files for cracking and analysis",
         "endpoint": "/api/tools/wifi_pentest/hcxpcapngtool",

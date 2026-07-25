@@ -71,8 +71,7 @@ TOOL_PROFILES = {
 
     #Tools for binary debugging
     "binary_debug": [
-        lambda mcp, client, logger: register_gdb_tools(mcp, client, logger),
-        lambda mcp, client, logger: register_radare2_tools(mcp, client, logger),
+        lambda mcp, client, logger: register_toolspec_category(mcp, client, logger, "binary_debug"),
     ],
 
     #Tools for ROP gadget searching and analysis (e.g., ROPgadget, OneGadget, Ropper).
@@ -107,29 +106,12 @@ TOOL_PROFILES = {
 
     #Tools for brute-forcing and cracking password hashes (e.g., Hydra, John, Hashcat, Medusa, Patator, HashId, Ophcrack, Aircrack-ng).
     "password_cracking": [
-        lambda mcp, client, logger: register_hydra_tool(mcp, client, logger),
-        lambda mcp, client, logger: register_john_tool(mcp, client, logger),
-        lambda mcp, client, logger: register_hashcat_tool(mcp, client, logger),
-        lambda mcp, client, logger: register_medusa_tool(mcp, client, logger),
-        lambda mcp, client, logger: register_patator_tool(mcp, client, logger),
-        lambda mcp, client, logger: register_hashid_tool(mcp, client, logger),
-        lambda mcp, client, logger: register_ophcrack_tool(mcp, client, logger),
+        lambda mcp, client, logger: register_toolspec_category(mcp, client, logger, "password_cracking"),
     ],
 
        # WiFi penetration testing and wireless security assessment
     "wifi_pentest": [
-        lambda mcp, client, logger: register_aircrack_ng_tools(mcp, client, logger),
-        lambda mcp, client, logger: register_airmon_ng_tools(mcp, client, logger),
-        lambda mcp, client, logger: register_airodump_ng_tools(mcp, client, logger),
-        lambda mcp, client, logger: register_aireplay_ng_tools(mcp, client, logger),
-        lambda mcp, client, logger: register_airbase_ng_tools(mcp, client, logger),
-        lambda mcp, client, logger: register_airdecap_ng_tools(mcp, client, logger),
-        lambda mcp, client, logger: register_hcxpcapngtool_tools(mcp, client, logger),
-        lambda mcp, client, logger: register_hcxdumptool_tools(mcp, client, logger),
-        lambda mcp, client, logger: register_eaphammer_tools(mcp, client, logger),
-        lambda mcp, client, logger: register_wifite2_tools(mcp, client, logger),
-        lambda mcp, client, logger: register_bettercap_wifi_tools(mcp, client, logger),
-        lambda mcp, client, logger: register_mdk4_tools(mcp, client, logger),
+        lambda mcp, client, logger: register_toolspec_category(mcp, client, logger, "wifi_pentest"),
     ],
 
     #Tools for SMB and network share enumeration (e.g., Enum4linux, NetExec, SMBMap, NBTSCan, RPCClient).
@@ -139,13 +121,7 @@ TOOL_PROFILES = {
 
     #Tools for reconnaissance and subdomain discovery (e.g., Amass, Subfinder, AutoRecon, TheHarvester).
     "recon": [
-        lambda mcp, client, logger: register_amass_tool(mcp, client, logger),
-        lambda mcp, client, logger: register_subfinder_tool(mcp, client, logger),
-        lambda mcp, client, logger: register_assetfinder_tool(mcp, client, logger),
-        lambda mcp, client, logger: register_shuffledns_tool(mcp, client, logger),
-        lambda mcp, client, logger: register_massdns_tool(mcp, client, logger),
-        lambda mcp, client, logger: register_autorecon_tool(mcp, client, logger),
-        lambda mcp, client, logger: register_theharvester_tool(mcp, client, logger),
+        lambda mcp, client, logger: register_toolspec_category(mcp, client, logger, "recon"),
     ],
 
     #Tools for network scanning and enumeration (e.g., Nmap, ARP-Scan, Masscan, Rustscan).
@@ -165,13 +141,7 @@ TOOL_PROFILES = {
 
     #Tools for web content discovery and fuzzing (e.g., Dirb, FFuf, Dirsearch, Gobuster, Feroxbuster, DotDotPwn, Wfuzz).
     "web_fuzz": [
-        lambda mcp, client, logger: register_dirb_tool(mcp, client, logger),
-        lambda mcp, client, logger: register_ffuf_tool(mcp, client, logger),
-        lambda mcp, client, logger: register_dirsearch_tools(mcp, client, logger),
-        lambda mcp, client, logger: register_gobuster(mcp, client, logger, CliColors),
-        lambda mcp, client, logger: register_feroxbuster_tool(mcp, client, logger),
-        lambda mcp, client, logger: register_dotdotpwn_tool(mcp, client, logger),
-        lambda mcp, client, logger: register_wfuzz_tool(mcp, client, logger),
+        lambda mcp, client, logger: register_toolspec_category(mcp, client, logger, "web_fuzz"),
     ],
 
     #Tools for web crawling and spidering (e.g., Katana, Hakrawler).

@@ -67,7 +67,7 @@ _patches = [
     patch("server_core.enhanced_command_executor.subprocess", _MOCK_SUBPROCESS),
     patch("server_core.enhanced_process_manager.subprocess", _MOCK_SUBPROCESS),
     patch("server_core.python_env_manager.subprocess", _MOCK_SUBPROCESS),
-    patch("server_api.wifi_pentest.hcxdumptool.subprocess", _MOCK_SUBPROCESS),
+    patch("server_core.tool_specs.wifi_pentest.subprocess", _MOCK_SUBPROCESS),
     patch("server_api.active_directory.impacket_scripts.subprocess", _MOCK_SUBPROCESS),
     patch("server_api.ops.system_monitoring.subprocess", _MOCK_SUBPROCESS),
     patch("server_api.ctf.binary_analyzer.subprocess", _MOCK_SUBPROCESS),

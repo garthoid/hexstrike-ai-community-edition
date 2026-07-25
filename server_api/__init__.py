@@ -8,18 +8,13 @@ from .ctf import *
 from .process import *
 from .api_audit import *
 from .binary_analysis import *
-from .binary_debug import *
 from .bugbounty_workflow import *
 from .error_handling import *
 from .exploit_framework import *
 from .ops import *
-from .password_cracking import *
-from .recon import *
 from .vuln_intel import *
 from .web_framework import *
-from .web_fuzz import *
 from .web_scan import *
-from .wifi_pentest import *
 from .active_directory import *
 from .burp_agent import *
 
@@ -62,25 +57,6 @@ def register_blueprints(app):
   app.register_blueprint(api_process_scale_pool_bp)
   app.register_blueprint(api_process_health_check_bp)
 
-  # Password Cracking
-  app.register_blueprint(api_password_cracking_medusa_bp)
-  app.register_blueprint(api_password_cracking_patator_bp)
-  app.register_blueprint(api_password_cracking_hashid_bp)
-  app.register_blueprint(api_password_cracking_ophcrack_bp)
-  app.register_blueprint(api_password_cracking_aircrack_ng_bp)
-  app.register_blueprint(api_password_cracking_hydra_bp)
-  app.register_blueprint(api_password_cracking_john_bp)
-  app.register_blueprint(api_password_cracking_hashcat_bp)
-
-  # Reconnaissance
-  app.register_blueprint(api_recon_theharvester_bp)
-  app.register_blueprint(api_recon_amass_bp)
-  app.register_blueprint(api_recon_subfinder_bp)
-  app.register_blueprint(api_recon_assetfinder_bp)
-  app.register_blueprint(api_recon_shuffledns_bp)
-  app.register_blueprint(api_recon_massdns_bp)
-  app.register_blueprint(api_recon_autorecon_bp)
-
   # Exploitation
   app.register_blueprint(api_exploit_framework_exploit_db_bp)
   app.register_blueprint(api_exploit_framework_pwninit_bp)
@@ -101,34 +77,6 @@ def register_blueprints(app):
   app.register_blueprint(api_binary_analysis_ropper_bp)
   app.register_blueprint(api_binary_analysis_binwalk_bp)
   app.register_blueprint(api_binary_analysis_checksec_bp)
-
-  # Binary Debug
-  app.register_blueprint(api_binary_debug_gdb_bp)
-  app.register_blueprint(api_binary_debug_gdb_peda_bp)
-  app.register_blueprint(api_binary_debug_radare2_bp)
-
-  # Wi-Fi Pentest
-  app.register_blueprint(api_wifi_pentest_aircrack_ng_bp)
-  app.register_blueprint(api_wifi_pentest_airmon_ng_bp)
-  app.register_blueprint(api_wifi_pentest_airodump_ng_bp)
-  app.register_blueprint(api_wifi_pentest_aireplay_ng_bp)
-  app.register_blueprint(api_wifi_pentest_airbase_ng_bp)
-  app.register_blueprint(api_wifi_pentest_airdecap_ng_bp)
-  app.register_blueprint(api_wifi_pentest_hcxpcapngtool_bp)
-  app.register_blueprint(api_wifi_pentest_hcxdumptool_bp)
-  app.register_blueprint(api_wifi_pentest_eaphammer_bp)
-  app.register_blueprint(api_wifi_pentest_wifite2_bp)
-  app.register_blueprint(api_wifi_pentest_bettercap_wifi_bp)
-  app.register_blueprint(api_wifi_pentest_mdk4_bp)
-
-  # Web Fuzzing
-  app.register_blueprint(api_web_fuzz_feroxbuster_bp)
-  app.register_blueprint(api_web_fuzz_dotdotpwn_bp)
-  app.register_blueprint(api_web_fuzz_wfuzz_bp)
-  app.register_blueprint(api_web_fuzz_dirsearch_bp)
-  app.register_blueprint(api_web_fuzz_gobuster_bp)
-  app.register_blueprint(api_web_fuzz_dirb_bp)
-  app.register_blueprint(api_web_fuzz_ffuf_bp)
 
   # Web Scanning
   app.register_blueprint(api_web_scan_xsser_bp)
