@@ -212,7 +212,6 @@ TOOL_PROFILES = {
         lambda mcp, client, logger: register_toolspec_category(mcp, client, logger, "cloud_audit"),
     ],
 
-    #Tools for cloud infrastructure visualization and mapping (e.g., CloudMapper).
     #Tools for cloud exploitation and attack simulation (e.g., CloudMapper, Pacu).
     "cloud_exploit": [
         lambda mcp, client, logger: register_toolspec_category(mcp, client, logger, "cloud_exploit"),
@@ -329,7 +328,6 @@ DEFAULT_PROFILE = [
     "monitoring",
     "process_management",
     "visual",
-    "auto_install"
 ]
 
 # Full profile includes all available tool categories

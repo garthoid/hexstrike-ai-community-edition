@@ -313,15 +313,6 @@ class TestVisual:
         assert_route_exists(r, "/api/visual/tool-output")
 
 
-# ===========================================================================
-# Auto Install
-# ===========================================================================
-
-class TestAutoInstall:
-    def test_auto_install_missing_apt(self, client):
-        r = _post(client, "/api/tools/auto-install-missing-apt")
-        assert_route_exists(r, "/api/tools/auto-install-missing-apt")
-
 
 # ===========================================================================
 # Database

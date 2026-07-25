@@ -1,6 +1,6 @@
 # List of tools considered always installed (built-in, code-provided or simulated)
 BUILT_IN_TOOLS = ["jwt-analyzer", "api-schema-analyzer", "graphql-scanner",
-                   "http-framework", "auto_install_missing_apt_tools", 
+                   "http-framework",
                   "analyze-target", "preview-attack-chain", "create-attack-chain", "smart-scan",
                   "technology-detection", "ai_analyze_session"]
 
@@ -63,8 +63,6 @@ HEALTH_TOOL_CATEGORIES = {
     ],
     "vulnerability_intelligence": ["vulnx"],
     "fingerprint": ["whatweb"],
-
-    "ops": ["auto_install_missing_apt_tools"],
 
     "intelligence": ["analyze-target", "preview-attack-chain", "create-attack-chain", "smart-scan", "technology-detection"],
     "ai_assist": ["ai_analyze_session"],

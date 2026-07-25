@@ -216,7 +216,6 @@ const HEALTH_CAT_TOOLS: Record<string, string[]> = {
   active_directory:         ['impacket-scripts', 'ldapdomaindump'],
   vulnerability_intelligence: ['vulnx'],
   fingerprint:              ['whatweb'],
-  ops:                      ['auto_install_missing_apt_tools'],
   intelligence:             ['analyze-target', 'preview-attack-chain', 'create-attack-chain', 'smart-scan', 'technology-detection'],
   ai_assist:                ['ai_analyze_session'],
   data_processing:          ['hurl', 'anew'],
