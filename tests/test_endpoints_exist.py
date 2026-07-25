@@ -548,6 +548,30 @@ class TestWebScanning:
         r = _post(client, "/api/tools/zap")
         assert_route_exists(r, "/api/tools/zap")
 
+    def test_breachsql(self, client):
+        r = _post(client, "/api/tools/breachsql")
+        assert_route_exists(r, "/api/tools/breachsql")
+
+    def test_interactsh(self, client):
+        r = _post(client, "/api/tools/web_scan/interactsh")
+        assert_route_exists(r, "/api/tools/web_scan/interactsh")
+
+    def test_joomscan(self, client):
+        r = _post(client, "/api/tools/web_recon/joomscan")
+        assert_route_exists(r, "/api/tools/web_recon/joomscan")
+
+    def test_phaseaccess(self, client):
+        r = _post(client, "/api/tools/phaseaccess")
+        assert_route_exists(r, "/api/tools/phaseaccess")
+
+    def test_stingxss(self, client):
+        r = _post(client, "/api/tools/stingxss")
+        assert_route_exists(r, "/api/tools/stingxss")
+
+    def test_whatweb(self, client):
+        r = _post(client, "/api/tools/web_recon/whatweb")
+        assert_route_exists(r, "/api/tools/web_recon/whatweb")
+
 
 # ===========================================================================
 # Web Crawling
@@ -759,6 +783,10 @@ class TestExploitation:
     def test_pwntools(self, client):
         r = _post(client, "/api/tools/pwntools")
         assert_route_exists(r, "/api/tools/pwntools")
+
+    def test_commix(self, client):
+        r = _post(client, "/api/tools/exploitation/commix")
+        assert_route_exists(r, "/api/tools/exploitation/commix")
 
 
 # ===========================================================================
@@ -1057,6 +1085,10 @@ class TestIntelligence:
     def test_zero_day_research(self, client):
         r = _post(client, "/api/vuln-intel/zero-day-research")
         assert_route_exists(r, "/api/vuln-intel/zero-day-research")
+
+    def test_vulnx(self, client):
+        r = _post(client, "/api/vuln-intel/vulnx")
+        assert_route_exists(r, "/api/vuln-intel/vulnx")
 
 
 # ===========================================================================

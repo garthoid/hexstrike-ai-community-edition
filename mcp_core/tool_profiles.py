@@ -81,17 +81,7 @@ TOOL_PROFILES = {
 
     #Tools for binary analysis (e.g., Binwalk, Checksec, xxd, Strings, Objdump, Libc, Angr, Autopsy, one_gadget, Ropper).
     "binary_analysis": [
-        lambda mcp, client, logger: register_binwalk_tool(mcp, client, logger),
-        lambda mcp, client, logger: register_checksec_tool(mcp, client, logger),
-        lambda mcp, client, logger: register_xxd_tool(mcp, client, logger),
-        lambda mcp, client, logger: register_strings_tool(mcp, client, logger),
-        lambda mcp, client, logger: register_objdump_tool(mcp, client, logger),
-        lambda mcp, client, logger: register_ghidra_tools(mcp, client, logger),
-        lambda mcp, client, logger: register_libc_tools(mcp, client, logger),
-        lambda mcp, client, logger: register_angr_tools(mcp, client, logger),
-        lambda mcp, client, logger: register_autopsy_tools(mcp, client, logger),
-        lambda mcp, client, logger: register_one_gadget_tool(mcp, client, logger),
-        lambda mcp, client, logger: register_ropper_tool(mcp, client, logger),
+        lambda mcp, client, logger: register_toolspec_category(mcp, client, logger, "binary_analysis"),
     ],
 
     #Tools for credential harvesting and network poisoning (e.g., Responder, VaultRip).
@@ -151,23 +141,8 @@ TOOL_PROFILES = {
 
     #Tools for web vulnerability scanning and assessment (e.g., Nikto, WPScan, SQLMap, Jaeles, Dalfox, ZAP, Burp Suite, XSSer).
     "web_scan": [
-        lambda mcp, client, logger: register_nikto_tool(mcp, client, logger),
-        lambda mcp, client, logger: register_sqlmap_tool(mcp, client, logger),
-        lambda mcp, client, logger: register_wpscan_tool(mcp, client, logger),
-        lambda mcp, client, logger: register_jaeles_tool(mcp, client, logger),
-        lambda mcp, client, logger: register_dalfox_tool(mcp, client, logger),
+        lambda mcp, client, logger: register_toolspec_category(mcp, client, logger, "web_scan"),
         lambda mcp, client, logger: register_burpsuite_tool(mcp, client, logger, CliColors),
-        lambda mcp, client, logger: register_zap_tool(mcp, client, logger),
-        lambda mcp, client, logger: register_xsser_tool(mcp, client, logger),
-        lambda mcp, client, logger: register_web_scan_interactsh_tool(mcp, client, logger),
-        lambda mcp, client, logger: register_breachsql_tool(mcp, client, logger),
-        lambda mcp, client, logger: register_stingxss_tool(mcp, client, logger),
-        lambda mcp, client, logger: register_phaseaccess_tool(mcp, client, logger),
-        lambda mcp, client, logger: register_joomscan_tool(mcp, client, logger),
-    ],
-
-    "fingerprint": [
-        lambda mcp, client, logger: register_whatweb_tool(mcp, client, logger),
     ],
 
     #Tools for web probing and technology detection (e.g., httpx).
@@ -182,11 +157,7 @@ TOOL_PROFILES = {
 
     #Tools for automated exploitation and attack frameworks (e.g., Metasploit, MSFVenom, Pwninit, Pwntools, exploit-db).
     "exploit_framework": [
-        lambda mcp, client, logger: register_metasploit_tool(mcp, client, logger),
-        lambda mcp, client, logger: register_msfvenom(mcp, client, logger),
-        lambda mcp, client, logger: register_pwntools(mcp, client, logger),
-        lambda mcp, client, logger: register_pwninit_tool(mcp, client, logger),
-        lambda mcp, client, logger: register_exploit_db_tool(mcp, client, logger), #aka. exploit-db
+        lambda mcp, client, logger: register_toolspec_category(mcp, client, logger, "exploit_framework"),
     ],
 
     #Tools for URL discovery and reconnaissance (e.g., Gau, Waybackurls, Waymore).
@@ -306,7 +277,7 @@ TOOL_PROFILES = {
     #Tools for vulnerability intelligence gathering and analysis
     "vuln_intel": [
         lambda mcp, client, logger: register_vulnerability_intelligence_tools(mcp, client, logger),
-        lambda mcp, client, logger: register_vulnx_tool(mcp, client, logger),
+        lambda mcp, client, logger: register_toolspec_category(mcp, client, logger, "vuln_intel"),
     ],
 
     #Tools for visual output and reporting

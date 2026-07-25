@@ -268,7 +268,7 @@ class TestNucleiCommandBuilder:
 # sqlmap
 # ---------------------------------------------------------------------------
 
-_SQLMAP_PATCH = "server_api.web_scan.sqlmap.execute_command"
+_SQLMAP_PATCH = "server_api._generic.blueprint_factory.execute_command"
 
 
 class TestSqlmapCommandBuilder:

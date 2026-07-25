@@ -7,10 +7,8 @@ from .settings import *
 from .ctf import *
 from .process import *
 from .api_audit import *
-from .binary_analysis import *
 from .bugbounty_workflow import *
 from .error_handling import *
-from .exploit_framework import *
 from .ops import *
 from .vuln_intel import *
 from .web_framework import *
@@ -57,42 +55,8 @@ def register_blueprints(app):
   app.register_blueprint(api_process_scale_pool_bp)
   app.register_blueprint(api_process_health_check_bp)
 
-  # Exploitation
-  app.register_blueprint(api_exploit_framework_exploit_db_bp)
-  app.register_blueprint(api_exploit_framework_pwninit_bp)
-  app.register_blueprint(api_exploit_framework_msfvenom_bp)
-  app.register_blueprint(api_exploit_framework_metasploit_bp)
-  app.register_blueprint(api_exploit_framework_pwntools_bp)
-  app.register_blueprint(api_exploit_framework_commix_bp)
-
-  # Binary Analysis
-  app.register_blueprint(api_binary_analysis_autopsy_bp)
-  app.register_blueprint(api_binary_analysis_xxd_bp)
-  app.register_blueprint(api_binary_analysis_strings_bp)
-  app.register_blueprint(api_binary_analysis_objdump_bp)
-  app.register_blueprint(api_binary_analysis_ghidra_bp)
-  app.register_blueprint(api_binary_analysis_one_gadget_bp)
-  app.register_blueprint(api_binary_analysis_libc_database_bp)
-  app.register_blueprint(api_binary_analysis_angr_bp)
-  app.register_blueprint(api_binary_analysis_ropper_bp)
-  app.register_blueprint(api_binary_analysis_binwalk_bp)
-  app.register_blueprint(api_binary_analysis_checksec_bp)
-
   # Web Scanning
-  app.register_blueprint(api_web_scan_xsser_bp)
-  app.register_blueprint(api_web_scan_jaeles_bp)
-  app.register_blueprint(api_web_scan_dalfox_bp)
   app.register_blueprint(api_web_scan_burpsuite_bp)
-  app.register_blueprint(api_web_scan_zap_bp)
-  app.register_blueprint(api_web_scan_nikto_bp)
-  app.register_blueprint(api_web_scan_sqlmap_bp)
-  app.register_blueprint(api_web_scan_wpscan_bp)
-  app.register_blueprint(api_web_scan_joomscan_bp)
-  app.register_blueprint(api_web_scan_whatweb_bp)
-  app.register_blueprint(api_web_scan_interactsh_bp)
-  app.register_blueprint(api_web_scan_breachsql_bp)
-  app.register_blueprint(api_web_scan_stingxss_bp)
-  app.register_blueprint(api_web_scan_phaseaccess_bp)
 
   # Web Framework
   app.register_blueprint(api_web_framework_http_framework_bp)
@@ -109,7 +73,6 @@ def register_blueprints(app):
   app.register_blueprint(api_vuln_intel_attack_chains_bp)
   app.register_blueprint(api_vuln_intel_threat_feeds_bp)
   app.register_blueprint(api_vuln_intel_zero_day_research_bp)
-  app.register_blueprint(api_vuln_intel_vulnx_bp)
   app.register_blueprint(api_vuln_intel_cve_exploit_chain_bp)
 
   # Bug Bounty Workflow
