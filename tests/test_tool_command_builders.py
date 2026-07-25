@@ -8,8 +8,10 @@ Safety guarantee
 ────────────────
 conftest.py already patches server_core.command_executor.execute_command
 at the session level (no real binary fires).  The tests here additionally
-patch the *module-local* reference (e.g. server_api.net_scan.nmap.execute_command)
-to capture call_args and inspect the exact command string built by each handler.
+patch the *module-local* reference (e.g. server_api.hydra.execute_command, or
+server_api._generic.blueprint_factory.execute_command for ToolSpec-migrated
+tools) to capture call_args and inspect the exact command string built by
+each handler.
 """
 
 import pytest
@@ -40,7 +42,7 @@ def _post(client, url, json_body):
 # nmap
 # ---------------------------------------------------------------------------
 
-_NMAP_PATCH = "server_api.net_scan.nmap.execute_command"
+_NMAP_PATCH = "server_api._generic.blueprint_factory.execute_command"
 
 
 class TestNmapCommandBuilder:

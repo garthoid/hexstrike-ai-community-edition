@@ -10,16 +10,11 @@ from .api_audit import *
 from .binary_analysis import *
 from .binary_debug import *
 from .bugbounty_workflow import *
-from .container_scan import *
 from .error_handling import *
 from .exploit_framework import *
-from .gadget_search import *
-from .net_scan import *
 from .ops import *
 from .password_cracking import *
 from .recon import *
-from .smb_enum import *
-from .stego_analysis import *
 from .vuln_intel import *
 from .web_framework import *
 from .web_fuzz import *
@@ -112,9 +107,6 @@ def register_blueprints(app):
   app.register_blueprint(api_binary_debug_gdb_peda_bp)
   app.register_blueprint(api_binary_debug_radare2_bp)
 
-  # Gadget Search
-  app.register_blueprint(api_gadget_search_ropgadget_bp)
-
   # Wi-Fi Pentest
   app.register_blueprint(api_wifi_pentest_aircrack_ng_bp)
   app.register_blueprint(api_wifi_pentest_airmon_ng_bp)
@@ -161,29 +153,6 @@ def register_blueprints(app):
   # AI Payload
   app.register_blueprint(api_ai_payload_generate_payload_bp)
   app.register_blueprint(api_ai_payload_test_payload_bp)
-
-  # SMB Enumeration
-  app.register_blueprint(api_smb_enum_nbtscan_bp)
-  app.register_blueprint(api_smb_enum_enum4linux_bp)
-  app.register_blueprint(api_smb_enum_netexec_bp)
-  app.register_blueprint(api_smb_enum_smbmap_bp)
-  app.register_blueprint(api_smb_enum_enum4linux_ng_bp)
-  app.register_blueprint(api_smb_enum_rpcclient_bp)
-
-  # Network Scanning
-  app.register_blueprint(api_net_scan_arp_scan_bp)
-  app.register_blueprint(api_net_scan_nmap_bp)
-  app.register_blueprint(api_net_scan_rustscan_bp)
-  app.register_blueprint(api_net_scan_masscan_bp)
-  app.register_blueprint(api_net_scan_nmap_advanced_bp)
-
-  # Steganography Analysis
-  app.register_blueprint(api_stego_analysis_steghide_bp)
-
-  # Container Scanning
-  app.register_blueprint(api_container_scan_trivy_bp)
-  app.register_blueprint(api_container_scan_docker_bench_bp)
-  app.register_blueprint(api_container_scan_clair_bp)
 
   # Vulnerability Intelligence
   app.register_blueprint(api_vulnerability_intelligence_bp)

@@ -41,7 +41,7 @@ TOOL_PROFILES = {
 
     #Tools for steganography analysis (e.g., Steghide).
     "stego_analysis": [
-        lambda mcp, client, logger: register_steghide_tool(mcp, client, logger),
+        lambda mcp, client, logger: register_toolspec_category(mcp, client, logger, "stego_analysis"),
     ],
 
     #Tools for metadata extraction (e.g., ExifTool).
@@ -77,12 +77,10 @@ TOOL_PROFILES = {
 
     #Tools for ROP gadget searching and analysis (e.g., ROPgadget, OneGadget, Ropper).
     "gadget_search": [
-        lambda mcp, client, logger: register_ropgadget_tool(mcp, client, logger),
-        lambda mcp, client, logger: register_one_gadget_tool(mcp, client, logger),
-        lambda mcp, client, logger: register_ropper_tool(mcp, client, logger),
+        lambda mcp, client, logger: register_toolspec_category(mcp, client, logger, "gadget_search"),
     ],
 
-    #Tools for binary analysis (e.g., Binwalk, Checksec, xxd, Strings, Objdump, Libc, Angr, Autopsy).
+    #Tools for binary analysis (e.g., Binwalk, Checksec, xxd, Strings, Objdump, Libc, Angr, Autopsy, one_gadget, Ropper).
     "binary_analysis": [
         lambda mcp, client, logger: register_binwalk_tool(mcp, client, logger),
         lambda mcp, client, logger: register_checksec_tool(mcp, client, logger),
@@ -93,6 +91,8 @@ TOOL_PROFILES = {
         lambda mcp, client, logger: register_libc_tools(mcp, client, logger),
         lambda mcp, client, logger: register_angr_tools(mcp, client, logger),
         lambda mcp, client, logger: register_autopsy_tools(mcp, client, logger),
+        lambda mcp, client, logger: register_one_gadget_tool(mcp, client, logger),
+        lambda mcp, client, logger: register_ropper_tool(mcp, client, logger),
     ],
 
     #Tools for credential harvesting and network poisoning (e.g., Responder, VaultRip).
@@ -134,11 +134,7 @@ TOOL_PROFILES = {
 
     #Tools for SMB and network share enumeration (e.g., Enum4linux, NetExec, SMBMap, NBTSCan, RPCClient).
     "smb_enum": [
-        lambda mcp, client, logger: register_enum4linux_tool(mcp, client, logger),
-        lambda mcp, client, logger: register_netexec_tool(mcp, client, logger),
-        lambda mcp, client, logger: register_smbmap_tool(mcp, client, logger),
-        lambda mcp, client, logger: register_nbtscan_tool(mcp, client, logger),
-        lambda mcp, client, logger: register_rpcclient_tool(mcp, client, logger),
+        lambda mcp, client, logger: register_toolspec_category(mcp, client, logger, "smb_enum"),
     ],
 
     #Tools for reconnaissance and subdomain discovery (e.g., Amass, Subfinder, AutoRecon, TheHarvester).
@@ -154,10 +150,7 @@ TOOL_PROFILES = {
 
     #Tools for network scanning and enumeration (e.g., Nmap, ARP-Scan, Masscan, Rustscan).
     "net_scan": [
-        lambda mcp, client, logger: register_nmap(mcp, client, logger, CliColors),
-        lambda mcp, client, logger: register_arp_scan_tool(mcp, client, logger),
-        lambda mcp, client, logger: register_masscan_tool(mcp, client, logger),
-        lambda mcp, client, logger: register_rustscan_tool(mcp, client, logger),
+        lambda mcp, client, logger: register_toolspec_category(mcp, client, logger, "net_scan"),
     ],
 
     #Tools for network information gathering and lookups (e.g., WHOIS).
@@ -296,9 +289,7 @@ TOOL_PROFILES = {
 
     #Tools for container scanning and vulnerability assessment (e.g., Trivy, Docker Bench, Clair).
     "container_scan": [
-        lambda mcp, client, logger: register_trivy_tool(mcp, client, logger),
-        lambda mcp, client, logger: register_docker_bench_tool(mcp, client, logger),
-        lambda mcp, client, logger: register_clair_vulnerability_tool(mcp, client, logger),
+        lambda mcp, client, logger: register_toolspec_category(mcp, client, logger, "container_scan"),
     ],
 
     #Tools for runtime monitoring and anomaly detection (e.g., Falco).
