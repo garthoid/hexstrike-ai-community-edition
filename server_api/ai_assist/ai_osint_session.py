@@ -92,7 +92,7 @@ def ai_osint_session():
 
     Expects JSON:
         {
-            "target": "example.com",
+            "target": "example.invalid",
             "create_session": false   // optional, default false
         }
 
@@ -106,7 +106,7 @@ def ai_osint_session():
     Returns:
         {
             "success": true,
-            "target": "example.com",
+            "target": "example.invalid",
             "session_name": "AI OSINT",
             "steps": [ ... ],
             "session_id": "sess_abc123"   // only when create_session=true

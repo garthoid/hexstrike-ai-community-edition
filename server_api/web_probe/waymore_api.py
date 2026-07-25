@@ -7,7 +7,7 @@ from .waymore import run_waymore, _ALLOWED_EXTRA_FLAGS, _VALID_MODES
 logger = logging.getLogger(__name__)
 
 api_web_probe_waymore_bp = Blueprint("api_web_probe_waymore", __name__)
-# Matches bare hostnames/domains: e.g. example.com, sub.example.co.uk
+# Matches bare hostnames/domains: e.g. example.invalid, sub.example.co.uk
 _DOMAIN_RE = re.compile(r'^(?:[a-zA-Z0-9](?:[a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,}$')
 
 

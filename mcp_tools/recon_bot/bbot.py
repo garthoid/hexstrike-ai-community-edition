@@ -26,7 +26,7 @@ def register_bbot_tools(mcp, api_client):
 
         Example:
             bbot_scan(
-                target="example.com",
+                target="example.invalid",
                 parameters={
                     "f": "subdomain-enum",
                     "rf": "safe",

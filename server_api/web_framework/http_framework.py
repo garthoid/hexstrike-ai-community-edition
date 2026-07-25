@@ -24,7 +24,7 @@ class HTTPTestingFramework:
         self.proxy_history = []
         self.vulnerabilities = []
         self.match_replace_rules = []  # [{'where':'query|headers|body|url','pattern':'regex','replacement':'str'}]
-        self.scope = None  # {'host': 'example.com', 'include_subdomains': True}
+        self.scope = None  # {'host': 'example.invalid', 'include_subdomains': True}
         self._req_id = 0
 
     def setup_proxy(self, proxy_port: int = 8080):

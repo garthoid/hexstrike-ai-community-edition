@@ -7,7 +7,7 @@ def register_test_error_recovery_tool(mcp, api_client, logger, CliColors):
 
     @mcp.tool()
     async def test_error_recovery(tool_name: str, error_type: str = "timeout",
-                           target: str = "example.com") -> Dict[str, Any]:
+                           target: str = "example.invalid") -> Dict[str, Any]:
         """
         Test the intelligent error recovery system with simulated failures.
 

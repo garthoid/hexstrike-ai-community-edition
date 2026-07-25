@@ -70,7 +70,7 @@ def register_phaseaccess_tool(mcp, api_client, logger):
         discover the login form and authenticate both sessions automatically.
 
         Args:
-            target: Primary target URL (e.g. http://app.example.com/users/42)
+            target: Primary target URL (e.g. http://app.example.invalid/users/42)
             session_a_headers: Auth headers for session A (e.g. {"Authorization": "Bearer <token>"})
             session_a_cookies: Cookie string for session A
             session_a_label: Human label for session A shown in findings

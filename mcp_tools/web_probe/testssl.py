@@ -89,13 +89,13 @@ def register_testssl_tool(mcp, api_client, logger):
 
         Examples:
             - Basic protocol and server-default checks:
-              testssl_analyze(target="https://example.com", protocols=True, server_defaults=True)
+              testssl_analyze(target="https://example.invalid", protocols=True, server_defaults=True)
             - Standalone version mode:
               testssl_analyze(version=True)
             - Header-focused run with JSON output:
-              testssl_analyze(target="example.com", headers=True, json_output=True)
+              testssl_analyze(target="example.invalid", headers=True, json_output=True)
             - STARTTLS SMTP check:
-              testssl_analyze(target="mail.example.com:25", starttls="smtp", protocols=True)
+              testssl_analyze(target="mail.example.invalid:25", starttls="smtp", protocols=True)
         """
         data = {
             "target": target,
