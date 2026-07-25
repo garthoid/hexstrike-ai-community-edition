@@ -257,7 +257,7 @@ TOOLS: Dict[str, dict] = {
         "method": "POST",
         "category": "web_recon",
         "params": {"url": {"required": True}},
-        "optional": {"additional_args": ""},
+        "optional": {"depth": 3, "js_crawl": True, "form_extraction": True, "output_format": "json", "additional_args": ""},
         "effectiveness": 0.88,
     },
     "gospider": {
@@ -514,6 +514,8 @@ TOOLS: Dict[str, dict] = {
             "system": True,
             "kerberos": True,
             "dump_path": "",
+            "target_user": "",
+            "target_pid": 0,
             "remote": False,
             "ssh_host": "",
             "ssh_user": "",
@@ -919,7 +921,7 @@ TOOLS: Dict[str, dict] = {
     },
     "sublist3r": {
         "desc": "Subdomain enumeration using OSINT sources",
-        "endpoint": "/api/osint/tools/sublist3r",
+        "endpoint": "/api/tools/osint/sublist3r",
         "method": "POST",
         "category": "osint",
         "params": {"domain": {"required": True}},

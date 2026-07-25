@@ -614,6 +614,28 @@ class TestURLRecon:
 
 
 # ===========================================================================
+# OSINT
+# ===========================================================================
+
+class TestOSINT:
+    def test_parsero(self, client):
+        r = _post(client, "/api/tools/osint/parsero")
+        assert_route_exists(r, "/api/tools/osint/parsero")
+
+    def test_sherlock(self, client):
+        r = _post(client, "/api/tools/osint/sherlock")
+        assert_route_exists(r, "/api/tools/osint/sherlock")
+
+    def test_spiderfoot(self, client):
+        r = _post(client, "/api/tools/osint/spiderfoot")
+        assert_route_exists(r, "/api/tools/osint/spiderfoot")
+
+    def test_sublist3r(self, client):
+        r = _post(client, "/api/tools/osint/sublist3r")
+        assert_route_exists(r, "/api/tools/osint/sublist3r")
+
+
+# ===========================================================================
 # Parameter Discovery & Fuzzing
 # ===========================================================================
 
@@ -863,6 +885,10 @@ class TestCredentialHarvesting:
     def test_responder(self, client):
         r = _post(client, "/api/tools/responder")
         assert_route_exists(r, "/api/tools/responder")
+
+    def test_vaultrip(self, client):
+        r = _post(client, "/api/tools/vaultrip")
+        assert_route_exists(r, "/api/tools/vaultrip")
 
 
 # ===========================================================================

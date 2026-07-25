@@ -15,7 +15,7 @@ from . import cloud_audit
 from .cloud_exploit import *
 from .cloud_visual import *
 from .container_scan import *
-from .credential_harvest import *
+from . import credential_harvest
 from .crypto_attack import *
 from . import data_processing
 from .db_query import *
@@ -44,14 +44,14 @@ from .url_recon import *
 from .vuln_intel import *
 from .vuln_scan import *
 from .waf_detect import *
-from .web_crawl import *
+from . import web_crawl
 from .web_framework import *
 from .web_fuzz import *
 from .web_probe import *
 from .web_scan import *
 from .wifi_pentest import *
 from .active_directory import *
-from .osint import *
+from . import osint
 from .burp_agent import *
 
 def register_blueprints(app):
@@ -70,11 +70,9 @@ def register_blueprints(app):
   app.register_blueprint(api_credentials_bp)
   app.register_blueprint(api_loot_bp)
 
-  #OSINT
-  app.register_blueprint(api_osint_sherlock_bp)
-  app.register_blueprint(api_osint_spiderfoot_bp)
-  app.register_blueprint(api_osint_sublist3r_bp)
-  app.register_blueprint(api_osint_parsero_bp)
+  #OSINT (ToolSpec-driven — see server_core/tool_specs/osint.py)
+  for bp in osint.BLUEPRINTS:
+    app.register_blueprint(bp)
 
   # Database
   app.register_blueprint(api_database_bp)
@@ -188,10 +186,9 @@ def register_blueprints(app):
   app.register_blueprint(api_web_scan_stingxss_bp)
   app.register_blueprint(api_web_scan_phaseaccess_bp)
 
-  # Web Crawl
-  app.register_blueprint(api_web_crawl_katana_bp)
-  app.register_blueprint(api_web_crawl_hakrawler_bp)
-  app.register_blueprint(api_web_crawl_gospider_bp)
+  # Web Crawl (ToolSpec-driven — see server_core/tool_specs/web_crawl.py)
+  for bp in web_crawl.BLUEPRINTS:
+    app.register_blueprint(bp)
 
   # Web Probe
   app.register_blueprint(api_web_probe_httpx_bp)
@@ -255,9 +252,9 @@ def register_blueprints(app):
   for bp in net_lookup.BLUEPRINTS:
     app.register_blueprint(bp)
 
-  # Credential Harvesting
-  app.register_blueprint(api_credential_harvest_responder_bp)
-  app.register_blueprint(api_credential_harvest_vaultrip_bp)
+  # Credential Harvesting (ToolSpec-driven — see server_core/tool_specs/credential_harvest.py)
+  for bp in credential_harvest.BLUEPRINTS:
+    app.register_blueprint(bp)
 
   # Memory Forensics (ToolSpec-driven — see server_core/tool_specs/memory_forensics.py)
   for bp in memory_forensics.BLUEPRINTS:

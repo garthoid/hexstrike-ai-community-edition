@@ -35,10 +35,7 @@ TOOL_PROFILES = {
 
     #OSINT tools for information gathering and reconnaissance e.g. Sherlock)
     "osint": [
-        lambda mcp, client, logger: register_osint_sherlock_tool(mcp, client, logger),
-        lambda mcp, client, logger: register_osint_spiderfoot_tool(mcp, client, logger),
-        lambda mcp, client, logger: register_osint_sublist3r_tool(mcp, client, logger),
-        lambda mcp, client, logger: register_osint_parsero_tool(mcp, client, logger),
+        lambda mcp, client, logger: register_osint_tools(mcp, client, logger),
         lambda mcp, client, logger: register_osint_joomscan_tool(mcp, client, logger),
     ],
 
@@ -102,8 +99,7 @@ TOOL_PROFILES = {
 
     #Tools for credential harvesting and network poisoning (e.g., Responder, VaultRip).
     "credential_harvest": [
-        lambda mcp, client, logger: register_responder_tool(mcp, client, logger),
-        lambda mcp, client, logger: register_vaultrip_tool(mcp, client, logger),
+        lambda mcp, client, logger: register_credential_harvest_tools(mcp, client, logger),
     ],
 
     #Tools for memory forensics analysis (e.g., Volatility, Volatility3).
@@ -189,9 +185,7 @@ TOOL_PROFILES = {
 
     #Tools for web crawling and spidering (e.g., Katana, Hakrawler).
     "web_crawl": [
-        lambda mcp, client, logger: register_katana_tool(mcp, client, logger),
-        lambda mcp, client, logger: register_hakrawler_tools(mcp, client, logger),
-        lambda mcp, client, logger: register_gospider_tool(mcp, client, logger),
+        lambda mcp, client, logger: register_web_crawl_tools(mcp, client, logger),
     ],
 
     #Tools for web vulnerability scanning and assessment (e.g., Nikto, WPScan, SQLMap, Jaeles, Dalfox, ZAP, Burp Suite, XSSer).
