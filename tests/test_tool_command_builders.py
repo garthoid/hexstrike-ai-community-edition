@@ -218,10 +218,10 @@ _NUCLEI_PATCH = "server_api.vuln_scan.nuclei.execute_command"
 class TestNucleiCommandBuilder:
     def test_basic_command(self, client):
         with patch(_NUCLEI_PATCH, return_value=_MOCK_RESULT) as mock_exec:
-            r = _post(client, "/api/tools/nuclei", {"target": "https://example.com"})
+            r = _post(client, "/api/tools/nuclei", {"target": "https://example.invalid"})
             assert r.status_code == 200
             cmd = mock_exec.call_args[0][0]
-            assert "nuclei -u https://example.com" in cmd
+            assert "nuclei -u https://example.invalid" in cmd
 
     def test_requires_target(self, client):
         r = _post(client, "/api/tools/nuclei", {})
@@ -230,7 +230,7 @@ class TestNucleiCommandBuilder:
     def test_severity_flag(self, client):
         with patch(_NUCLEI_PATCH, return_value=_MOCK_RESULT) as mock_exec:
             r = _post(client, "/api/tools/nuclei", {
-                "target": "https://example.com", "severity": "critical,high"
+                "target": "https://example.invalid", "severity": "critical,high"
             })
             assert r.status_code == 200
             cmd = mock_exec.call_args[0][0]
@@ -239,7 +239,7 @@ class TestNucleiCommandBuilder:
     def test_tags_flag(self, client):
         with patch(_NUCLEI_PATCH, return_value=_MOCK_RESULT) as mock_exec:
             r = _post(client, "/api/tools/nuclei", {
-                "target": "https://example.com", "tags": "cve,oast"
+                "target": "https://example.invalid", "tags": "cve,oast"
             })
             assert r.status_code == 200
             cmd = mock_exec.call_args[0][0]
@@ -248,7 +248,7 @@ class TestNucleiCommandBuilder:
     def test_template_flag(self, client):
         with patch(_NUCLEI_PATCH, return_value=_MOCK_RESULT) as mock_exec:
             r = _post(client, "/api/tools/nuclei", {
-                "target": "https://example.com", "template": "cves/2021/"
+                "target": "https://example.invalid", "template": "cves/2021/"
             })
             assert r.status_code == 200
             cmd = mock_exec.call_args[0][0]
@@ -256,7 +256,7 @@ class TestNucleiCommandBuilder:
 
     def test_no_severity_when_not_provided(self, client):
         with patch(_NUCLEI_PATCH, return_value=_MOCK_RESULT) as mock_exec:
-            r = _post(client, "/api/tools/nuclei", {"target": "https://example.com"})
+            r = _post(client, "/api/tools/nuclei", {"target": "https://example.invalid"})
             assert r.status_code == 200
             cmd = mock_exec.call_args[0][0]
             assert "-severity" not in cmd
@@ -272,10 +272,10 @@ _SQLMAP_PATCH = "server_api.web_scan.sqlmap.execute_command"
 class TestSqlmapCommandBuilder:
     def test_basic_command(self, client):
         with patch(_SQLMAP_PATCH, return_value=_MOCK_RESULT) as mock_exec:
-            r = _post(client, "/api/tools/sqlmap", {"url": "http://example.com/page?id=1"})
+            r = _post(client, "/api/tools/sqlmap", {"url": "http://example.invalid/page?id=1"})
             assert r.status_code == 200
             cmd = mock_exec.call_args[0][0]
-            assert "sqlmap -u http://example.com/page?id=1" in cmd
+            assert "sqlmap -u http://example.invalid/page?id=1" in cmd
             assert "--batch" in cmd
 
     def test_requires_url(self, client):
@@ -285,7 +285,7 @@ class TestSqlmapCommandBuilder:
     def test_data_flag(self, client):
         with patch(_SQLMAP_PATCH, return_value=_MOCK_RESULT) as mock_exec:
             r = _post(client, "/api/tools/sqlmap", {
-                "url": "http://example.com/login",
+                "url": "http://example.invalid/login",
                 "data": "user=admin&pass=test"
             })
             assert r.status_code == 200
@@ -296,7 +296,7 @@ class TestSqlmapCommandBuilder:
     def test_additional_args(self, client):
         with patch(_SQLMAP_PATCH, return_value=_MOCK_RESULT) as mock_exec:
             r = _post(client, "/api/tools/sqlmap", {
-                "url": "http://example.com/?id=1",
+                "url": "http://example.invalid/?id=1",
                 "additional_args": "--level=5 --risk=3"
             })
             assert r.status_code == 200

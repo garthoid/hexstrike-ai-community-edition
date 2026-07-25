@@ -87,7 +87,7 @@ class TestClassifyErrorByMessage:
         ("target unreachable", ErrorType.TARGET_UNREACHABLE),
         ("target not responding", ErrorType.TARGET_UNREACHABLE),
         ("target down", ErrorType.TARGET_UNREACHABLE),
-        ("dns resolution failed for example.com", ErrorType.TARGET_UNREACHABLE),
+        ("dns resolution failed for example.invalid", ErrorType.TARGET_UNREACHABLE),
         # PARSING_ERROR
         ("parse error at line 42", ErrorType.PARSING_ERROR),
         ("json decode error: unexpected token", ErrorType.PARSING_ERROR),

@@ -59,45 +59,45 @@ class TestDetermineTargetType:
 
     # --- api. subdomain prefix ---
     @pytest.mark.parametrize("target", [
-        "https://api.example.com",
-        "https://api.example.com/v1/users",
-        "api.example.com",
+        "https://api.example.invalid",
+        "https://api.example.invalid/v1/users",
+        "api.example.invalid",
     ])
     def test_api_subdomain_is_api_endpoint(self, engine, target):
         assert engine._determine_target_type(target) == TargetType.API_ENDPOINT
 
     # --- API path hints ---
     @pytest.mark.parametrize("target", [
-        "https://example.com/api",
-        "https://example.com/api/v2/items",
-        "https://example.com/graphql",
-        "https://example.com/v1/users",
+        "https://example.invalid/api",
+        "https://example.invalid/api/v2/items",
+        "https://example.invalid/graphql",
+        "https://example.invalid/v1/users",
     ])
     def test_api_path_hints_are_api_endpoint(self, engine, target):
         assert engine._determine_target_type(target) == TargetType.API_ENDPOINT
 
     # --- query string tokens ---
     @pytest.mark.parametrize("target", [
-        "https://example.com/query?graphql=1",
-        "https://example.com/docs?openapi=true",
-        "https://example.com/spec?swagger=json",
+        "https://example.invalid/query?graphql=1",
+        "https://example.invalid/docs?openapi=true",
+        "https://example.invalid/spec?swagger=json",
     ])
     def test_query_token_is_api_endpoint(self, engine, target):
         assert engine._determine_target_type(target) == TargetType.API_ENDPOINT
 
     # --- plain web application ---
     @pytest.mark.parametrize("target", [
-        "https://example.com",
-        "https://shop.example.com/products",
-        "https://blog.example.com/post/1",
-        "http://example.com/login",
+        "https://example.invalid",
+        "https://shop.example.invalid/products",
+        "https://blog.example.invalid/post/1",
+        "http://example.invalid/login",
     ])
     def test_plain_web_url_is_web_application(self, engine, target):
         assert engine._determine_target_type(target) == TargetType.WEB_APPLICATION
 
     # --- bare domain without scheme ---
     @pytest.mark.parametrize("target", [
-        "example.com",
+        "example.invalid",
         "shop.example.co.uk",
     ])
     def test_bare_domain_is_web_application(self, engine, target):
@@ -119,24 +119,24 @@ class TestDetermineTargetType:
 
 class TestDetectTechnologies:
     def test_wordpress_url_detected(self, engine):
-        techs = engine._detect_technologies("https://example.com/wp-login.php")
+        techs = engine._detect_technologies("https://example.invalid/wp-login.php")
         assert TechnologyStack.WORDPRESS in techs
 
     def test_php_extension_detected(self, engine):
-        techs = engine._detect_technologies("https://example.com/index.php")
+        techs = engine._detect_technologies("https://example.invalid/index.php")
         assert TechnologyStack.PHP in techs
 
     def test_aspx_extension_detected(self, engine):
-        techs = engine._detect_technologies("https://example.com/login.aspx")
+        techs = engine._detect_technologies("https://example.invalid/login.aspx")
         assert TechnologyStack.DOTNET in techs
 
     def test_unknown_target_returns_unknown(self, engine):
-        techs = engine._detect_technologies("https://example.com")
+        techs = engine._detect_technologies("https://example.invalid")
         assert techs == [TechnologyStack.UNKNOWN]
 
     def test_multiple_technologies_detected(self, engine):
         # URL hints at both WordPress and PHP
-        techs = engine._detect_technologies("https://example.com/wordpress.php")
+        techs = engine._detect_technologies("https://example.invalid/wordpress.php")
         assert TechnologyStack.WORDPRESS in techs
         assert TechnologyStack.PHP in techs
 
@@ -147,16 +147,16 @@ class TestDetectTechnologies:
 
 class TestDetectCMS:
     def test_wordpress_detected(self, engine):
-        assert engine._detect_cms("https://example.com/wp-admin") == "WordPress"
+        assert engine._detect_cms("https://example.invalid/wp-admin") == "WordPress"
 
     def test_drupal_detected(self, engine):
-        assert engine._detect_cms("https://example.com/drupal/node/1") == "Drupal"
+        assert engine._detect_cms("https://example.invalid/drupal/node/1") == "Drupal"
 
     def test_joomla_detected(self, engine):
-        assert engine._detect_cms("https://example.com/joomla/index.php") == "Joomla"
+        assert engine._detect_cms("https://example.invalid/joomla/index.php") == "Joomla"
 
     def test_unknown_returns_none(self, engine):
-        assert engine._detect_cms("https://example.com") is None
+        assert engine._detect_cms("https://example.invalid") is None
 
 
 # ---------------------------------------------------------------------------
@@ -174,4 +174,4 @@ class TestDetectCloudProvider:
         assert engine._detect_cloud_provider("https://storage.googleapis.com") == "gcp"
 
     def test_unknown_returns_none(self, engine):
-        assert engine._detect_cloud_provider("https://example.com") is None
+        assert engine._detect_cloud_provider("https://example.invalid") is None
