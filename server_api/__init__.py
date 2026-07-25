@@ -11,7 +11,7 @@ from .api_scan import *
 from .binary_analysis import *
 from .binary_debug import *
 from .bugbounty_workflow import *
-from .cloud_audit import *
+from . import cloud_audit
 from .cloud_exploit import *
 from .cloud_visual import *
 from .container_scan import *
@@ -284,9 +284,9 @@ def register_blueprints(app):
   app.register_blueprint(api_container_scan_docker_bench_bp)
   app.register_blueprint(api_container_scan_clair_bp)
 
-  # Cloud Audit
-  app.register_blueprint(api_cloud_audit_scout_suite_bp)
-  app.register_blueprint(api_cloud_audit_prowler_bp)
+  # Cloud Audit (ToolSpec-driven — see server_core/tool_specs/cloud_audit.py)
+  for bp in cloud_audit.BLUEPRINTS:
+    app.register_blueprint(bp)
 
   # Cloud Exploitation
   app.register_blueprint(api_cloud_exploit_cloudmapper_bp)

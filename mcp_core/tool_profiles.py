@@ -286,8 +286,7 @@ TOOL_PROFILES = {
 
     #Tools for cloud assessment and auditing (e.g., Prowler, Scout Suite).
     "cloud_audit": [
-        lambda mcp, client, logger: register_prowler_tool(mcp, client, logger),
-        lambda mcp, client, logger: register_scout_suite_tool(mcp, client, logger),
+        lambda mcp, client, logger: register_cloud_audit_tools(mcp, client, logger),
     ],
 
     #Tools for cloud infrastructure visualization and mapping (e.g., CloudMapper).

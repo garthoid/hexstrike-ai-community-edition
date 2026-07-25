@@ -1095,7 +1095,7 @@ TOOLS: Dict[str, dict] = {
         "method": "POST",
         "category": "cloud",
         "params": {},
-        "optional": {"provider": "aws", "profile": "default", "region": "", "checks": "", "additional_args": ""},
+        "optional": {"provider": "aws", "profile": "default", "region": "", "checks": "", "output_dir": "/tmp/prowler_output", "output_format": "json", "additional_args": ""},
         "effectiveness": 0.90,
     },
     "trivy": {
