@@ -23,6 +23,7 @@ Patched paths
 """
 
 import subprocess
+import sys
 from unittest.mock import MagicMock, patch
 
 
@@ -80,6 +81,12 @@ def pytest_configure(config):
     """Start all patches before test collection begins."""
     for p in _patches:
         p.start()
+
+    from nyxstrike_server import app as _app
+    from server_core.plugin_loader import _load_tool_plugin
+
+    if "_plugin_tool_server_api_h2csmuggler" not in sys.modules:
+        _load_tool_plugin(_app, "h2csmuggler", set(), set())
 
 
 def pytest_unconfigure(config):
