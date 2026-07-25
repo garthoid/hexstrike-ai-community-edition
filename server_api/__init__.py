@@ -10,10 +10,7 @@ from .api_audit import *
 from .binary_analysis import *
 from .binary_debug import *
 from .bugbounty_workflow import *
-from .cloud_exploit import *
-from .cloud_visual import *
 from .container_scan import *
-from .db_query import *
 from .error_handling import *
 from .exploit_framework import *
 from .gadget_search import *
@@ -21,14 +18,11 @@ from .net_scan import *
 from .ops import *
 from .password_cracking import *
 from .recon import *
-from .recon_bot import *
 from .smb_enum import *
 from .stego_analysis import *
-from .url_recon import *
 from .vuln_intel import *
 from .web_framework import *
 from .web_fuzz import *
-from .web_probe import *
 from .web_scan import *
 from .wifi_pentest import *
 from .active_directory import *
@@ -51,9 +45,6 @@ def register_blueprints(app):
   app.register_blueprint(api_session_reports_bp)
   app.register_blueprint(api_credentials_bp)
   app.register_blueprint(api_loot_bp)
-
-  # Database
-  app.register_blueprint(api_database_bp)
 
   #Active Directory
   app.register_blueprint(api_tools_impacket_bp)
@@ -94,7 +85,6 @@ def register_blueprints(app):
   app.register_blueprint(api_recon_shuffledns_bp)
   app.register_blueprint(api_recon_massdns_bp)
   app.register_blueprint(api_recon_autorecon_bp)
-  app.register_blueprint(api_recon_bot_bbot_bp)
 
   # Exploitation
   app.register_blueprint(api_exploit_framework_exploit_db_bp)
@@ -164,18 +154,9 @@ def register_blueprints(app):
   app.register_blueprint(api_web_scan_stingxss_bp)
   app.register_blueprint(api_web_scan_phaseaccess_bp)
 
-  # Web Probe
-  app.register_blueprint(api_web_probe_httpx_bp)
-  app.register_blueprint(api_web_probe_testssl_bp)
-
   # Web Framework
   app.register_blueprint(api_web_framework_http_framework_bp)
   app.register_blueprint(api_web_framework_browser_agent_bp)
-
-  # URL Recon
-  app.register_blueprint(api_url_recon_gau_bp)
-  app.register_blueprint(api_url_recon_waybackurls_bp)
-  app.register_blueprint(api_web_probe_waymore_bp)
 
   # AI Payload
   app.register_blueprint(api_ai_payload_generate_payload_bp)
@@ -203,10 +184,6 @@ def register_blueprints(app):
   app.register_blueprint(api_container_scan_trivy_bp)
   app.register_blueprint(api_container_scan_docker_bench_bp)
   app.register_blueprint(api_container_scan_clair_bp)
-
-  # Cloud Exploitation
-  app.register_blueprint(api_cloud_exploit_cloudmapper_bp)
-  app.register_blueprint(api_cloud_exploit_pacu_bp)
 
   # Vulnerability Intelligence
   app.register_blueprint(api_vulnerability_intelligence_bp)

@@ -19,7 +19,7 @@ from typing import Any, Dict
 
 from server_core.tool_spec import ToolSpec
 
-_TYPE_NAMES = {str: "str", bool: "bool", int: "int", float: "float", list: "list"}
+_TYPE_NAMES = {str: "str", bool: "bool", int: "int", float: "float", list: "list", dict: "dict"}
 
 
 def _build_signature_src(spec: ToolSpec) -> str:

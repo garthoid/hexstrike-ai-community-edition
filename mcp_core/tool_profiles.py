@@ -167,7 +167,7 @@ TOOL_PROFILES = {
 
     #Tools for reconnaissance and enumeration (e.g., BBot).
     "recon_bot": [
-        lambda mcp, client, logger: register_bbot_tools(mcp, client),
+        lambda mcp, client, logger: register_toolspec_category(mcp, client, logger, "recon_bot"),
     ],
 
     #Tools for web content discovery and fuzzing (e.g., Dirb, FFuf, Dirsearch, Gobuster, Feroxbuster, DotDotPwn, Wfuzz).
@@ -209,8 +209,7 @@ TOOL_PROFILES = {
 
     #Tools for web probing and technology detection (e.g., httpx).
     "web_probe": [
-        lambda mcp, client, logger: register_httpx_tool(mcp, client, logger),
-        lambda mcp, client, logger: register_testssl_tool(mcp, client, logger),
+        lambda mcp, client, logger: register_toolspec_category(mcp, client, logger, "web_probe"),
     ],
 
     #Tools for vulnerability scanning and assessment (e.g., Nuclei).
@@ -229,9 +228,7 @@ TOOL_PROFILES = {
 
     #Tools for URL discovery and reconnaissance (e.g., Gau, Waybackurls, Waymore).
     "url_recon": [
-        lambda mcp, client, logger: register_gau_tool(mcp, client, logger),
-        lambda mcp, client, logger: register_waybackurls_tool(mcp, client, logger),
-        lambda mcp, client, logger: register_waymore_tool(mcp, client, logger),
+        lambda mcp, client, logger: register_toolspec_category(mcp, client, logger, "url_recon"),
     ],
 
     #Tools for parameter discovery and fuzzing (e.g., Arju0n, ParamSpider, x8).
@@ -282,13 +279,9 @@ TOOL_PROFILES = {
     ],
 
     #Tools for cloud infrastructure visualization and mapping (e.g., CloudMapper).
-    "cloud_visual": [
-        lambda mcp, client, logger: register_cloudmapper_tool(mcp, client, logger),
-    ],
-
-    #Tools for cloud exploitation and attack simulation (e.g., Pacu).
+    #Tools for cloud exploitation and attack simulation (e.g., CloudMapper, Pacu).
     "cloud_exploit": [
-        lambda mcp, client, logger: register_pacu_tool(mcp, client, logger),
+        lambda mcp, client, logger: register_toolspec_category(mcp, client, logger, "cloud_exploit"),
     ],
 
     #Tools for Kubernetes scanning and penetration testing (e.g., kube-hunter, kube-bench).
@@ -315,9 +308,7 @@ TOOL_PROFILES = {
 
     #Tools for database querying and interaction (e.g., SQLite, MySQL, PostgreSQL).
     "db_query": [
-        lambda mcp, client, logger: register_mysql_tools(mcp, client, logger),
-        lambda mcp, client, logger: register_sqlite_tools(mcp, client, logger),
-        #lambda mcp, client, logger: register_postgresql_tools(mcp, client, logger),
+        lambda mcp, client, logger: register_toolspec_category(mcp, client, logger, "db_query"),
     ],
 
     #Tools for Python environment interaction and code execution
