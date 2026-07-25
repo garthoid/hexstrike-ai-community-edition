@@ -67,9 +67,24 @@ batch multiple categories in one pass.
 
 7. **Extend `tests/test_endpoints_exist.py`** with a `test_<tool>` per newly
    migrated tool in the category's test class (route-existence check only,
-   `execute_command` is mocked globally by that file).
+   `execute_command` is mocked globally by that file). Create the test class if
+   the category has none yet (e.g. `osint`, `credential_harvest` had zero
+   coverage before migration).
 
-8. **Verify**:
+8. **Check `tests/test_tool_command_builders.py` for stale patch targets.**
+   `grep -n '"server_api\.<category>\.' tests/test_tool_command_builders.py` —
+   this file has richer per-tool command-assertion tests with a hardcoded
+   `_<TOOL>_PATCH = "server_api.<category>.<tool>.execute_command"` string used
+   with `unittest.mock.patch(...)`. Deleting the old per-tool file breaks that
+   patch target (`AttributeError: module has no attribute '<tool>'`) since
+   `execute_command` is no longer imported into a per-tool module — it now
+   lives only in `server_api/_generic/blueprint_factory.py`. Fix by updating
+   the constant to `"server_api._generic.blueprint_factory.execute_command"`
+   (found and fixed for `nuclei` in the `vuln_scan` migration — this is easy
+   to miss since `test_endpoints_exist.py` alone won't catch it, only a full
+   suite run will).
+
+9. **Verify**:
    - `./nyxstrike-env/bin/pytest tests/test_endpoints_exist.py -k "<tool names>"`
    - Manual Flask smoke test: start the server, POST sample payloads to each
      migrated endpoint, diff response shape against a pre-migration capture.
@@ -79,3 +94,6 @@ batch multiple categories in one pass.
    - `git diff --stat` should touch only this category's files plus the two
      registration-wiring files — nothing in `server_core/_generic`,
      `server_api/_generic`, or `mcp_tools/_generic` (those are shared, already built).
+   - Run the **full** test suite at least once before considering the category
+     done — `test_tool_command_builders.py`'s stale-patch failures (step 8)
+     only surface there, not in a `-k`-filtered targeted run.

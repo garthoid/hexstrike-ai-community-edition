@@ -32,7 +32,7 @@ from . import net_lookup
 from .net_scan import *
 from .ops import *
 from . import param_discovery
-from .param_fuzz import *
+from . import param_fuzz
 from .password_cracking import *
 from .recon import *
 from .recon_bot import *
@@ -42,8 +42,8 @@ from .stego_analysis import *
 from .url_filter import *
 from .url_recon import *
 from .vuln_intel import *
-from .vuln_scan import *
-from .waf_detect import *
+from . import vuln_scan
+from . import waf_detect
 from . import web_crawl
 from .web_framework import *
 from .web_fuzz import *
@@ -210,11 +210,13 @@ def register_blueprints(app):
   for bp in param_discovery.BLUEPRINTS:
     app.register_blueprint(bp)
 
-  # Parameter Fuzzing
-  app.register_blueprint(api_param_fuzz_qsreplace_bp)
+  # Parameter Fuzzing (ToolSpec-driven — see server_core/tool_specs/param_fuzz.py)
+  for bp in param_fuzz.BLUEPRINTS:
+    app.register_blueprint(bp)
 
-  # WAF Detection
-  app.register_blueprint(api_waf_detect_wafw00f_bp)
+  # WAF Detection (ToolSpec-driven — see server_core/tool_specs/waf_detect.py)
+  for bp in waf_detect.BLUEPRINTS:
+    app.register_blueprint(bp)
 
   # DNS Enumeration (ToolSpec-driven — see server_core/tool_specs/dns_enum.py)
   for bp in dns_enum.BLUEPRINTS:
@@ -300,8 +302,9 @@ def register_blueprints(app):
   for bp in iac_scan.BLUEPRINTS:
     app.register_blueprint(bp)
 
-  # Vulnerability Scanning
-  app.register_blueprint(api_vuln_scan_nuclei_bp)
+  # Vulnerability Scanning (ToolSpec-driven — see server_core/tool_specs/vuln_scan.py)
+  for bp in vuln_scan.BLUEPRINTS:
+    app.register_blueprint(bp)
 
   # Vulnerability Intelligence
   app.register_blueprint(api_vulnerability_intelligence_bp)

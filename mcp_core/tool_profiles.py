@@ -216,7 +216,7 @@ TOOL_PROFILES = {
 
     #Tools for vulnerability scanning and assessment (e.g., Nuclei).
     "vuln_scan": [
-        lambda mcp, client, logger: register_nuclei(mcp, client, logger, CliColors),
+        lambda mcp, client, logger: register_vuln_scan_tools(mcp, client, logger),
     ],
 
     #Tools for automated exploitation and attack frameworks (e.g., Metasploit, MSFVenom, Pwninit, Pwntools, exploit-db).
@@ -242,7 +242,7 @@ TOOL_PROFILES = {
 
     #Tools for query string parameter replacement (e.g., qsreplace).
     "param_fuzz": [
-        lambda mcp, client, logger: register_qsreplace_tool(mcp, client, logger),
+        lambda mcp, client, logger: register_param_fuzz_tools(mcp, client, logger),
     ],
 
     #Tools for data processing and unique line filtering (e.g., anew).
@@ -263,7 +263,7 @@ TOOL_PROFILES = {
 
     #Tools for WAF detection and fingerprinting (e.g., wafw00f).
     "waf_detect": [
-        lambda mcp, client, logger: register_wafw00f_tool(mcp, client, logger),    
+        lambda mcp, client, logger: register_waf_detect_tools(mcp, client, logger),
     ],
 
     #Tools for DNS enumeration and subdomain takeover detection (e.g., Fierce, DNSenum).

@@ -212,7 +212,7 @@ class TestHashcatCommandBuilder:
 # nuclei
 # ---------------------------------------------------------------------------
 
-_NUCLEI_PATCH = "server_api.vuln_scan.nuclei.execute_command"
+_NUCLEI_PATCH = "server_api._generic.blueprint_factory.execute_command"
 
 
 class TestNucleiCommandBuilder:

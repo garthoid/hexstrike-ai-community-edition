@@ -1,5 +1,7 @@
-from .qsreplace import register_qsreplace_tool
+from server_core.tool_specs.param_fuzz import SPECS
+from mcp_tools._generic.registrar import register_tool_from_spec
 
-__all__ = [
-    'register_qsreplace_tool'
-]
+
+def register_param_fuzz_tools(mcp, api_client, logger):
+    for spec in SPECS:
+        register_tool_from_spec(mcp, api_client, logger, spec)

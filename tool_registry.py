@@ -336,7 +336,7 @@ TOOLS: Dict[str, dict] = {
         "endpoint": "/api/tools/wafw00f",
         "method": "POST",
         "category": "web_recon",
-        "params": {"url": {"required": True}},
+        "params": {"target": {"required": True}},
         "optional": {"additional_args": ""},
         "effectiveness": 0.80,
     },
