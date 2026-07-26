@@ -188,6 +188,9 @@ export function ChatWidget({ llmAvailable, currentPage, currentSessionId }: Chat
         <div
           ref={widgetRef}
           className="chat-widget"
+          role="dialog"
+          aria-modal="false"
+          aria-label="NyxStrike AI chat"
           style={{ width: size.w, height: size.h }}
         >
           {/* Resize handles */}
@@ -216,22 +219,23 @@ export function ChatWidget({ llmAvailable, currentPage, currentSessionId }: Chat
                   className="chat-sidebar-toggle"
                   onClick={() => setSidebarOpen(prev => !prev)}
                   title={sidebarOpen ? 'Hide sessions' : 'Show sessions'}
+                  aria-label={sidebarOpen ? 'Hide sessions' : 'Show sessions'}
                 >
                   {sidebarOpen ? <ChevronLeft size={14} /> : <ChevronRight size={14} />}
                 </button>
-                <div
+                <button
+                  type="button"
                   className="chat-header-info"
                   onClick={toggleOpen}
                   title="Collapse chat"
-                  style={{ cursor: 'pointer' }}
                 >
                   <span className="chat-header-title">NyxStrike AI</span>
                   {currentSessionId && currentPage === 'session-detail' && (
                     <span className="chat-context-badge">context: session</span>
                   )}
                   <span className="chat-session-label mono">{sessionLabel}</span>
-                </div>
-                <button className="chat-close-btn" onClick={toggleOpen} title="Close">
+                </button>
+                <button className="chat-close-btn" onClick={toggleOpen} title="Close" aria-label="Close chat">
                   <ArrowDown size={14} />
                 </button>
               </div>

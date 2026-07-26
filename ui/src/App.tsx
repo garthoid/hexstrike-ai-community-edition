@@ -59,8 +59,8 @@ export default function App() {
   })
 
   const {
-    paletteOpen, setPaletteOpen, commandToolRequest, clearCommandToolRequest,
-    showPaletteHint, dismissPaletteHint, openCommandPalette, handleCommandSelectTool,
+    paletteOpen, commandToolRequest, clearCommandToolRequest,
+    showPaletteHint, dismissPaletteHint, openCommandPalette, closeCommandPalette, handleCommandSelectTool,
   } = useCommandPalette(setPage)
   const { themeId, setThemeId, reduceTextureEffects, setReduceTextureEffects } = useThemePreferences()
 
@@ -75,7 +75,7 @@ export default function App() {
       <div className={demo ? 'layout layout--demo' : 'layout'}>
         <CommandPalette
           open={paletteOpen}
-          onClose={() => setPaletteOpen(false)}
+          onClose={closeCommandPalette}
           setPage={setPage}
           tools={tools}
           onSelectTool={handleCommandSelectTool}

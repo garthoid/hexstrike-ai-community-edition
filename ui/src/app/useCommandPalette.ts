@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import type { Tool } from '../api'
 import type { Page } from './routing'
 
@@ -20,10 +20,13 @@ export function useCommandPalette(setPage: (page: Page) => void) {
     }
   })
 
+  const triggerRef = useRef<HTMLElement | null>(null)
+
   useEffect(() => {
     function onGlobalKeyDown(e: KeyboardEvent) {
       if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
         e.preventDefault()
+        triggerRef.current = document.activeElement as HTMLElement | null
         setPaletteOpen(true)
       }
     }
@@ -46,8 +49,14 @@ export function useCommandPalette(setPage: (page: Page) => void) {
   }
 
   function openCommandPalette() {
+    triggerRef.current = document.activeElement as HTMLElement | null
     setPaletteOpen(true)
     if (showPaletteHint) dismissPaletteHint()
+  }
+
+  function closeCommandPalette() {
+    setPaletteOpen(false)
+    triggerRef.current?.focus()
   }
 
   function clearCommandToolRequest() {
@@ -62,6 +71,7 @@ export function useCommandPalette(setPage: (page: Page) => void) {
     showPaletteHint,
     dismissPaletteHint,
     openCommandPalette,
+    closeCommandPalette,
     handleCommandSelectTool,
   }
 }
