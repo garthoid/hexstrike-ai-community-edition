@@ -25,7 +25,7 @@ export interface ThemeOption {
 export const THEME_STORAGE_KEY = 'nyxstrike_theme'
 
 export const THEME_OPTIONS: ThemeOption[] = [
-  { id: 'dark', label: 'Dark Ops', hint: 'Default tactical dark' },
+  { id: 'dark', label: 'Dark Ops', hint: 'Tactical dark · Green accent' },
   { id: 'unicorn', label: 'Unicorn Dream', hint: 'Pastel neon fantasy glow' },
   { id: 'forest', label: 'Forest Canopy', hint: 'Moss, pine, bark, and misty sky' },
   { id: 'solarized', label: 'Solarized Terminal', hint: 'Muted tan and navy readability' },

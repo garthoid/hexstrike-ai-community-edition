@@ -7,7 +7,7 @@ export function useThemePreferences() {
       const stored = localStorage.getItem(THEME_STORAGE_KEY)
       if (stored && isThemeId(stored)) return stored
     } catch { /* ignored */ }
-    return 'dark'
+    return 'catppuccin'
   })
   const [reduceTextureEffects, setReduceTextureEffects] = useState<boolean>(() => {
     try {
