@@ -41,6 +41,7 @@ import type {
   ProcessListResponse,
   RunHistoryResponse,
   RunHistorySummaryResponse,
+  RunLookupResponse,
   SessionAiReportResponse,
   SessionDeleteResponse,
   SessionDetailResponse,
@@ -57,6 +58,7 @@ import type {
   SessionNoteSearchResponse,
   SessionNotesResponse,
   SessionReportResponse,
+  SessionIntegrityResponse,
   SessionTemplateDeleteResponse,
   SessionTemplateMutationResponse,
   SessionTemplatesResponse,
@@ -113,6 +115,9 @@ export const api = {
   runHistorySummary: (limit?: number) =>
     get<RunHistorySummaryResponse>(`/api/runs/history/summary${limit ? `?limit=${limit}` : ''}`),
   clearRunHistory: () => post<{ success: boolean }>('/api/runs/clear'),
+  /** Find the run (session-scoped or ad-hoc) that produced a given evidence-chain hash. */
+  lookupRun: (hash: string) =>
+    get<RunLookupResponse>(`/api/runs/lookup?hash=${encodeURIComponent(hash)}`),
   runTool: (endpoint: string, params: Record<string, unknown>) =>
     postWithTimeout<ToolExecResponse>(endpoint, params, 86400),
   /** Submit a tool for async execution — returns a task_id immediately instead of blocking. */
@@ -275,6 +280,8 @@ export const api = {
     post<SessionReportResponse>(`/api/sessions/${sessionId}/report`, options),
   generateSessionAiReport: (sessionId: string, options: GenerateAiReportPayload = {}) =>
     post<SessionAiReportResponse>(`/api/sessions/${sessionId}/report/ai`, options),
+  verifySessionIntegrity: (sessionId: string) =>
+    get<SessionIntegrityResponse>(`/api/sessions/${sessionId}/verify-integrity`),
   /** Returns the URL to trigger a notes zip download in the browser */
   exportSessionNotesUrl: (sessionId: string) => `/api/sessions/${sessionId}/notes/export`,
 

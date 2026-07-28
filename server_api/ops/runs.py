@@ -5,16 +5,21 @@ GET  /api/runs/history         — return the last N server-side tool executions
 GET  /api/runs/history/summary — return the last N entries with only id, tool,
                                   timestamp, success, execution_time (no stdout/stderr/params)
 POST /api/runs/clear           — clear the run history
+GET  /api/runs/lookup          — find the run that produced a given evidence-chain hash
 """
 
 import logging
+import re
 from flask import Blueprint, jsonify, request
 
+import server_core.evidence_chain as evidence_chain
 from server_core.singletons import run_history
 
 logger = logging.getLogger(__name__)
 
 api_runs_bp = Blueprint("api_runs", __name__)
+
+_HASH_RE = re.compile(r"^[0-9a-fA-F]{64}$")
 
 
 @api_runs_bp.route("/api/runs/history", methods=["GET"])
@@ -67,4 +72,35 @@ def clear_run_history():
     return jsonify({"success": True})
   except Exception as e:
     logger.error(f"Error clearing run history: {e}")
+    return jsonify({"success": False, "error": str(e)}), 500
+
+
+@api_runs_bp.route("/api/runs/lookup", methods=["GET"])
+def lookup_run():
+  """Find the run (session-scoped or ad-hoc) that produced a given evidence-chain hash."""
+  try:
+    hash_hex = (request.args.get("hash") or "").strip()
+    if not hash_hex or not _HASH_RE.match(hash_hex):
+      return jsonify({"success": False, "error": "hash must be a 64-character hex string"}), 400
+
+    match = evidence_chain.find_run_by_hash(run_history.get_all(), hash_hex)
+    if not match:
+      return jsonify({"success": True, "found": False})
+
+    return jsonify({
+      "success": True,
+      "found": True,
+      "session_id": match.get("session_id", ""),
+      "tool": match.get("tool", ""),
+      "endpoint": match.get("endpoint", ""),
+      "params": match.get("params", {}),
+      "stdout": match.get("stdout", ""),
+      "stderr": match.get("stderr", ""),
+      "return_code": match.get("return_code", -1),
+      "timestamp": match.get("timestamp", ""),
+      "hash": match.get("hash", ""),
+      "prev_hash": match.get("prev_hash", ""),
+    })
+  except Exception as e:
+    logger.error(f"Error looking up run by hash: {e}")
     return jsonify({"success": False, "error": str(e)}), 500

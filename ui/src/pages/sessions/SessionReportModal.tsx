@@ -1,9 +1,9 @@
 import { useState } from 'react'
-import { Download, FileText, Brain, Archive, RefreshCw } from 'lucide-react'
+import { Download, FileText, Brain, Archive, RefreshCw, ShieldCheck, ShieldAlert, ShieldQuestion } from 'lucide-react'
 import { api } from '../../api'
 import { useEscapeClose } from '../../hooks/useEscapeClose'
 import { reportGenStart, reportGenDone, reportGenError } from '../../app/reportGeneration'
-import type { SessionSummary } from '../../api'
+import type { SessionSummary, SessionIntegrityResponse } from '../../api'
 
 type ReportMode = 'structured' | 'ai'
 
@@ -28,8 +28,23 @@ export function SessionReportModal({ isOpen, session, onClose, llmAvailable = fa
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [preview, setPreview] = useState<string | null>(null)
+  const [integrityLoading, setIntegrityLoading] = useState(false)
+  const [integrity, setIntegrity] = useState<SessionIntegrityResponse | null>(null)
 
   if (!isOpen) return null
+
+  async function verifyIntegrity() {
+    setIntegrityLoading(true)
+    setIntegrity(null)
+    try {
+      const res = await api.verifySessionIntegrity(session.session_id)
+      setIntegrity(res)
+    } catch (e) {
+      setIntegrity({ success: false, error: String(e) })
+    } finally {
+      setIntegrityLoading(false)
+    }
+  }
 
   function downloadText(text: string, filename: string) {
     const blob = new Blob([text], { type: 'text/markdown' })
@@ -252,7 +267,37 @@ export function SessionReportModal({ isOpen, session, onClose, llmAvailable = fa
             >
               <Archive size={12} /> Export Notes (.zip)
             </button>
+
+            <button
+              className="session-action-btn"
+              onClick={verifyIntegrity}
+              disabled={integrityLoading}
+              title="Verify the tamper-evident hash chain of this session's run log"
+            >
+              {integrityLoading
+                ? <><RefreshCw size={12} className="spin" /> Verifying…</>
+                : <><ShieldCheck size={12} /> Verify Integrity</>
+              }
+            </button>
           </div>
+
+          {integrity && (
+            <div className={
+              !integrity.success ? 'report-modal-error'
+                : integrity.total_runs === 0 ? 'section-meta'
+                : integrity.valid ? 'report-integrity-badge report-integrity-badge--ok'
+                : 'report-integrity-badge report-integrity-badge--bad'
+            }>
+              {!integrity.success
+                ? (integrity.error ?? 'Failed to verify integrity.')
+                : integrity.total_runs === 0
+                  ? <><ShieldQuestion size={12} /> No run history to verify.</>
+                  : integrity.valid
+                    ? <><ShieldCheck size={12} /> {integrity.verified_runs}/{integrity.total_runs} runs verified — evidence chain intact.</>
+                    : <><ShieldAlert size={12} /> Tamper detected at run #{integrity.broken_at_index} ({integrity.verified_runs}/{integrity.total_runs} verified before the break).</>
+              }
+            </div>
+          )}
 
           {preview && (
             <div className="report-preview">

@@ -2,6 +2,10 @@
 
 ## 1.8.0 - exploitotter (NEXT)
 
+### Evidence chain-of-custody
+- Every tool run is now hash-chained (tamper-evident), including one-off runs made outside any session.
+- New "Verify" page — look up the exact run behind a given hash, or check any session's evidence chain by ID. Session reports also show integrity inline.
+
 ### Topology map
 - Added a network topology map — export a completed nmap/nmap-advanced run to a live host/port graph, auto-creating a session if needed.
 - Toggle on the Run page to auto-export scan results, plus manual "Export to Topology" buttons on the Run page and session tool runs.

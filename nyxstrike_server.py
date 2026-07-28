@@ -156,7 +156,7 @@ def record_tool_run(response):
   # Only record responses that look like tool execution results
   if "stdout" in body or "stderr" in body or "return_code" in body:
     session_id = (params.get("session_id") or "") if isinstance(params, dict) else ""
-    run_history.record(
+    chained_run = run_history.record(
       tool=tool_name,
       endpoint=path,
       params=params,
@@ -191,6 +191,9 @@ def record_tool_run(response):
           "partial_results": bool(body.get("partial_results", False)),
           "execution_time": body.get("execution_time", 0),
           "timestamp": body.get("timestamp", ""),
+          "hash": chained_run.get("hash"),
+          "prev_hash": chained_run.get("prev_hash"),
+          "run_history_id": chained_run.get("id"),
         })
       except Exception:
         logger.debug("session_flow recording failed for tool %s", tool_name, exc_info=True)

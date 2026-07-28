@@ -586,6 +586,28 @@
   line-height: 1.4;
 }
 
+.report-integrity-badge {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  border-radius: 6px;
+  padding: 8px 12px;
+  line-height: 1.4;
+}
+
+.report-integrity-badge--ok {
+  color: var(--green, #98c379);
+  background: color-mix(in srgb, var(--green, #98c379) 8%, transparent);
+  border: 1px solid color-mix(in srgb, var(--green, #98c379) 25%, transparent);
+}
+
+.report-integrity-badge--bad {
+  color: var(--red, #e06c75);
+  background: color-mix(in srgb, var(--red, #e06c75) 8%, transparent);
+  border: 1px solid color-mix(in srgb, var(--red, #e06c75) 25%, transparent);
+}
+
 .report-preview {
   background: color-mix(in srgb, var(--text-dim) 3%, transparent);
   border: 1px solid var(--border);

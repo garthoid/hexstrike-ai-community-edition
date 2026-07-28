@@ -7,6 +7,7 @@ from collections import deque
 from typing import Any, Deque, Dict, List, Optional
 
 import server_core.config_core as config_core
+import server_core.evidence_chain as evidence_chain
 
 
 logger = logging.getLogger(__name__)
@@ -41,10 +42,11 @@ class RunHistoryStore:
     params: Optional[Dict[str, Any]],
     result: Dict[str, Any],
     session_id: Optional[str] = None,
-  ) -> None:
+  ) -> Dict[str, Any]:
+    """Record a run and return the chained entry (includes hash/prev_hash/id)."""
     with self._lock:
       self._id_counter += 1
-      self._entries.appendleft({
+      entry = {
         "id": self._id_counter,
         "tool": tool or "unknown",
         "endpoint": endpoint or "",
@@ -58,8 +60,12 @@ class RunHistoryStore:
         "partial_results": result.get("partial_results", False),
         "execution_time": result.get("execution_time", 0.0),
         "timestamp": result.get("timestamp", ""),
-      })
+      }
+      prev_hash = self._entries[0]["hash"] if self._entries else evidence_chain.GENESIS_HASH
+      chained_entry = evidence_chain.chain_entry(entry, prev_hash)
+      self._entries.appendleft(chained_entry)
       self._save_locked()
+      return chained_entry
 
   def get_all(self) -> List[Dict[str, Any]]:
     with self._lock:
@@ -113,6 +119,8 @@ class RunHistoryStore:
           "partial_results": bool(entry.get("partial_results", False)),
           "execution_time": entry.get("execution_time", 0.0),
           "timestamp": entry.get("timestamp", ""),
+          "prev_hash": entry.get("prev_hash", ""),
+          "hash": entry.get("hash", ""),
         })
       self._entries = deque(cleaned, maxlen=self.MAX_ENTRIES)
       self._id_counter = max_id

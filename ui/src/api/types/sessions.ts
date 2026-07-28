@@ -382,6 +382,17 @@ export interface GenerateReportPayload {
   save_to_notes?: boolean;
 }
 
+export interface SessionIntegrityResponse {
+  success: boolean;
+  session_id?: string;
+  valid?: boolean;
+  total_runs?: number;
+  verified_runs?: number;
+  broken_at_index?: number | null;
+  tip_hash?: string | null;
+  error?: string;
+}
+
 export interface GenerateAiReportPayload extends GenerateReportPayload {
   focus?: string;
 }

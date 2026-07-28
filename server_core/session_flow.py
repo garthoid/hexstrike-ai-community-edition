@@ -2,6 +2,7 @@ import time
 import uuid
 from typing import Any, Dict, List, Optional, Tuple
 
+import server_core.evidence_chain as evidence_chain
 from server_core.singletons import session_store
 
 
@@ -197,6 +198,18 @@ def append_run_log(session_id: str, entry: Dict[str, Any]) -> None:
         session_store.archive(session_id, session_dict)
     else:
         session_store.save(session_id, session_dict)
+
+
+def verify_session_integrity(session_id: str) -> Optional[Dict[str, Any]]:
+    """Verify the hash chain of a session's run_log. None if session doesn't exist."""
+    loaded = load_session_any(session_id)
+    if not loaded:
+        return None
+    session_dict, _state = loaded
+    run_log = session_dict.get("run_log", [])
+    if not isinstance(run_log, list):
+        run_log = []
+    return evidence_chain.verify_chain(run_log)
 
 
 def load_session_any(session_id: str) -> Optional[Tuple[Dict[str, Any], str]]:

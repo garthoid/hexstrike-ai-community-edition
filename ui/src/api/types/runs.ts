@@ -14,6 +14,7 @@ export interface RunHistoryEntry {
   tool: string;
   endpoint: string;
   params: Record<string, unknown>;
+  session_id?: string;
   stdout: string;
   stderr: string;
   return_code: number;
@@ -22,6 +23,8 @@ export interface RunHistoryEntry {
   partial_results: boolean;
   execution_time: number;
   timestamp: string;
+  hash?: string;
+  prev_hash?: string;
 }
 
 export interface RunHistoryResponse {
@@ -43,4 +46,21 @@ export interface RunHistorySummaryResponse {
   success: boolean;
   total: number;
   runs: RunHistorySummaryEntry[];
+}
+
+/** Response from GET /api/runs/lookup?hash=<hex> — find the run that produced a given evidence-chain hash. */
+export interface RunLookupResponse {
+  success: boolean;
+  found: boolean;
+  session_id?: string;
+  tool?: string;
+  endpoint?: string;
+  params?: Record<string, unknown>;
+  stdout?: string;
+  stderr?: string;
+  return_code?: number;
+  timestamp?: string;
+  hash?: string;
+  prev_hash?: string;
+  error?: string;
 }

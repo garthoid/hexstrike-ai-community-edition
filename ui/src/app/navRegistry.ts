@@ -1,7 +1,7 @@
 import type { LucideIcon } from 'lucide-react'
 import {
   LayoutDashboard, Play, Terminal, Settings as SettingsIcon, HelpCircle,
-  ListTodo, Wrench, Puzzle, FileText, Layers, KeyRound,
+  ListTodo, Wrench, Puzzle, FileText, Layers, KeyRound, ShieldCheck,
 } from 'lucide-react'
 import type { Page } from './routing'
 
@@ -25,6 +25,7 @@ export const NAV_ENTRIES: NavEntry[] = [
   { id: 'tools', label: 'Tools', icon: Wrench, description: 'Browse and inspect available tools', mandatory: false, paletteLabel: 'Open Tools' },
   { id: 'plugins', label: 'Plugins', icon: Puzzle, description: 'Manage skill and plugin extensions', mandatory: false, paletteLabel: 'Open Plugins' },
   { id: 'reports', label: 'Reports', icon: FileText, description: 'Generated scan reports', mandatory: false, paletteLabel: 'Open Reports' },
+  { id: 'verify', label: 'Verify', icon: ShieldCheck, description: 'Evidence chain-of-custody — look up runs by hash, check session integrity', mandatory: false, paletteLabel: 'Open Verify' },
   { id: 'sessions', label: 'Sessions', icon: Layers, description: 'Saved recon/engagement sessions', mandatory: false, paletteLabel: 'Open Sessions' },
   { id: 'loot', label: 'Loot', icon: KeyRound, description: 'Captured credentials and artefacts', mandatory: false, paletteLabel: 'Open Loot' },
 ]

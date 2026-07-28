@@ -28,6 +28,7 @@ export type {
   RunHistoryResponse,
   RunHistorySummaryEntry,
   RunHistorySummaryResponse,
+  RunLookupResponse,
   ToolExecResponse,
 } from './runs';
 
@@ -124,6 +125,7 @@ export type {
   SessionNoteSearchResult,
   SessionNotesResponse,
   SessionReportResponse,
+  SessionIntegrityResponse,
   SessionSummary,
   SessionTemplate,
   SessionTemplateDeleteResponse,
