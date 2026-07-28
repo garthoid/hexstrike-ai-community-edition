@@ -23,6 +23,8 @@ interface RunPageProps {
   setRunHistory: React.Dispatch<React.SetStateAction<RunHistoryEntry[]>>
   commandToolRequest?: { toolName: string; requestId: number } | null
   onCommandToolHandled?: () => void
+  urlToolName?: string | null
+  onToolSelected?: (toolName: string | null) => void
   onRefresh?: () => void
   onClearHistory?: () => Promise<void>
 }
@@ -34,6 +36,8 @@ export function RunPage({
   setRunHistory: setHistory,
   commandToolRequest,
   onCommandToolHandled,
+  urlToolName,
+  onToolSelected,
   onRefresh,
   onClearHistory,
 }: RunPageProps) {
@@ -82,6 +86,7 @@ export function RunPage({
     for (const k of Object.keys(t.params)) defaults[k] = ''
     for (const [k, v] of Object.entries(t.optional)) defaults[k] = String(v)
     setFieldValues(defaults)
+    onToolSelected?.(t.name)
   }
 
   function toggleFavoriteSelected() {
@@ -177,6 +182,15 @@ export function RunPage({
     }
     onCommandToolHandled?.()
   }, [commandToolRequest, tools, onCommandToolHandled])
+
+  // Keeps the selected tool in sync with the URL: opens directly into a tool when the
+  // page is loaded from a deep link (#/run/<tool>), and follows Back/Forward navigation
+  // between tools. Never pre-fills params from the URL — only picks the tool.
+  useEffect(() => {
+    if (!urlToolName || selected?.name === urlToolName) return
+    const tool = tools.find(t => t.name === urlToolName)
+    if (tool) selectTool(tool)
+  }, [urlToolName, tools, selected])
 
   const compareText = modalEntry
     ? (() => {

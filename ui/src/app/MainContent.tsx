@@ -83,6 +83,8 @@ interface MainContentProps {
   clearServerRunHistory: () => Promise<void>
   commandToolRequest?: { toolName: string; requestId: number } | null
   onCommandToolHandled?: () => void
+  urlToolName?: string | null
+  onToolSelected?: (toolName: string | null) => void
   openSessionDetail: (sessionId: string) => void
   activeSessionId: string | null
   setPage: (page: Page) => void
@@ -118,6 +120,8 @@ export function MainContent({
   clearServerRunHistory,
   commandToolRequest,
   onCommandToolHandled,
+  urlToolName,
+  onToolSelected,
   openSessionDetail,
   activeSessionId,
   setPage,
@@ -163,6 +167,8 @@ export function MainContent({
             setRunHistory={setRunHistory}
             commandToolRequest={commandToolRequest}
             onCommandToolHandled={onCommandToolHandled}
+            urlToolName={urlToolName}
+            onToolSelected={onToolSelected}
             onRefresh={fetchServerRunHistory}
             onClearHistory={clearServerRunHistory}
           />

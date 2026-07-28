@@ -29,7 +29,7 @@ export default function App() {
   const [demo] = useState(isDemoMode)
 
   const { isPageEnabled, togglePage } = usePageVisibility()
-  const { page, activeSessionId, sidebarMobileOpen, setSidebarMobileOpen, setPage, openSessionDetail } = useAppRouting(isPageEnabled)
+  const { page, activeSessionId, activeToolName, sidebarMobileOpen, setSidebarMobileOpen, setPage, openSessionDetail, setActiveToolName } = useAppRouting(isPageEnabled)
 
   const [sidebarCollapsed, setSidebarCollapsed] = usePersistentState('nyxstrike_sidebar_collapsed', false)
   useEscapeClose(sidebarMobileOpen, () => setSidebarMobileOpen(false))
@@ -151,6 +151,8 @@ export default function App() {
             clearServerRunHistory={clearServerRunHistory}
             commandToolRequest={commandToolRequest}
             onCommandToolHandled={clearCommandToolRequest}
+            urlToolName={activeToolName}
+            onToolSelected={setActiveToolName}
             openSessionDetail={openSessionDetail}
             activeSessionId={activeSessionId}
             setPage={setPage}
