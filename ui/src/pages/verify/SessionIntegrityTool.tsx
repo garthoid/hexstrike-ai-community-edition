@@ -59,26 +59,23 @@ export function SessionIntegrityTool() {
               : result.valid ? 'verify-badge verify-badge--ok'
               : 'verify-badge verify-badge--bad'
           }>
-            {!result.success
-              ? (result.error ?? 'Session not found.')
-              : result.total_runs === 0
-                ? <><ShieldQuestion size={12} /> No run history to verify for this session.</>
-                : result.valid
-                  ? <><ShieldCheck size={12} /> {result.verified_runs}/{result.total_runs} runs verified — evidence chain intact.</>
-                  : <><ShieldAlert size={12} /> Tamper detected at run #{result.broken_at_index} ({result.verified_runs}/{result.total_runs} verified before the break).</>
-            }
+            <div className="verify-badge-row">
+              {!result.success
+                ? (result.error ?? 'Session not found.')
+                : result.total_runs === 0
+                  ? <><ShieldQuestion size={12} /> No run history to verify for this session.</>
+                  : result.valid
+                    ? <><ShieldCheck size={12} /> {result.verified_runs}/{result.total_runs} runs verified — evidence chain intact.</>
+                    : <><ShieldAlert size={12} /> Tamper detected at run #{result.broken_at_index} ({result.verified_runs}/{result.total_runs} verified before the break).</>
+              }
+            </div>
+            {result.success && result.tip_hash && (
+              <div className="verify-badge-hash">
+                <span className="verify-badge-hash-label">Tip Hash</span>
+                <CopyHash value={result.tip_hash} />
+              </div>
+            )}
           </div>
-        )}
-
-        {result?.success && result.tip_hash && (
-          <table className="verify-result-table">
-            <tbody>
-              <tr>
-                <td>Tip Hash</td>
-                <td><CopyHash value={result.tip_hash} /></td>
-              </tr>
-            </tbody>
-          </table>
         )}
       </div>
     </section>

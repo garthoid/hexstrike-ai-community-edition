@@ -155,13 +155,32 @@
 
 .verify-badge {
   display: flex;
-  align-items: center;
-  gap: 6px;
+  flex-direction: column;
+  gap: 8px;
   margin-top: 12px;
   font-size: 12px;
   border-radius: 6px;
   padding: 8px 12px;
   line-height: 1.4;
+}
+
+.verify-badge-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.verify-badge-hash {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding-top: 8px;
+  border-top: 1px solid color-mix(in srgb, currentColor 20%, transparent);
+}
+
+.verify-badge-hash-label {
+  color: var(--text-dim);
+  white-space: nowrap;
 }
 
 .verify-badge--ok {
