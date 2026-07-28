@@ -3,18 +3,22 @@
 ## 1.7.0 - phishfalcon (NEXT)
 
 ### Navigation
-- Replaced the top nav tab bar with a collapsible sidebar — collapses to an icon-only rail on desktop (state persists across reloads) and becomes a slide-out overlay drawer on mobile, replacing the old page dropdown.
+- Replaced the top nav tab bar with a collapsible sidebar — icon-only rail on desktop (state persists across reloads), slide-out drawer on mobile.
 
 ### Themes
 - Added new themes — Dracula, Rosé, and more.
-- Every theme has a subtle animated accent sweep across the top bar and sidebar edge; both respect the OS-level "reduce motion" setting.
+- Every theme now has a subtle animated accent sweep across the top bar and sidebar edge, respecting the OS "reduce motion" setting.
 
 ### Intelligence
-- The Intelligent Decision Engine now considers the current session's run history when scoring tools — a tool that just failed is deprioritized (not excluded) in favor of alternatives on the next recommendation, instead of being suggested again unchanged.
+- The Decision Engine now weighs the current session's run history when scoring tools — a tool that just failed is deprioritized (not excluded) on the next recommendation.
 
 ### Run page & live output
-- The Run page no longer blocks on a single long-running request with no feedback — tool execution now streams live output and progress while it runs, instead of only showing results once the command finishes.
-- Fixed the process dashboard and stream showing a fake "Running for Xs" placeholder instead of real command output — `last_output` now carries the tool's actual recent stdout/stderr, visible live on the Tasks page.
+- Run page tool execution now streams live output and progress instead of blocking silently until the command finishes.
+- Fixed the process dashboard/stream showing a fake "Running for Xs" placeholder — `last_output` now carries the tool's real stdout/stderr, visible live on the Tasks page.
+- Selecting a tool on the Run page now updates the URL to `#/run/<tool>` — bookmarkable/shareable, reopens straight into that tool with empty inputs (no params prefilled).
+
+### Accessibility
+- Added focus-trap keyboard navigation to the Command Palette and Chat widget.
 
 ### Error recovery
 - Fixed `/api/error-handling/execute-with-recovery` raising a server error on every real call.
@@ -23,7 +27,10 @@
 ### Process pool
 - Fixed `/api/process/execute-async` returning the cached result payload instead of a task ID on a cache hit, which broke polling it via `/api/process/get-task-result/<task_id>`.
 - Fixed the process pool's worker auto-scaling miscounting active workers after scaling down.
-- All tool command execution now runs through the process pool's auto-scaling instead of bypassing it, and pooled task results no longer leak memory on long-running instances.
+- All tool command execution now runs through the process pool's auto-scaling (previously bypassed it); pooled task results no longer leak memory on long-running instances.
+
+### Internals
+- Migrated the entire tool registry to a unified `ToolSpec`-driven registration system, replacing legacy per-category registration code across all tool categories.
 
 ## 1.6.0 - injectlynx (2026-07-03)
 
