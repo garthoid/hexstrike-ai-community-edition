@@ -368,11 +368,12 @@ def run_impacket():
 
         argv, spec = _build_impacket_command(script_name, payload)
         command = shlex.join(argv)
+        use_recovery = bool(payload.get("use_recovery", False))
 
         logger.info("Starting Impacket script %s", script_name)
         logger.debug("Impacket command: %s", command)
 
-        result = execute_command(command)
+        result = execute_command(command, use_recovery=use_recovery, tool=script_name, target=payload.get("target", ""))
 
         logger.info("Completed Impacket script %s", script_name)
 

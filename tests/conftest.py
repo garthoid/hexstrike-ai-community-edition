@@ -15,11 +15,9 @@ Patched paths
 5.  server_api.wifi_pentest.hcxdumptool.subprocess         — direct hcxdumptool BPF calls
 6.  server_api.active_directory.impacket_scripts.subprocess — impacket direct calls
 7.  server_api.ops.system_monitoring.subprocess            — tool-availability probes
-8.  server_api.ctf.binary_analyzer.subprocess              — file/checksec/strings/ROPgadget calls
-9.  server_api.ctf.forensics_analyzer.subprocess           — exiftool/binwalk/steghide calls
-10. server_core.ai_exploit_generator — imports subprocess locally; covered by module patches above
-11. server_core.singletons.cache                           — cache singleton
-12. server_core.singletons.telemetry                       — telemetry singleton
+8.  server_core.ai_exploit_generator — imports subprocess locally; covered by module patches above
+9.  server_core.singletons.cache                           — cache singleton
+10. server_core.singletons.telemetry                       — telemetry singleton
 """
 
 import subprocess
@@ -70,8 +68,6 @@ _patches = [
     patch("server_core.tool_specs.wifi_pentest.subprocess", _MOCK_SUBPROCESS),
     patch("server_api.active_directory.impacket_scripts.subprocess", _MOCK_SUBPROCESS),
     patch("server_api.ops.system_monitoring.subprocess", _MOCK_SUBPROCESS),
-    patch("server_api.ctf.binary_analyzer.subprocess", _MOCK_SUBPROCESS),
-    patch("server_api.ctf.forensics_analyzer.subprocess", _MOCK_SUBPROCESS),
     patch("server_core.singletons.cache", _CACHE_MOCK),
     patch("server_core.singletons.telemetry", _TELEMETRY_MOCK),
 ]
