@@ -12,6 +12,12 @@
   background: var(--bg-main, var(--bg-card));
 }
 
+.session-topology-canvas .react-flow__minimap {
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  overflow: hidden;
+}
+
 .topology-node-label {
   display: flex;
   flex-direction: column;

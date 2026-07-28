@@ -119,7 +119,14 @@ export function SessionTopology({ session }: { session: SessionSummary }) {
         <ReactFlow nodes={nodes} edges={edges} fitView proOptions={{ hideAttribution: true }}>
           <Background />
           <Controls showInteractive={false} />
-          <MiniMap pannable zoomable />
+          <MiniMap
+            pannable
+            zoomable
+            bgColor="var(--bg-card2)"
+            maskColor="color-mix(in srgb, var(--bg) 65%, transparent)"
+            nodeColor="var(--bg-card)"
+            nodeStrokeColor="var(--border)"
+          />
         </ReactFlow>
       </div>
     </div>

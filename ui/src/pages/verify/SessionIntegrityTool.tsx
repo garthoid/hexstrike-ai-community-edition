@@ -35,8 +35,7 @@ export function SessionIntegrityTool() {
       <div className="verify-tool-body">
         <p className="verify-tool-desc">
           Check any session's evidence chain by ID — confirms none of its recorded tool runs
-          were edited after the fact. The same check is also available inline from a session's
-          report modal.
+          were edited after the fact.
         </p>
 
         <div className="verify-tool-row">
