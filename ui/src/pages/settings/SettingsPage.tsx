@@ -151,7 +151,10 @@ export default function SettingsPage({
               }}
               type="button"
             >
-              <span className="theme-picker-card-label">{option.label}</span>
+              <span className="theme-picker-card-label">
+                {option.label}
+                {option.light && <span className="theme-picker-card-badge">Light</span>}
+              </span>
               <span className="theme-picker-card-hint">{option.hint}</span>
             </button>
           ))}

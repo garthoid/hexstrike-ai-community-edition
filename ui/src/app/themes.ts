@@ -20,6 +20,7 @@ export interface ThemeOption {
   id: ThemeId
   label: string
   hint: string
+  light?: boolean
 }
 
 export const THEME_STORAGE_KEY = 'nyxstrike_theme'
@@ -35,12 +36,12 @@ export const THEME_OPTIONS: ThemeOption[] = [
   { id: 'nord', label: 'Nord Calm', hint: 'Cool balanced blue-gray palette' },
   { id: 'dracula', label: 'Dracula', hint: 'Slate purple · Lavender · Classic vampire' },
   { id: 'gruvbox', label: 'Gruvbox', hint: 'Warm olive · Burnt orange · Retro terminal' },
-  { id: 'folio', label: 'Folio', hint: 'Warm cream · Forest emerald · Paper & ink' },
   { id: 'tokyo', label: 'Tokyo', hint: 'Deep navy · Electric blue · Pro editor' },
   { id: 'catppuccin', label: 'Catppuccin', hint: 'Warm dark · Pastel mauve · Soft & calm' },
   { id: 'synthwave', label: 'Synthwave', hint: 'Outrun purple · Hot magenta · Neon cyan' },
   { id: 'rose', label: 'Rosé', hint: 'Muted charcoal · Dusty rose · Elegant calm' },
-  { id: 'frost', label: 'Frost', hint: 'Icy white · Glacier blue · Crisp & clinical' },
+  { id: 'folio', label: 'Folio', hint: 'Warm cream · Forest emerald · Paper & ink', light: true },
+  { id: 'frost', label: 'Frost', hint: 'Icy white · Glacier blue · Crisp & clinical', light: true },
 ]
 
 export function isThemeId(value: string): value is ThemeId {
