@@ -1,9 +1,11 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { Search } from 'lucide-react'
 import type { Tool } from '../api'
 import type { Page } from '../app/routing'
+import { NAV_ENTRIES } from '../app/navRegistry'
 import { useEscapeClose } from '../hooks/useEscapeClose'
+import { useFocusTrap } from '../hooks/useFocusTrap'
 import './CommandPalette.css'
 
 interface CommandPaletteProps {
@@ -21,22 +23,15 @@ interface PaletteAction {
   run: () => void
 }
 
-const PAGE_ACTIONS: Array<{ page: Page; label: string }> = [
-  { page: 'dashboard', label: 'Open Home' },
-  { page: 'run', label: 'Open Run' },
-  { page: 'reports', label: 'Open Reports' },
-  { page: 'tasks', label: 'Open Tasks' },
-  { page: 'tools', label: 'Open Tools' },
-  { page: 'sessions', label: 'Open Sessions' },
-  { page: 'loot', label: 'Open Loot' },
-  { page: 'settings', label: 'Open Settings' },
-  { page: 'logs', label: 'Open Logs' },
-  { page: 'help', label: 'Open Help' },
-]
+const PAGE_ACTIONS: Array<{ page: Page; label: string }> = NAV_ENTRIES.map(({ id, paletteLabel }) => ({
+  page: id,
+  label: paletteLabel,
+}))
 
 export function CommandPalette({ open, onClose, setPage, tools, onSelectTool }: CommandPaletteProps) {
   const [query, setQuery] = useState('')
   const [active, setActive] = useState(0)
+  const dialogRef = useRef<HTMLDivElement>(null)
 
   const actions = useMemo<PaletteAction[]>(() => {
     const pageActions: PaletteAction[] = PAGE_ACTIONS.map(item => ({
@@ -75,6 +70,7 @@ export function CommandPalette({ open, onClose, setPage, tools, onSelectTool }: 
   }, [open])
 
   useEscapeClose(open, onClose)
+  useFocusTrap(dialogRef, open)
 
   useEffect(() => {
     if (!open) return
@@ -109,12 +105,20 @@ export function CommandPalette({ open, onClose, setPage, tools, onSelectTool }: 
 
   return createPortal(
     <div className="modal-backdrop" onClick={onClose}>
-      <div className="modal command-palette" onClick={e => e.stopPropagation()}>
+      <div
+        ref={dialogRef}
+        className="modal command-palette"
+        role="dialog"
+        aria-modal="true"
+        aria-label="Command palette"
+        onClick={e => e.stopPropagation()}
+      >
         <div className="command-palette-input-wrap">
-          <Search size={14} />
+          <Search size={14} aria-hidden="true" />
           <input
             autoFocus
             className="command-palette-input mono"
+            aria-label="Search commands and tools"
             value={query}
             onChange={e => { setQuery(e.target.value); setActive(0) }}
             placeholder="Type a command or tool name..."

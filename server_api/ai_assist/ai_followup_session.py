@@ -117,7 +117,7 @@ def ai_followup_session():
         {
             "success": true,
             "source_session_id": "sess_abc123",
-            "target": "example.com",
+            "target": "example.invalid",
             "session_name": "AI Follow-up",
             "workflow_steps": [ ... ],
             "session_id": "sess_xyz789"   // only when create_session=true

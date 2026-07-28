@@ -14,7 +14,7 @@ from shared.target_profile import TargetProfile
 from shared.target_types import TargetType
 
 
-def _make_profile(target="https://example.com"):
+def _make_profile(target="https://example.invalid"):
     p = TargetProfile(target=target)
     p.target_type = TargetType.WEB_APPLICATION
     return p
@@ -140,10 +140,10 @@ class TestToDict:
         assert isinstance(d["required_tools"], list)
 
     def test_to_dict_target_matches_profile(self):
-        profile = _make_profile("https://target.example.com")
+        profile = _make_profile("https://target.example.invalid")
         chain = AttackChain(profile)
         d = chain.to_dict()
-        assert d["target"] == "https://target.example.com"
+        assert d["target"] == "https://target.example.invalid"
 
     def test_to_dict_success_probability_reflects_calculation(self):
         chain = AttackChain(_make_profile())

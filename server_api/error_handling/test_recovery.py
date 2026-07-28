@@ -20,7 +20,7 @@ def test_error_recovery():
         data = request.get_json()
         tool_name = data.get("tool_name", "nmap")
         error_type = data.get("error_type", "timeout")
-        target = data.get("target", "example.com")
+        target = data.get("target", "example.invalid")
 
         # Simulate an error for testing
         if error_type == "timeout":

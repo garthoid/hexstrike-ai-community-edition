@@ -8,19 +8,13 @@ def register_impacket(mcp, api_client, logger, CliColors):
 
     Expected backend endpoints:
       - POST /api/tool/active_directory/impacket
-      - GET  /api/tool/active_directory/impacket/spec/<script_name>
+      - POST /api/tool/active_directory/impacket/spec
     """
 
     async def _run_post(endpoint: str, data: Dict[str, Any]) -> Dict[str, Any]:
         loop = asyncio.get_running_loop()
         return await loop.run_in_executor(
             None, lambda: api_client.safe_post(endpoint, data)
-        )
-
-    async def _run_get(endpoint: str) -> Dict[str, Any]:
-        loop = asyncio.get_running_loop()
-        return await loop.run_in_executor(
-            None, lambda: api_client.safe_get(endpoint)
         )
 
     @mcp.tool()
@@ -66,7 +60,7 @@ def register_impacket(mcp, api_client, logger, CliColors):
             f"{f' against {target}' if target else ''}{CliColors.RESET}"
         )
 
-        result = await _run_post("api/tools/impacket", data)
+        result = await _run_post("api/tool/active_directory/impacket", data)
 
         if result.get("success"):
             logger.info(
@@ -112,7 +106,7 @@ def register_impacket(mcp, api_client, logger, CliColors):
             f"{CliColors.FIRE_RED}📚 Fetching Impacket spec for: {script}{CliColors.RESET}"
         )
 
-        result = await _run_get(f"api/tools/impacket/spec/{script}")
+        result = await _run_post("api/tool/active_directory/impacket/spec", {"script": script})
 
         if result.get("error"):
             logger.error(
@@ -202,7 +196,7 @@ def register_impacket(mcp, api_client, logger, CliColors):
             f"against {target}{CliColors.RESET}"
         )
 
-        result = await _run_post("api/tools/impacket", data)
+        result = await _run_post("api/tool/active_directory/impacket", data)
 
         if result.get("success"):
             logger.info(
@@ -289,7 +283,7 @@ def register_impacket(mcp, api_client, logger, CliColors):
             f"against {target}{CliColors.RESET}"
         )
 
-        result = await _run_post("api/tools/impacket", data)
+        result = await _run_post("api/tool/active_directory/impacket", data)
 
         if result.get("success"):
             logger.info(

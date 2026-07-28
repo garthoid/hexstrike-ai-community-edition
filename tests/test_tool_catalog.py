@@ -179,3 +179,90 @@ class TestCatalogStructure:
     def test_validate_returns_no_issues(self):
         issues = validate_tool_catalog(build_tool_catalog())
         assert issues == []
+
+
+# ---------------------------------------------------------------------------
+# Cross-catalog consistency with the root tool_registry.py
+#
+# The intelligence engine picks tool names from build_tool_catalog() and
+# drops them straight into AttackStep.tool. Anything executed through the
+# mcp_tools gateway's run_tool(tool_name, params) resolves that name via
+# tool_registry.get_tool(), which does an exact-key lookup. A name that
+# exists in the catalog but not the registry silently fails at execution
+# time with "Unknown tool" instead of at import/test time.
+# ---------------------------------------------------------------------------
+
+class TestCatalogRegistryConsistency:
+    def test_every_catalog_tool_is_registered(self):
+        from tool_registry import TOOLS
+
+        catalog = build_tool_catalog()
+        missing = sorted(name for name in catalog if name not in TOOLS)
+        assert missing == [], (
+            f"Tools in build_tool_catalog() with no matching tool_registry.TOOLS "
+            f"entry (run_tool() would fail with 'Unknown tool' if the decision "
+            f"engine ever selects these): {missing}"
+        )
+
+
+# ---------------------------------------------------------------------------
+# Cross-consistency with the live server_core/tool_specs/*.py ToolSpecs
+# -----------------------------------------------------
+
+class TestToolRegistryToolSpecConsistency:
+    @staticmethod
+    def _registry_by_endpoint():
+        from tool_registry import TOOLS
+
+        by_endpoint = {}
+        for key, definition in TOOLS.items():
+            by_endpoint.setdefault(definition["endpoint"], []).append((key, definition))
+        return by_endpoint
+
+    def test_every_toolspec_endpoint_has_a_registry_entry(self):
+        from server_core.tool_spec import iter_all_specs
+
+        registry_by_endpoint = self._registry_by_endpoint()
+        missing = sorted(
+            spec.endpoint
+            for spec in iter_all_specs()
+            if spec.endpoint not in registry_by_endpoint
+        )
+        assert missing == [], (
+            f"ToolSpec endpoints with no tool_registry.py entry at all — "
+            f"run_tool()/classify_task() can never route to these: {missing}"
+        )
+
+    def test_registry_params_match_toolspec_contract(self):
+        from server_core.tool_spec import iter_all_specs, to_tool_definition
+
+        registry_by_endpoint = self._registry_by_endpoint()
+        problems = []
+
+        for spec in iter_all_specs():
+            entries = registry_by_endpoint.get(spec.endpoint)
+            if not entries:
+                continue  # covered by test_every_toolspec_endpoint_has_a_registry_entry
+
+            expected = to_tool_definition(spec)
+            known_params = set(expected["params"]) | set(expected["optional"])
+            required_params = set(expected["params"])
+
+            for key, definition in entries:
+                actual_params = set(definition.get("params", {})) | set(definition.get("optional", {}))
+
+                phantom = sorted(actual_params - known_params)
+                if phantom:
+                    problems.append(
+                        f"{key!r} ({spec.endpoint}): registry has param(s) {phantom} "
+                        f"the ToolSpec doesn't define at all"
+                    )
+
+                absent_required = sorted(required_params - actual_params)
+                if absent_required:
+                    problems.append(
+                        f"{key!r} ({spec.endpoint}): registry is missing required "
+                        f"param(s) {absent_required} under any name"
+                    )
+
+        assert problems == [], "\n".join(problems)

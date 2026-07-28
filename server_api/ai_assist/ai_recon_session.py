@@ -103,7 +103,7 @@ def ai_recon_session():
     """
     Build a standard AI Recon session for the given target.
 
-    Expects JSON: { "target": "example.com", "create_session": false }
+    Expects JSON: { "target": "example.invalid", "create_session": false }
 
     When create_session is true, also persists the session via SessionStore
     and returns the session_id in the response. The ai_analyze_session step's
@@ -112,7 +112,7 @@ def ai_recon_session():
     Returns:
         {
             "success": true,
-            "target": "example.com",
+            "target": "example.invalid",
             "session_name": "AI Recon",
             "steps": [ ... ],
             "session_id": "sess_abc123"   # only when create_session=true

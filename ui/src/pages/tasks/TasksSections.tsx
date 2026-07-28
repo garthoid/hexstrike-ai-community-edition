@@ -1,3 +1,4 @@
+import { Fragment } from 'react'
 import {
   RefreshCw, Activity, Cpu, MemoryStick, Wifi,
   PauseCircle, PlayCircle, StopCircle, ListTodo,
@@ -78,7 +79,6 @@ export function WorkerPoolSection({
 
 export function ProcessesSection({
   processes,
-  actionMsg,
   streamStatus,
   onRefresh,
   onPause,
@@ -87,7 +87,6 @@ export function ProcessesSection({
   onCancelAiTask,
 }: {
   processes: ProcessDashboardResponse['processes']
-  actionMsg: string | null
   streamStatus: StreamStatus
   onRefresh: () => Promise<void>
   onPause: (pid: number) => Promise<void>
@@ -100,7 +99,6 @@ export function ProcessesSection({
       <div className="section-header">
         <h3>Active Processes <span className="badge">{processes.length}</span></h3>
         <div className="section-header-controls">
-          {actionMsg && <span className="section-meta" style={{ color: 'var(--amber)' }}>{actionMsg}</span>}
           {streamStatus !== 'streaming' && (
             <button className="icon-btn" onClick={onRefresh} title="Refresh"><RefreshCw size={14} /></button>
           )}
@@ -134,43 +132,48 @@ export function ProcessesSection({
                 : 'var(--text-dim)'
 
             return (
-              <div key={rowKey} className="tasks-row">
-                <span className="mono tasks-pid" title={isAiTask ? (process.task_id ?? '') : ''}>
-                  {isAiTask ? 'AI' : process.pid}
-                </span>
-                <span className="mono tasks-cmd" title={process.command}>{process.command}</span>
-                <span className={`tasks-status tasks-status--${process.status}`}>{process.status}</span>
-                <div className="tasks-progress">
-                  <div className="tasks-progress-bar-bg">
-                    <div className="tasks-progress-bar-fill" style={{ width: `${Math.min(100, pct)}%`, background: barColor }} />
+              <Fragment key={rowKey}>
+                <div className="tasks-row">
+                  <span className="mono tasks-pid" title={isAiTask ? (process.task_id ?? '') : ''}>
+                    {isAiTask ? 'AI' : process.pid}
+                  </span>
+                  <span className="mono tasks-cmd" title={process.command}>{process.command}</span>
+                  <span className={`tasks-status tasks-status--${process.status}`}>{process.status}</span>
+                  <div className="tasks-progress">
+                    <div className="tasks-progress-bar-bg">
+                      <div className="tasks-progress-bar-fill" style={{ width: `${Math.min(100, pct)}%`, background: barColor }} />
+                    </div>
+                    <span className="tasks-pct mono">{process.progress_percent}</span>
                   </div>
-                  <span className="tasks-pct mono">{process.progress_percent}</span>
+                  <span className="mono">{process.runtime}</span>
+                  <span className="mono">{process.eta}</span>
+                  <div className="tasks-actions">
+                    {!isAiTask && process.status !== 'paused' && (
+                      <button className="tasks-btn tasks-btn--pause" title="Pause" onClick={() => onPause(process.pid as number)}>
+                        <PauseCircle size={14} />
+                      </button>
+                    )}
+                    {!isAiTask && process.status === 'paused' && (
+                      <button className="tasks-btn tasks-btn--resume" title="Resume" onClick={() => onResume(process.pid as number)}>
+                        <PlayCircle size={14} />
+                      </button>
+                    )}
+                    {isAiTask ? (
+                      <button className="tasks-btn tasks-btn--stop" title="Cancel AI task"
+                              onClick={() => onCancelAiTask(process.task_id ?? '')}>
+                        <StopCircle size={14} />
+                      </button>
+                    ) : (
+                      <button className="tasks-btn tasks-btn--stop" title="Terminate" onClick={() => onTerminate(process.pid as number)}>
+                        <StopCircle size={14} />
+                      </button>
+                    )}
+                  </div>
                 </div>
-                <span className="mono">{process.runtime}</span>
-                <span className="mono">{process.eta}</span>
-                <div className="tasks-actions">
-                  {!isAiTask && process.status !== 'paused' && (
-                    <button className="tasks-btn tasks-btn--pause" title="Pause" onClick={() => onPause(process.pid as number)}>
-                      <PauseCircle size={14} />
-                    </button>
-                  )}
-                  {!isAiTask && process.status === 'paused' && (
-                    <button className="tasks-btn tasks-btn--resume" title="Resume" onClick={() => onResume(process.pid as number)}>
-                      <PlayCircle size={14} />
-                    </button>
-                  )}
-                  {isAiTask ? (
-                    <button className="tasks-btn tasks-btn--stop" title="Cancel AI task"
-                            onClick={() => onCancelAiTask(process.task_id ?? '')}>
-                      <StopCircle size={14} />
-                    </button>
-                  ) : (
-                    <button className="tasks-btn tasks-btn--stop" title="Terminate" onClick={() => onTerminate(process.pid as number)}>
-                      <StopCircle size={14} />
-                    </button>
-                  )}
-                </div>
-              </div>
+                {!isAiTask && process.status === 'running' && process.last_output && (
+                  <div className="tasks-row-output mono">{process.last_output}</div>
+                )}
+              </Fragment>
             )
           })}
         </div>

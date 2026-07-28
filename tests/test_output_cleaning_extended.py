@@ -65,7 +65,7 @@ class TestIsBannerTextLine:
         assert _is_banner_text_line("https://github.com/RustScan/RustScan") is True
 
     def test_http_url_is_banner(self):
-        assert _is_banner_text_line("http://example.com/docs") is True
+        assert _is_banner_text_line("http://example.invalid/docs") is True
 
     def test_normal_result_line_is_not_banner(self):
         assert _is_banner_text_line("Open 192.168.1.57:8096") is False

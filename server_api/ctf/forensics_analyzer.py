@@ -1,7 +1,9 @@
 from flask import Blueprint, request, jsonify
 import logging
-import subprocess
+import shlex
 from datetime import datetime
+
+from server_core.command_executor import execute_command
 
 logger = logging.getLogger(__name__)
 
@@ -34,12 +36,12 @@ def ctf_forensics_analyzer():
 
         # Basic file analysis
         try:
-            file_result = subprocess.run(['file', file_path], capture_output=True, text=True, timeout=30)
-            if file_result.returncode == 0:
-                results["file_info"]["type"] = file_result.stdout.strip()
+            file_result = execute_command(shlex.join(['file', file_path]), timeout=30)
+            if file_result["return_code"] == 0:
+                results["file_info"]["type"] = file_result["stdout"].strip()
 
                 # Determine file category and suggest tools
-                file_type = file_result.stdout.lower()
+                file_type = file_result["stdout"].lower()
                 if "image" in file_type:
                     results["recommended_tools"].extend(["exiftool", "steghide", "stegsolve", "zsteg"])
                     results["next_steps"].extend([
@@ -73,20 +75,20 @@ def ctf_forensics_analyzer():
 
         # Metadata extraction
         try:
-            exif_result = subprocess.run(['exiftool', file_path], capture_output=True, text=True, timeout=30)
-            if exif_result.returncode == 0:
-                results["metadata"]["exif"] = exif_result.stdout
+            exif_result = execute_command(shlex.join(['exiftool', file_path]), timeout=30)
+            if exif_result["return_code"] == 0:
+                results["metadata"]["exif"] = exif_result["stdout"]
         except Exception as e:
             results["metadata"]["exif_error"] = str(e)
 
         # Binwalk analysis for hidden files
         if extract_hidden:
             try:
-                binwalk_result = subprocess.run(['binwalk', '-e', file_path], capture_output=True, text=True, timeout=60)
-                if binwalk_result.returncode == 0:
+                binwalk_result = execute_command(shlex.join(['binwalk', '-e', file_path]), timeout=60)
+                if binwalk_result["return_code"] == 0:
                     results["hidden_data"].append({
                         "tool": "binwalk",
-                        "output": binwalk_result.stdout
+                        "output": binwalk_result["stdout"]
                     })
             except Exception as e:
                 results["hidden_data"].append({
@@ -101,16 +103,16 @@ def ctf_forensics_analyzer():
                 try:
                     steg_result = None
                     if tool == "steghide":
-                        steg_result = subprocess.run([tool, 'info', file_path], capture_output=True, text=True, timeout=30)
+                        steg_result = execute_command(shlex.join([tool, 'info', file_path]), timeout=30)
                     elif tool == "zsteg":
-                        steg_result = subprocess.run([tool, '-a', file_path], capture_output=True, text=True, timeout=30)
+                        steg_result = execute_command(shlex.join([tool, '-a', file_path]), timeout=30)
                     elif tool == "outguess":
-                        steg_result = subprocess.run([tool, '-r', file_path, '/tmp/outguess_output'], capture_output=True, text=True, timeout=30)
+                        steg_result = execute_command(shlex.join([tool, '-r', file_path, '/tmp/outguess_output']), timeout=30)
 
-                    if steg_result and steg_result.returncode == 0 and steg_result.stdout.strip():
+                    if steg_result and steg_result["return_code"] == 0 and steg_result["stdout"].strip():
                         results["steganography_results"].append({
                             "tool": tool,
-                            "output": steg_result.stdout
+                            "output": steg_result["stdout"]
                         })
                 except Exception as e:
                     results["steganography_results"].append({
@@ -120,10 +122,10 @@ def ctf_forensics_analyzer():
 
         # Strings analysis
         try:
-            strings_result = subprocess.run(['strings', file_path], capture_output=True, text=True, timeout=30)
-            if strings_result.returncode == 0:
+            strings_result = execute_command(shlex.join(['strings', file_path]), timeout=30)
+            if strings_result["return_code"] == 0:
                 interesting_strings = []
-                for line in strings_result.stdout.split('\n'):
+                for line in strings_result["stdout"].split('\n'):
                     if any(keyword in line.lower() for keyword in ['flag', 'password', 'key', 'secret', 'http', 'ftp']):
                         interesting_strings.append(line.strip())
 

@@ -16,7 +16,7 @@ def client():
 
 
 def test_compare_planner_modes_directly_for_same_target():
-    profile = decision_engine.analyze_target("https://example.com/api")
+    profile = decision_engine.analyze_target("https://example.invalid/api")
 
     advanced_tools = decision_engine.select_optimal_tools(profile, "api_security", planner_mode="advanced")
     legacy_tools = decision_engine.select_optimal_tools(profile, "api_security", planner_mode="legacy")
@@ -39,7 +39,7 @@ def test_compare_planner_modes_directly_for_same_target():
 def test_compare_planners_endpoint_contains_recommendation_fields(_mock_exec, client):
     response = client.post(
         "/api/intelligence/compare-planners",
-        json={"target": "https://example.com/api", "objective": "api_security"},
+        json={"target": "https://example.invalid/api", "objective": "api_security"},
     )
 
     assert response.status_code != 404

@@ -1,8 +1,10 @@
 from flask import Blueprint, request, jsonify
 import logging
-import subprocess
+import shlex
 from datetime import datetime
 from typing import Dict
+
+from server_core.command_executor import execute_command
 
 logger = logging.getLogger(__name__)
 
@@ -36,11 +38,11 @@ def ctf_binary_analyzer():
 
         # Basic file information
         try:
-            file_result = subprocess.run(['file', binary_path], capture_output=True, text=True, timeout=30)
-            if file_result.returncode == 0:
-                results["file_info"]["type"] = file_result.stdout.strip()
+            file_result = execute_command(shlex.join(['file', binary_path]), timeout=30)
+            if file_result["return_code"] == 0:
+                results["file_info"]["type"] = file_result["stdout"].strip()
 
-                file_output = file_result.stdout.lower()
+                file_output = file_result["stdout"].lower()
                 if "x86-64" in file_output or "x86_64" in file_output:
                     results["file_info"]["architecture"] = "x86_64"
                 elif "i386" in file_output or "80386" in file_output:
@@ -55,11 +57,11 @@ def ctf_binary_analyzer():
         # Security protections check
         if check_protections:
             try:
-                checksec_result = subprocess.run(['checksec', '--file', binary_path], capture_output=True, text=True, timeout=30)
-                if checksec_result.returncode == 0:
-                    results["security_protections"]["checksec"] = checksec_result.stdout
+                checksec_result = execute_command(shlex.join(['checksec', '--file', binary_path]), timeout=30)
+                if checksec_result["return_code"] == 0:
+                    results["security_protections"]["checksec"] = checksec_result["stdout"]
 
-                    output = checksec_result.stdout.lower()
+                    output = checksec_result["stdout"].lower()
                     if "no canary found" in output:
                         results["exploitation_hints"].append("Stack canary disabled - buffer overflow exploitation possible")
                     if "nx disabled" in output:
@@ -73,9 +75,9 @@ def ctf_binary_analyzer():
 
         # Strings analysis
         try:
-            strings_result = subprocess.run(['strings', binary_path], capture_output=True, text=True, timeout=30)
-            if strings_result.returncode == 0:
-                strings_output = strings_result.stdout.split('\n')
+            strings_result = execute_command(shlex.join(['strings', binary_path]), timeout=30)
+            if strings_result["return_code"] == 0:
+                strings_output = strings_result["stdout"].split('\n')
 
                 interesting_categories: Dict[str, list] = {
                     "functions": [],
@@ -123,9 +125,9 @@ def ctf_binary_analyzer():
         # ROP gadgets search
         if find_gadgets and analysis_depth in ["comprehensive", "deep"]:
             try:
-                ropgadget_result = subprocess.run(['ROPgadget', '--binary', binary_path, '--only', 'pop|ret'], capture_output=True, text=True, timeout=60)
-                if ropgadget_result.returncode == 0:
-                    gadget_lines = ropgadget_result.stdout.split('\n')
+                ropgadget_result = execute_command(shlex.join(['ROPgadget', '--binary', binary_path, '--only', 'pop|ret']), timeout=60)
+                if ropgadget_result["return_code"] == 0:
+                    gadget_lines = ropgadget_result["stdout"].split('\n')
                     useful_gadgets = []
 
                     for line in gadget_lines:
@@ -144,10 +146,10 @@ def ctf_binary_analyzer():
         # Function analysis with objdump
         if analysis_depth in ["comprehensive", "deep"]:
             try:
-                objdump_result = subprocess.run(['objdump', '-t', binary_path], capture_output=True, text=True, timeout=30)
-                if objdump_result.returncode == 0:
+                objdump_result = execute_command(shlex.join(['objdump', '-t', binary_path]), timeout=30)
+                if objdump_result["return_code"] == 0:
                     functions = []
-                    for line in objdump_result.stdout.split('\n'):
+                    for line in objdump_result["stdout"].split('\n'):
                         if 'F .text' in line:
                             parts = line.split()
                             if len(parts) >= 6:

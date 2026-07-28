@@ -14,18 +14,18 @@ def test_catalog_validation_passes():
 
 
 def test_quick_mode_precision_is_compact():
-    tools, _profile = _tools_for("https://example.com", "quick")
+    tools, _profile = _tools_for("https://example.invalid", "quick")
     assert 1 <= len(tools) <= 4
 
 
 def test_comprehensive_mode_allows_safer_coverage_tool_count():
-    tools, _profile = _tools_for("https://example.com", "comprehensive")
+    tools, _profile = _tools_for("https://example.invalid", "comprehensive")
     assert len(tools) <= 8
     assert len(tools) >= 5
 
 
 def test_api_security_prefers_api_capabilities():
-    tools, _profile = _tools_for("https://example.com/api", "api_security")
+    tools, _profile = _tools_for("https://example.invalid/api", "api_security")
     lowered = set(tools)
     assert "arjun" in lowered or "x8" in lowered or "paramspider" in lowered
     assert "httpx" in lowered or "nuclei" in lowered or "api-schema-analyzer" in lowered
@@ -45,7 +45,7 @@ def test_cloud_domain_classification_and_selection():
 
 
 def test_create_attack_chain_respects_runtime_overrides():
-    profile = decision_engine.analyze_target("https://example.com/api")
+    profile = decision_engine.analyze_target("https://example.invalid/api")
     # Pick whatever tool the planner actually selects first for this objective,
     # then assert the override is applied to it.
     tools = decision_engine.select_optimal_tools(profile, "api_security")
@@ -70,7 +70,7 @@ def test_create_attack_chain_respects_runtime_overrides():
 
 
 def test_planner_mode_switch_per_call_supports_legacy_and_advanced():
-    profile = decision_engine.analyze_target("https://example.com")
+    profile = decision_engine.analyze_target("https://example.invalid")
     advanced_tools = decision_engine.select_optimal_tools(profile, "comprehensive", planner_mode="advanced")
     legacy_tools = decision_engine.select_optimal_tools(profile, "comprehensive", planner_mode="legacy")
 
@@ -92,7 +92,7 @@ def test_planner_mode_switch_global_toggle():
         decision_engine.enable_legacy_planner()
         assert decision_engine.get_planner_mode() == "legacy"
 
-        profile = decision_engine.analyze_target("https://example.com/api")
+        profile = decision_engine.analyze_target("https://example.invalid/api")
         selected_tools = decision_engine.select_optimal_tools(profile, "api_security")
         assert selected_tools
 

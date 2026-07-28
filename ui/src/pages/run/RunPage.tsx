@@ -23,6 +23,8 @@ interface RunPageProps {
   setRunHistory: React.Dispatch<React.SetStateAction<RunHistoryEntry[]>>
   commandToolRequest?: { toolName: string; requestId: number } | null
   onCommandToolHandled?: () => void
+  urlToolName?: string | null
+  onToolSelected?: (toolName: string | null) => void
   onRefresh?: () => void
   onClearHistory?: () => Promise<void>
 }
@@ -34,6 +36,8 @@ export function RunPage({
   setRunHistory: setHistory,
   commandToolRequest,
   onCommandToolHandled,
+  urlToolName,
+  onToolSelected,
   onRefresh,
   onClearHistory,
 }: RunPageProps) {
@@ -47,9 +51,23 @@ export function RunPage({
   const [modalEntry, setModalEntry] = useState<RunHistoryEntry | null>(null)
   const [histSearch, setHistSearch] = useState('')
   const [runError, setRunError] = useState<string | null>(null)
+  const [liveOutput, setLiveOutput] = useState<string | null>(null)
   const [favorites, setFavorites] = usePersistentState<string[]>(RUN_FAVORITES_KEY, [])
   const [recentTargets, setRecentTargets] = usePersistentState<string[]>(RUN_RECENT_TARGETS_KEY, [])
   const runIdRef = useRef(0)
+  const pollRef = useRef<ReturnType<typeof setInterval> | null>(null)
+  const liveStreamRef = useRef<EventSource | null>(null)
+
+  function stopLiveTracking() {
+    if (pollRef.current) {
+      clearInterval(pollRef.current)
+      pollRef.current = null
+    }
+    liveStreamRef.current?.close()
+    liveStreamRef.current = null
+  }
+
+  useEffect(() => stopLiveTracking, [])
 
   const cats = getToolCategories(tools)
   const filtered = filterToolsByOptions(tools, {
@@ -68,6 +86,7 @@ export function RunPage({
     for (const k of Object.keys(t.params)) defaults[k] = ''
     for (const [k, v] of Object.entries(t.optional)) defaults[k] = String(v)
     setFieldValues(defaults)
+    onToolSelected?.(t.name)
   }
 
   function toggleFavoriteSelected() {
@@ -97,9 +116,43 @@ export function RunPage({
     setRunError(null)
     setRunning(true)
     setViewEntry(null)
+    setLiveOutput(null)
     const id = ++runIdRef.current
+    stopLiveTracking()
     try {
-      const result = await api.runTool(selected.endpoint, payload)
+      const { task_id } = await api.executeToolAsync(selected.name, payload)
+
+      const liveSource = api.processesStream()
+      liveStreamRef.current = liveSource
+      liveSource.onmessage = e => {
+        try {
+          const streamPayload = JSON.parse(e.data) as { processes?: Record<string, { task_id?: string | null; last_output?: string }> }
+          const match = Object.values(streamPayload.processes ?? {}).find(p => p.task_id === task_id)
+          if (match) setLiveOutput(match.last_output || null)
+        } catch {
+          // ignore malformed SSE frames — the poll loop is the source of truth for completion
+        }
+      }
+
+      const result = await new Promise<import('../../api').ToolExecResponse>((resolve, reject) => {
+        pollRef.current = setInterval(async () => {
+          try {
+            const res = await api.getTaskResult(task_id)
+            const { status } = res.result
+            if (status === 'completed') {
+              stopLiveTracking()
+              resolve(res.result.result as import('../../api').ToolExecResponse)
+            } else if (status === 'failed' || status === 'not_found') {
+              stopLiveTracking()
+              reject(new Error(res.result.error || `Tool execution ${status}`))
+            }
+          } catch (e) {
+            stopLiveTracking()
+            reject(e)
+          }
+        }, 1500)
+      })
+
       const entry: RunHistoryEntry = { id, tool: selected.name, params: payload, result, ts: new Date(), source: 'browser' }
       setHistory(h => [entry, ...h].slice(0, 100)) // Limit to last 100 runs
       setViewEntry(entry)
@@ -110,6 +163,8 @@ export function RunPage({
     } catch (e) {
       setRunError(String(e))
     } finally {
+      stopLiveTracking()
+      setLiveOutput(null)
       setRunning(false)
     }
   }
@@ -127,6 +182,15 @@ export function RunPage({
     }
     onCommandToolHandled?.()
   }, [commandToolRequest, tools, onCommandToolHandled])
+
+  // Keeps the selected tool in sync with the URL: opens directly into a tool when the
+  // page is loaded from a deep link (#/run/<tool>), and follows Back/Forward navigation
+  // between tools. Never pre-fills params from the URL — only picks the tool.
+  useEffect(() => {
+    if (!urlToolName || selected?.name === urlToolName) return
+    const tool = tools.find(t => t.name === urlToolName)
+    if (tool) selectTool(tool)
+  }, [urlToolName, tools, selected])
 
   const compareText = modalEntry
     ? (() => {
@@ -183,6 +247,7 @@ export function RunPage({
         setShowOptional={setShowOptional}
         running={running}
         runError={runError}
+        liveOutput={liveOutput}
         isFavorite={selected ? favorites.includes(selected.name) : false}
         onToggleFavorite={toggleFavoriteSelected}
         onRunTool={runTool}

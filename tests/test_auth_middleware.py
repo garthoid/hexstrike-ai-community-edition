@@ -53,7 +53,7 @@ class TestNoTokenConfigured:
         assert r.status_code != 401
 
     def test_post_without_auth_header_allowed(self, client_no_token):
-        with patch("server_api.net_scan.nmap.execute_command",
+        with patch("server_api._generic.blueprint_factory.execute_command",
                    return_value={"success": True, "output": "ok", "returncode": 0}):
             r = client_no_token.post(
                 "/api/tools/nmap",
@@ -102,7 +102,7 @@ class TestTokenConfigured:
         assert r.status_code == 401
 
     def test_post_with_correct_token_allowed(self, client_with_token):
-        with patch("server_api.net_scan.nmap.execute_command",
+        with patch("server_api._generic.blueprint_factory.execute_command",
                    return_value={"success": True, "output": "ok", "returncode": 0}):
             r = client_with_token.post(
                 "/api/tools/nmap",

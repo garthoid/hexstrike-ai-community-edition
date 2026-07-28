@@ -1,13 +1,21 @@
+import logging
 import os
 import shlex
+import threading
+import uuid
 import psutil
 from typing import Any, Dict, Optional
 from server_core import config_core
 from server_core.enhanced_command_executor import EnhancedCommandExecutor
 from server_core.singletons import cache as _cache
+from server_core.singletons import enhanced_process_manager as _epm
+
+logger = logging.getLogger(__name__)
 
 # CPU threshold above which tool commands are niced down.
 _CPU_NICE_THRESHOLD = config_core.get("CPU_NICE_THRESHOLD", 85)
+
+_current_task_id = threading.local()
 
 COMMAND_TIMEOUT = config_core.get("COMMAND_TIMEOUT", 300)  # Default to 5 minutes if not set
 
@@ -23,6 +31,24 @@ def _normalize_timeout(raw_timeout: Any) -> Optional[int]:
   if parsed <= 0:
     return None
   return parsed
+
+
+def _pool_failure_result(reason: str) -> Dict[str, Any]:
+  """Normalized failure shape for when the ProcessPool can't produce a result.
+
+  Mirrors EnhancedCommandExecutor.execute()'s own failure dict so downstream
+  code that reads stdout/stderr/return_code never has to special-case this.
+  """
+  return {
+    "stdout": "",
+    "stderr": reason,
+    "return_code": -1,
+    "success": False,
+    "timed_out": False,
+    "timeout_reason": "",
+    "partial_results": False,
+    "execution_time": 0,
+  }
 
 
 def _is_unlimited_timeout(raw_timeout: Any) -> bool:
@@ -73,22 +99,40 @@ def execute_command(
   tool: Optional[str] = None,
   endpoint: Optional[str] = None,
   params: Optional[Dict[str, Any]] = None,
+  use_recovery: bool = False,
+  target: Optional[str] = None,
 ) -> Dict[str, Any]:
   """
   Execute a shell command with enhanced features.
 
   Args:
-      command:    The command to execute
-      use_cache:  Whether to use caching for this command
-      cache:      Optional cache instance (falls back to the module-level singleton)
-      timeout:    Command execution timeout in seconds (<=0 means no hard timeout)
-      tool:       Reserved — tool name (unused; recording is done in the after_request hook)
-      endpoint:   Reserved — API endpoint (unused; recording is done in the after_request hook)
-      params:     Reserved — request params (unused; recording is done in the after_request hook)
+      command:      The command to execute
+      use_cache:    Whether to use caching for this command
+      cache:        Optional cache instance (falls back to the module-level singleton)
+      timeout:      Command execution timeout in seconds (<=0 means no hard timeout)
+      tool:         Reserved — tool name (unused unless use_recovery=True; recording is done in the after_request hook)
+      endpoint:     Reserved — API endpoint (unused; recording is done in the after_request hook)
+      params:       Reserved — request params (unused unless use_recovery=True; recording is done in the after_request hook)
+      use_recovery: When True, run through RecoveryExecutor — retries, reduced-scope
+                    retries, or alternative-tool swaps are applied on failure.
+      target:       Optional target string forwarded to the error handler for context
+                    (only used when use_recovery=True).
 
   Returns:
       A dictionary containing the stdout, stderr, return code, and metadata
   """
+  if use_recovery:
+    return execute_command_with_recovery(
+      command,
+      use_cache=use_cache,
+      cache=cache,
+      timeout=timeout,
+      tool=tool,
+      endpoint=endpoint,
+      params=params,
+      target=target,
+    )
+
   active_cache = cache if cache is not None else (_cache if use_cache else None)
 
   # Cache key always uses the original command — before any runtime adjustments.
@@ -109,15 +153,29 @@ def execute_command(
   except Exception:
     pass  # never let a psutil hiccup block a tool call
 
-  _executor = EnhancedCommandExecutor(exec_command, timeout=effective_timeout)
-  result = _executor.execute()
+  # Route the actual subprocess through the shared ProcessPool so its
+  # auto-scaling/queueing genuinely gates how many tool commands run
+  # concurrently app-wide.
+  task_id = f"exec_{uuid.uuid4().hex}"
+  external_task_id = getattr(_current_task_id, "value", None)
+  try:
+    result = _epm.process_pool.submit_and_wait(
+      task_id,
+      lambda: EnhancedCommandExecutor(exec_command, timeout=effective_timeout, task_id=external_task_id).execute(),
+    )
+    if "stdout" not in result:
+      # submit_and_wait's own failure shape ({"success": False, "error": ...})
+      # rather than EnhancedCommandExecutor's.
+      result = _pool_failure_result(result.get("error", "process pool execution failed"))
+  except Exception as e:
+    logger.error("Process pool submission failed for task %s: %s", task_id, e)
+    result = _pool_failure_result(f"process pool submission failed: {e}")
 
   if active_cache is not None and result.get("success", False):
     active_cache.set(command, {}, result)
 
-  # Record into the performance dashboard (lazy — wakes EnhancedProcessManager)
+  # Record into the performance dashboard
   try:
-    from server_core.singletons import enhanced_process_manager as _epm
     _epm.performance_dashboard.record_execution(exec_command, result)
   except Exception:
     pass  # dashboard recording must never break a tool call

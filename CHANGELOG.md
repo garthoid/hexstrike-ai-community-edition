@@ -1,6 +1,38 @@
 # Changelog
 
-## 1.6.0 - injectlynx
+## 1.7.0 - phishfalcon (NEXT)
+
+### Navigation
+- Replaced the top nav tab bar with a collapsible sidebar — icon-only rail on desktop (state persists across reloads), slide-out drawer on mobile.
+
+### Themes
+- Added new themes — Dracula, Rosé, and more.
+- Every theme now has a subtle animated accent sweep across the top bar and sidebar edge, respecting the OS "reduce motion" setting.
+
+### Intelligence
+- The Decision Engine now weighs the current session's run history when scoring tools — a tool that just failed is deprioritized (not excluded) on the next recommendation.
+
+### Run page & live output
+- Run page tool execution now streams live output and progress instead of blocking silently until the command finishes.
+- Fixed the process dashboard/stream showing a fake "Running for Xs" placeholder — `last_output` now carries the tool's real stdout/stderr, visible live on the Tasks page.
+- Selecting a tool on the Run page now updates the URL to `#/run/<tool>` — bookmarkable/shareable, reopens straight into that tool with empty inputs (no params prefilled).
+
+### Accessibility
+- Added focus-trap keyboard navigation to the Command Palette and Chat widget.
+
+### Error recovery
+- Fixed `/api/error-handling/execute-with-recovery` raising a server error on every real call.
+- Wired automatic error recovery (retry/backoff, alternative-tool swap) into recon, scanning, fuzzing, and forensics tool executions.
+
+### Process pool
+- Fixed `/api/process/execute-async` returning the cached result payload instead of a task ID on a cache hit, which broke polling it via `/api/process/get-task-result/<task_id>`.
+- Fixed the process pool's worker auto-scaling miscounting active workers after scaling down.
+- All tool command execution now runs through the process pool's auto-scaling (previously bypassed it); pooled task results no longer leak memory on long-running instances.
+
+### Internals
+- Migrated the entire tool registry to a unified `ToolSpec`-driven registration system, replacing legacy per-category registration code across all tool categories.
+
+## 1.6.0 - injectlynx (2026-07-03)
 
 ### New tools
 - Integrated `breachsql` — SQLi detection and exploitation across all major backends with boolean, time-blind, union, error, and OOB techniques; `--exploit` and `--dump` support.

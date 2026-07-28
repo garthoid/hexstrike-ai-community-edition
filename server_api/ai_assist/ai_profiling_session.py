@@ -188,7 +188,7 @@ def ai_profiling_session():
 
     Expects JSON:
         {
-            "target": "example.com",
+            "target": "example.invalid",
             "create_session": false   // optional, default false
         }
 
@@ -199,7 +199,7 @@ def ai_profiling_session():
     Returns:
         {
             "success": true,
-            "target": "example.com",
+            "target": "example.invalid",
             "target_type": "domain",
             "session_name": "AI Profiling",
             "steps": [ ... ],

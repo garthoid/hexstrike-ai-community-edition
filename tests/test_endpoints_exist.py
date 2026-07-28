@@ -313,15 +313,6 @@ class TestVisual:
         assert_route_exists(r, "/api/visual/tool-output")
 
 
-# ===========================================================================
-# Auto Install
-# ===========================================================================
-
-class TestAutoInstall:
-    def test_auto_install_missing_apt(self, client):
-        r = _post(client, "/api/tools/auto-install-missing-apt")
-        assert_route_exists(r, "/api/tools/auto-install-missing-apt")
-
 
 # ===========================================================================
 # Database
@@ -405,6 +396,14 @@ class TestNetworkLookup:
     def test_whois(self, client):
         r = _post(client, "/api/tools/whois")
         assert_route_exists(r, "/api/tools/whois")
+
+    def test_dig(self, client):
+        r = _post(client, "/api/tools/dig")
+        assert_route_exists(r, "/api/tools/dig")
+
+    def test_http_headers(self, client):
+        r = _post(client, "/api/tools/http-headers")
+        assert_route_exists(r, "/api/tools/http-headers")
 
 
 # ===========================================================================
@@ -540,6 +539,30 @@ class TestWebScanning:
         r = _post(client, "/api/tools/zap")
         assert_route_exists(r, "/api/tools/zap")
 
+    def test_breachsql(self, client):
+        r = _post(client, "/api/tools/breachsql")
+        assert_route_exists(r, "/api/tools/breachsql")
+
+    def test_interactsh(self, client):
+        r = _post(client, "/api/tools/web_scan/interactsh")
+        assert_route_exists(r, "/api/tools/web_scan/interactsh")
+
+    def test_joomscan(self, client):
+        r = _post(client, "/api/tools/web_recon/joomscan")
+        assert_route_exists(r, "/api/tools/web_recon/joomscan")
+
+    def test_phaseaccess(self, client):
+        r = _post(client, "/api/tools/phaseaccess")
+        assert_route_exists(r, "/api/tools/phaseaccess")
+
+    def test_stingxss(self, client):
+        r = _post(client, "/api/tools/stingxss")
+        assert_route_exists(r, "/api/tools/stingxss")
+
+    def test_whatweb(self, client):
+        r = _post(client, "/api/tools/web_recon/whatweb")
+        assert_route_exists(r, "/api/tools/web_recon/whatweb")
+
 
 # ===========================================================================
 # Web Crawling
@@ -572,6 +595,10 @@ class TestWebProbing:
         r = _post(client, "/api/tools/testssl")
         assert_route_exists(r, "/api/tools/testssl")
 
+    def test_waymore(self, client):
+        r = _post(client, "/api/tools/waymore")
+        assert_route_exists(r, "/api/tools/waymore")
+
 
 # ===========================================================================
 # Web Framework Helpers
@@ -603,6 +630,28 @@ class TestURLRecon:
     def test_uro(self, client):
         r = _post(client, "/api/tools/uro")
         assert_route_exists(r, "/api/tools/uro")
+
+
+# ===========================================================================
+# OSINT
+# ===========================================================================
+
+class TestOSINT:
+    def test_parsero(self, client):
+        r = _post(client, "/api/tools/osint/parsero")
+        assert_route_exists(r, "/api/tools/osint/parsero")
+
+    def test_sherlock(self, client):
+        r = _post(client, "/api/tools/osint/sherlock")
+        assert_route_exists(r, "/api/tools/osint/sherlock")
+
+    def test_spiderfoot(self, client):
+        r = _post(client, "/api/tools/osint/spiderfoot")
+        assert_route_exists(r, "/api/tools/osint/spiderfoot")
+
+    def test_sublist3r(self, client):
+        r = _post(client, "/api/tools/osint/sublist3r")
+        assert_route_exists(r, "/api/tools/osint/sublist3r")
 
 
 # ===========================================================================
@@ -645,6 +694,10 @@ class TestAPIFuzzingAndScanning:
     def test_api_fuzzer(self, client):
         r = _post(client, "/api/tools/api_fuzzer")
         assert_route_exists(r, "/api/tools/api_fuzzer")
+
+    def test_schemathesis(self, client):
+        r = _post(client, "/api/tools/api_fuzz/schemathesis")
+        assert_route_exists(r, "/api/tools/api_fuzz/schemathesis")
 
     def test_graphql_scanner(self, client):
         r = _post(client, "/api/tools/graphql_scanner")
@@ -721,6 +774,10 @@ class TestExploitation:
     def test_pwntools(self, client):
         r = _post(client, "/api/tools/pwntools")
         assert_route_exists(r, "/api/tools/pwntools")
+
+    def test_commix(self, client):
+        r = _post(client, "/api/tools/exploitation/commix")
+        assert_route_exists(r, "/api/tools/exploitation/commix")
 
 
 # ===========================================================================
@@ -851,6 +908,10 @@ class TestCredentialHarvesting:
     def test_responder(self, client):
         r = _post(client, "/api/tools/responder")
         assert_route_exists(r, "/api/tools/responder")
+
+    def test_vaultrip(self, client):
+        r = _post(client, "/api/tools/vaultrip")
+        assert_route_exists(r, "/api/tools/vaultrip")
 
 
 # ===========================================================================
@@ -1015,6 +1076,10 @@ class TestIntelligence:
     def test_zero_day_research(self, client):
         r = _post(client, "/api/vuln-intel/zero-day-research")
         assert_route_exists(r, "/api/vuln-intel/zero-day-research")
+
+    def test_vulnx(self, client):
+        r = _post(client, "/api/vuln-intel/vulnx")
+        assert_route_exists(r, "/api/vuln-intel/vulnx")
 
 
 # ===========================================================================

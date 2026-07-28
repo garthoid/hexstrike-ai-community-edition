@@ -29,6 +29,7 @@ def app():
     from nyxstrike_server import app as _app
 
     _app.config["TESTING"] = True
+    # h2csmuggler is loaded onto this shared app by conftest.py
     return _app
 
 

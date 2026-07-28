@@ -99,7 +99,7 @@ def ai_vuln_session():
 
     Expects JSON:
         {
-            "target": "https://example.com",
+            "target": "https://example.invalid",
             "create_session": false   // optional, default false
         }
 
@@ -110,7 +110,7 @@ def ai_vuln_session():
     Returns:
         {
             "success": true,
-            "target": "https://example.com",
+            "target": "https://example.invalid",
             "session_name": "AI Vuln Scan",
             "steps": [ ... ],
             "session_id": "sess_abc123"   // only when create_session=true
