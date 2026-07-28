@@ -136,6 +136,17 @@
   word-break: break-word;
 }
 
+.verify-hash-value {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.verify-copy-btn {
+  padding: 2px;
+  flex-shrink: 0;
+}
+
 .verify-session-link {
   color: var(--green);
   text-decoration: none;

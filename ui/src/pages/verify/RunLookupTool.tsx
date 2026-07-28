@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Search, RefreshCw } from 'lucide-react'
 import { api } from '../../api'
 import type { RunLookupResponse } from '../../api'
+import { CopyHash } from './CopyHash'
 
 function fmtTs(ts: string | undefined): string {
   if (!ts) return '—'
@@ -85,7 +86,8 @@ export function RunLookupTool() {
                 <tr><td>Endpoint</td><td className="mono">{result.endpoint}</td></tr>
                 <tr><td>Timestamp</td><td>{fmtTs(result.timestamp)}</td></tr>
                 <tr><td>Return Code</td><td className="mono">{result.return_code}</td></tr>
-                <tr><td>Prev Hash</td><td className="mono" style={{ wordBreak: 'break-all' }}>{result.prev_hash}</td></tr>
+                <tr><td>Hash</td><td><CopyHash value={result.hash} /></td></tr>
+                <tr><td>Prev Hash</td><td><CopyHash value={result.prev_hash} /></td></tr>
               </tbody>
             </table>
             {(result.stdout || result.stderr) && (

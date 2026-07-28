@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { ShieldCheck, ShieldAlert, ShieldQuestion, RefreshCw } from 'lucide-react'
 import { api } from '../../api'
 import type { SessionIntegrityResponse } from '../../api'
+import { CopyHash } from './CopyHash'
 
 export function SessionIntegrityTool() {
   const [sessionId, setSessionId] = useState('')
@@ -67,6 +68,17 @@ export function SessionIntegrityTool() {
                   : <><ShieldAlert size={12} /> Tamper detected at run #{result.broken_at_index} ({result.verified_runs}/{result.total_runs} verified before the break).</>
             }
           </div>
+        )}
+
+        {result?.success && result.tip_hash && (
+          <table className="verify-result-table">
+            <tbody>
+              <tr>
+                <td>Tip Hash</td>
+                <td><CopyHash value={result.tip_hash} /></td>
+              </tr>
+            </tbody>
+          </table>
         )}
       </div>
     </section>

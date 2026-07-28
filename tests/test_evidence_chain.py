@@ -161,6 +161,20 @@ class TestRunHistoryStoreChaining:
         # get_all() is newest-first
         assert verify_chain(list(reversed(store.get_all())))["valid"] is True
 
+    def test_chains_onto_genesis_after_legacy_unhashed_entry(self, tmp_path):
+        """A store loaded with pre-existing data recorded before this feature shipped
+        (hash="" from the _load() fallback) must chain the next record() onto
+        GENESIS_HASH, not onto the empty string."""
+        store = RunHistoryStore(data_dir=str(tmp_path))
+        store._entries.appendleft({
+            "id": 1, "tool": "legacy", "endpoint": "", "params": {}, "session_id": "",
+            "stdout": "", "stderr": "", "return_code": 0, "success": True,
+            "timed_out": False, "partial_results": False, "execution_time": 0.0,
+            "timestamp": "", "prev_hash": "", "hash": "",
+        })
+        chained = store.record(tool="nmap", endpoint="/e1", params={}, result={"stdout": "a"})
+        assert chained["prev_hash"] == GENESIS_HASH
+
     def test_hash_survives_reload(self, tmp_path):
         store = RunHistoryStore(data_dir=str(tmp_path))
         chained = store.record(tool="nmap", endpoint="/e1", params={}, result={"stdout": "a"})

@@ -61,7 +61,7 @@ class RunHistoryStore:
         "execution_time": result.get("execution_time", 0.0),
         "timestamp": result.get("timestamp", ""),
       }
-      prev_hash = self._entries[0]["hash"] if self._entries else evidence_chain.GENESIS_HASH
+      prev_hash = (self._entries[0].get("hash") if self._entries else None) or evidence_chain.GENESIS_HASH
       chained_entry = evidence_chain.chain_entry(entry, prev_hash)
       self._entries.appendleft(chained_entry)
       self._save_locked()
