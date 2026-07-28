@@ -1,6 +1,6 @@
 import { Palette, RefreshCw, Trash2, XCircle } from 'lucide-react'
-import { useEffect, useState } from 'react'
-import { InformationModal } from '../../components/InformationModal'
+import { useState } from 'react'
+import { ThemePickerModal } from '../../components/ThemePickerModal'
 import { THEME_OPTIONS, type ThemeId } from '../../app/themes'
 import { useSettingsData } from './useSettingsData'
 import {
@@ -29,29 +29,6 @@ export default function SettingsPage({
   togglePage: (page: Page) => void
 }) {
   const [themeModalOpen, setThemeModalOpen] = useState(false)
-  const [themePreviewId, setThemePreviewId] = useState<ThemeId>(themeId)
-  const [themeSelectionId, setThemeSelectionId] = useState<ThemeId>(themeId)
-
-  useEffect(() => {
-    if (!themeModalOpen) {
-      setThemePreviewId(themeId)
-      setThemeSelectionId(themeId)
-      return
-    }
-    document.documentElement.setAttribute('data-theme', themePreviewId)
-  }, [themeModalOpen, themePreviewId, themeId])
-
-  function closeThemeModal() {
-    document.documentElement.setAttribute('data-theme', themeId)
-    setThemePreviewId(themeId)
-    setThemeSelectionId(themeId)
-    setThemeModalOpen(false)
-  }
-
-  function applyThemeSelection() {
-    setThemeId(themeSelectionId)
-    setThemeModalOpen(false)
-  }
 
   const {
     settings,
@@ -120,46 +97,14 @@ export default function SettingsPage({
 
   return (
     <div className="settings-page">
-      <InformationModal
+      <ThemePickerModal
         isOpen={themeModalOpen}
-        title="Choose Theme"
-        description="Preview themes live, then apply your selection."
-        className="theme-picker-modal"
-        primaryLabel="Apply Theme"
-        primaryVariant="success"
-        secondaryLabel="Cancel"
-        onPrimary={applyThemeSelection}
-        onSecondary={closeThemeModal}
-        onClose={closeThemeModal}
-      >
-        <label className="theme-picker-toggle-row">
-          <input
-            type="checkbox"
-            checked={reduceTextureEffects}
-            onChange={e => setReduceTextureEffects(e.target.checked)}
-          />
-          <span className="theme-picker-toggle-text">Reduce background texture effects</span>
-        </label>
-        <div className="theme-picker-grid">
-          {THEME_OPTIONS.map(option => (
-            <button
-              key={option.id}
-              className={`theme-picker-card${themeSelectionId === option.id ? ' active' : ''}`}
-              onClick={() => {
-                setThemeSelectionId(option.id)
-                setThemePreviewId(option.id)
-              }}
-              type="button"
-            >
-              <span className="theme-picker-card-label">
-                {option.label}
-                {option.light && <span className="theme-picker-card-badge">Light</span>}
-              </span>
-              <span className="theme-picker-card-hint">{option.hint}</span>
-            </button>
-          ))}
-        </div>
-      </InformationModal>
+        themeId={themeId}
+        setThemeId={setThemeId}
+        reduceTextureEffects={reduceTextureEffects}
+        setReduceTextureEffects={setReduceTextureEffects}
+        onClose={() => setThemeModalOpen(false)}
+      />
 
       <div className="kpi-row settings-appearance-row">
         <div
