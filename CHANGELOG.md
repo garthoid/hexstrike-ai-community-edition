@@ -1,6 +1,10 @@
 # Changelog
 
-## 1.7.0 - phishfalcon (NEXT)
+## 1.8.0 - exploitotter (NEXT)
+
+TODO
+
+## 1.7.0 - phishfalcon (2026-07-28)
 
 ### Navigation
 - Replaced the top nav tab bar with a collapsible sidebar — icon-only rail on desktop (state persists across reloads), slide-out drawer on mobile.
