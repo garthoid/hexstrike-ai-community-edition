@@ -33,6 +33,7 @@ def register_blueprints(app):
   app.register_blueprint(api_session_reports_bp)
   app.register_blueprint(api_credentials_bp)
   app.register_blueprint(api_loot_bp)
+  app.register_blueprint(api_topology_bp)
 
   #Active Directory
   app.register_blueprint(api_tools_impacket_bp)

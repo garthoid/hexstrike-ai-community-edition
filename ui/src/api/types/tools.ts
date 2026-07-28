@@ -8,6 +8,7 @@ export interface Tool {
   optional: Record<string, string | number | boolean>;
   effectiveness: number;
   parent_tool?: string | null;
+  topology_capable?: boolean;
 }
 
 export interface ToolsCatalogResponse {

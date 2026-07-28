@@ -2,7 +2,10 @@
 
 ## 1.8.0 - exploitotter (NEXT)
 
-TODO
+### Topology map
+- Added a network topology map — export a completed nmap/nmap-advanced run to a live host/port graph, auto-creating a session if needed.
+- Toggle on the Run page to auto-export scan results, plus manual "Export to Topology" buttons on the Run page and session tool runs.
+- New "Topology" tab on the session detail page renders the graph.
 
 ## 1.7.0 - phishfalcon (2026-07-28)
 

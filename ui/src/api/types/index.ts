@@ -131,4 +131,8 @@ export type {
   SessionTemplatesResponse,
   SessionsResponse,
   UpdateSessionPayload,
+  Topology,
+  TopologyHost,
+  TopologyPort,
+  TopologyExportResponse,
 } from './sessions';

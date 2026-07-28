@@ -1,6 +1,6 @@
 import {
   CheckCircle, XCircle, RefreshCw, Play, AlertCircle,
-  ChevronUp, ChevronDown, Download, Star,
+  ChevronUp, ChevronDown, Download, Star, Network,
 } from 'lucide-react'
 import { useEffect, useRef, type Dispatch, type SetStateAction } from 'react'
 import type { Tool } from '../../api'
@@ -22,6 +22,9 @@ interface RunPanelProps {
   onToggleFavorite: () => void
   onRunTool: () => Promise<void>
   viewEntry: RunHistoryEntry | null
+  autoTopology: boolean
+  setAutoTopology: Dispatch<SetStateAction<boolean>>
+  onExportTopology: (entry: RunHistoryEntry) => void
 }
 
 export function RunPanel({
@@ -38,6 +41,9 @@ export function RunPanel({
   onToggleFavorite,
   onRunTool,
   viewEntry,
+  autoTopology,
+  setAutoTopology,
+  onExportTopology,
 }: RunPanelProps) {
   const formRef = useRef<HTMLDivElement | null>(null)
   const requiredKeys = selected ? Object.keys(selected.params) : []
@@ -112,6 +118,17 @@ export function RunPanel({
               <div className="run-error"><AlertCircle size={13} /> {runError}</div>
             )}
 
+            {selected.topology_capable && (
+              <label className="run-topology-toggle">
+                <input
+                  type="checkbox"
+                  checked={autoTopology}
+                  onChange={e => setAutoTopology(e.target.checked)}
+                />
+                <Network size={12} /> Add results to topology map
+              </label>
+            )}
+
             <button className="run-submit" onClick={onRunTool} disabled={running}>
               {running
                 ? <><RefreshCw size={13} className="spin" /> Running…</>
@@ -143,6 +160,11 @@ export function RunPanel({
                       <button className="run-export-btn" onClick={() => exportEntry(viewEntry, 'json')} title="Export as .json">
                         <Download size={11} /> JSON
                       </button>
+                      {selected.topology_capable && (
+                        <button className="run-export-btn" onClick={() => onExportTopology(viewEntry)} title="Export to topology map">
+                          <Network size={11} /> Topology
+                        </button>
+                      )}
                     </div>
                   </>
                 )}

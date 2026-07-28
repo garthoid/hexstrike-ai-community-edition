@@ -10,7 +10,8 @@ import { RunToolPicker } from './RunToolPicker'
 import { RunPanel } from './RunPanel'
 import { RunHistoryPanel } from './RunHistoryPanel'
 import { RunQuickBar } from './RunQuickBar'
-import { deriveTargetFromParams, RUN_FAVORITES_KEY, RUN_RECENT_TARGETS_KEY } from './storage'
+import { deriveTargetFromParams, RUN_FAVORITES_KEY, RUN_RECENT_TARGETS_KEY, RUN_TOPOLOGY_SESSION_KEY } from './storage'
+import { useToast } from '../../components/ToastProvider'
 import '../../components/tool-run/shared.css'
 import './RunPage.css'
 
@@ -27,6 +28,7 @@ interface RunPageProps {
   onToolSelected?: (toolName: string | null) => void
   onRefresh?: () => void
   onClearHistory?: () => Promise<void>
+  onOpenSession?: (sessionId: string) => void
 }
 
 export function RunPage({
@@ -40,7 +42,9 @@ export function RunPage({
   onToolSelected,
   onRefresh,
   onClearHistory,
+  onOpenSession,
 }: RunPageProps) {
+  const { pushToast } = useToast()
   const [search, setSearch] = useState('')
   const [activeCat, setActiveCat] = useState('all')
   const [selected, setSelected] = useState<Tool | null>(null)
@@ -54,6 +58,8 @@ export function RunPage({
   const [liveOutput, setLiveOutput] = useState<string | null>(null)
   const [favorites, setFavorites] = usePersistentState<string[]>(RUN_FAVORITES_KEY, [])
   const [recentTargets, setRecentTargets] = usePersistentState<string[]>(RUN_RECENT_TARGETS_KEY, [])
+  const [autoTopology, setAutoTopology] = useState(false)
+  const [topologySessionId, setTopologySessionId] = usePersistentState<string | null>(RUN_TOPOLOGY_SESSION_KEY, null)
   const runIdRef = useRef(0)
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const liveStreamRef = useRef<EventSource | null>(null)
@@ -109,6 +115,28 @@ export function RunPage({
     })
   }
 
+  async function exportTopology(entry: RunHistoryEntry, navigate: boolean) {
+    try {
+      const res = await api.exportTopology(entry.tool, entry.params, entry.result, topologySessionId ?? undefined)
+      if (!res.success) {
+        pushToast('error', res.error || 'Topology export failed')
+        return
+      }
+      if (!res.topology) {
+        pushToast('info', res.message || 'No hosts/ports found in output')
+        return
+      }
+      if (res.session_id) setTopologySessionId(res.session_id)
+      if (navigate && res.session_id) {
+        onOpenSession?.(res.session_id)
+      } else {
+        pushToast('success', `Topology map updated (session ${res.session_id})`)
+      }
+    } catch (e) {
+      pushToast('error', `Topology export failed: ${String(e)}`)
+    }
+  }
+
   async function runTool() {
     if (!selected) return
     const { payload, missing } = buildRunPayload(selected, fieldValues)
@@ -159,6 +187,9 @@ export function RunPage({
       const target = deriveTargetFromParams(payload)
       if (target) {
         setRecentTargets(prev => [target, ...prev.filter(t => t !== target)].slice(0, 10))
+      }
+      if (autoTopology && selected.topology_capable) {
+        void exportTopology(entry, false)
       }
     } catch (e) {
       setRunError(String(e))
@@ -224,6 +255,8 @@ export function RunPage({
             }
             setModalEntry(null)
           }}
+          topologyCapable={tools.find(t => t.name === modalEntry.tool)?.topology_capable}
+          onExportTopology={entry => void exportTopology(entry, true)}
         />
       )}
       <RunToolPicker
@@ -252,6 +285,9 @@ export function RunPage({
         onToggleFavorite={toggleFavoriteSelected}
         onRunTool={runTool}
         viewEntry={viewEntry}
+        autoTopology={autoTopology}
+        setAutoTopology={setAutoTopology}
+        onExportTopology={entry => void exportTopology(entry, true)}
       />
 
       <RunQuickBar

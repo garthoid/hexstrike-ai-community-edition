@@ -171,6 +171,7 @@ export function MainContent({
             onToolSelected={onToolSelected}
             onRefresh={fetchServerRunHistory}
             onClearHistory={clearServerRunHistory}
+            onOpenSession={openSessionDetail}
           />
         )}
         {page === 'tasks' && (

@@ -1,4 +1,4 @@
-import { ChevronDown, ChevronUp, Download, FileText, Play, RefreshCw, Send, Square, Terminal, Trash2, Power } from 'lucide-react'
+import { ChevronDown, ChevronUp, Download, FileText, Network, Play, RefreshCw, Send, Square, Terminal, Trash2, Power } from 'lucide-react'
 import { useEffect, useRef, useState, type Dispatch, type SetStateAction } from 'react'
 import { ParamField } from '../../components/tool-run/ParamField'
 import type { AttackChainStep, Tool, ToolExecResponse } from '../../api'
@@ -43,6 +43,7 @@ interface SessionDetailWorkbenchProps {
   setAddToolSearch: Dispatch<SetStateAction<string>>
   addCandidates: Tool[]
   onAddTool: (tool: Tool) => Promise<void>
+  onExportTopology: (tool: string, params: Record<string, string>, result: ToolExecResponse) => void
 }
 
 type RemoteTerminalState = {
@@ -267,6 +268,7 @@ export function SessionDetailWorkbench({
   setAddToolSearch,
   addCandidates,
   onAddTool,
+  onExportTopology,
 }: SessionDetailWorkbenchProps) {
   const { pushToast } = useToast()
   const selectedRunning = selectedStepKey ? runningStepKey === selectedStepKey : false
@@ -536,6 +538,11 @@ export function SessionDetailWorkbench({
                           <ActionButton variant="default" onClick={() => void exportToNotes(selectedStep.tool, stepFieldValues[selectedStepKey] ?? {}, resultData)}>
                             <FileText size={11} /> Notes
                           </ActionButton>
+                          {selectedTool.topology_capable && (
+                            <ActionButton variant="default" onClick={() => onExportTopology(selectedStep.tool, stepFieldValues[selectedStepKey] ?? {}, resultData)}>
+                              <Network size={11} /> Topology
+                            </ActionButton>
+                          )}
                           {selectedStep.tool === 'create-attack-chain' && resultData.success && (
                             <ActionButton disabled={isCompleted} variant="success" onClick={() => { void onApplyAttackChainFromResult() }}>
                               Use Chain
@@ -585,6 +592,11 @@ export function SessionDetailWorkbench({
                               <ActionButton variant="default" onClick={() => void exportToNotes(selectedStep.tool, stepFieldValues[selectedStepKey] ?? {}, prior)}>
                                 <FileText size={11} /> Notes
                               </ActionButton>
+                              {selectedTool.topology_capable && (
+                                <ActionButton variant="default" onClick={() => onExportTopology(selectedStep.tool, stepFieldValues[selectedStepKey] ?? {}, prior)}>
+                                  <Network size={11} /> Topology
+                                </ActionButton>
+                              )}
                             </div>
                             <pre className="session-result-pre mono">{resultText(prior, 'stdout') || '(no stdout)'}</pre>
                             {resultText(prior, 'stderr') && <pre className="session-result-pre mono">{resultText(prior, 'stderr')}</pre>}

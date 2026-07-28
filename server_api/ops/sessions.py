@@ -82,6 +82,7 @@ def _summary_from_data(data, fallback_sid):
     "handover_history": data.get("handover_history", []),
     "findings": data.get("findings", []),
     "event_log": data.get("event_log", []),
+    "topology": data.get("topology"),
     "created_at": data.get("created_at", 0),
     "updated_at": data.get("updated_at", 0),
   }

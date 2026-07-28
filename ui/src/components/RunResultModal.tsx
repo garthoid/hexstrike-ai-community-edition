@@ -1,14 +1,16 @@
 import { createPortal } from 'react-dom'
-import { CheckCircle, XCircle, Play, Download, GitCompare } from 'lucide-react'
+import { CheckCircle, XCircle, Play, Download, GitCompare, Network } from 'lucide-react'
 import { type RunHistoryEntry } from '../shared/types'
 import { exportEntry, safeFixed } from '../shared/utils'
 import { useEscapeClose } from '../hooks/useEscapeClose'
 
-export function RunResultModal({ entry, onClose, onRerun, compareText }: {
+export function RunResultModal({ entry, onClose, onRerun, compareText, topologyCapable, onExportTopology }: {
   entry: RunHistoryEntry
   onClose: () => void
   onRerun?: () => void
   compareText?: string
+  topologyCapable?: boolean
+  onExportTopology?: (entry: RunHistoryEntry) => void
 }) {
   const r = entry.result
 
@@ -57,6 +59,11 @@ export function RunResultModal({ entry, onClose, onRerun, compareText }: {
             <button className="run-export-btn" onClick={() => exportEntry(entry, 'json')} title="Export as .json">
               <Download size={11} /> JSON
             </button>
+            {topologyCapable && onExportTopology && (
+              <button className="run-export-btn" onClick={() => onExportTopology(entry)} title="Export to topology map">
+                <Network size={11} /> Topology
+              </button>
+            )}
           </div>
         </div>
 

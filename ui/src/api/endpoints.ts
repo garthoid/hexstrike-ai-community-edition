@@ -61,6 +61,7 @@ import type {
   SessionTemplateMutationResponse,
   SessionTemplatesResponse,
   SessionsResponse,
+  TopologyExportResponse,
   Settings,
   SettingsResponse,
   RefreshToolAvailabilityResponse,
@@ -158,6 +159,22 @@ export const api = {
     patch<SessionTemplateMutationResponse>(`/api/sessions/templates/${templateId}`, payload),
   deleteSessionTemplate: (templateId: string) =>
     del<SessionTemplateDeleteResponse>(`/api/sessions/templates/${templateId}`),
+
+  // ── Topology ─────────────────────────────────────────────────────────────
+  exportTopology: (
+    tool: string,
+    params: Record<string, unknown>,
+    result: ToolExecResponse,
+    sessionId?: string,
+    target?: string,
+  ) =>
+    post<TopologyExportResponse>('/api/topology/export', {
+      tool,
+      params,
+      result,
+      session_id: sessionId,
+      target,
+    }),
 
   // ── Session Notes ────────────────────────────────────────────────────────
   sessionNotes: (sessionId: string) =>

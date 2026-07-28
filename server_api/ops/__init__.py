@@ -14,3 +14,4 @@ from .session_findings import *
 from .session_reports import *
 from .plugins import *
 from .credential_store import *
+from .topology import *

@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { ArrowLeft, Brain, RefreshCw, Target, Activity, Clock, Download, FileText, Shield, List } from 'lucide-react'
+import { ArrowLeft, Brain, RefreshCw, Target, Activity, Clock, Download, FileText, Shield, List, Network } from 'lucide-react'
 import { api, type SessionSummary, type AttackChainStep, type Tool, type ToolExecResponse } from '../../api'
 import { buildInitialFieldValues, buildRunPayload, inferTargetValue } from '../../components/tool-run/payload'
 import { fmtTs } from '../../shared/utils'
@@ -7,6 +7,7 @@ import { SessionDetailWorkbench } from './SessionDetailWorkbench'
 import { SessionNotes } from './SessionNotes'
 import { SessionFindings } from './SessionFindings'
 import { SessionTimeline } from './SessionTimeline'
+import { SessionTopology } from './SessionTopology'
 import { SessionReportModal } from './SessionReportModal'
 import { TemplateModal } from './TemplateModal'
 import { ConfirmActionModal } from '../../components/ConfirmActionModal'
@@ -69,7 +70,7 @@ export default function SessionDetailPage({
   const [selectedChainFields, setSelectedChainFields] = useState<Record<string, boolean>>({})
   const [chainPreferences, setChainPreferences] = useState<ChainMappingPreference[]>([])
   const [showChainPrefModal, setShowChainPrefModal] = useState(false)
-  const [activeTab, setActiveTab] = useState<'workflow' | 'notes' | 'findings' | 'timeline'>('workflow')
+  const [activeTab, setActiveTab] = useState<'workflow' | 'notes' | 'findings' | 'timeline' | 'topology'>('workflow')
   const [showReportModal, setShowReportModal] = useState(false)
   const [notesInitialOpenPath, setNotesInitialOpenPath] = useState<string | undefined>(undefined)
 
@@ -838,6 +839,25 @@ export default function SessionDetailPage({
     }
   }
 
+  async function exportTopologyFromSession(tool: string, params: Record<string, string>, result: ToolExecResponse) {
+    if (!session) return
+    try {
+      const res = await api.exportTopology(tool, params, result, session.session_id)
+      if (!res.success) {
+        pushToast('error', res.error || 'Topology export failed')
+        return
+      }
+      if (!res.topology) {
+        pushToast('info', res.message || 'No hosts/ports found in output')
+        return
+      }
+      pushToast('success', 'Topology map updated')
+      await loadSession()
+    } catch (e) {
+      pushToast('error', `Topology export failed: ${String(e)}`)
+    }
+  }
+
   if (loading) return (
     <div className="loading-state">
       <RefreshCw size={20} className="spin" color="var(--green)" />
@@ -1007,11 +1027,18 @@ export default function SessionDetailPage({
         >
           <List size={12} /> Timeline
         </button>
+        <button
+          className={`session-tab-btn${activeTab === 'topology' ? ' session-tab-btn--active' : ''}`}
+          onClick={() => setActiveTab('topology')}
+        >
+          <Network size={12} /> Topology
+        </button>
       </div>
 
       {activeTab === 'notes' && <SessionNotes sessionId={session.session_id} initialOpenPath={notesInitialOpenPath} onInitialOpenConsumed={() => setNotesInitialOpenPath(undefined)} />}
       {activeTab === 'findings' && <SessionFindings session={session} onUpdate={loadSession} />}
       {activeTab === 'timeline' && <SessionTimeline session={session} />}
+      {activeTab === 'topology' && <SessionTopology session={session} />}
 
       <SessionReportModal
         isOpen={showReportModal}
@@ -1053,6 +1080,7 @@ export default function SessionDetailPage({
         setAddToolSearch={setAddToolSearch}
         addCandidates={addCandidates}
         onAddTool={addToolToSession}
+        onExportTopology={exportTopologyFromSession}
       />}
     </div>
   )

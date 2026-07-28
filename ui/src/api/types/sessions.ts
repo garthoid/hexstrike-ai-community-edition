@@ -44,6 +44,41 @@ export interface SessionEvent {
   data?: Record<string, unknown>;
 }
 
+// ── Topology ────────────────────────────────────────────────────────────────
+
+export interface TopologyHost {
+  ip: string;
+  hostname?: string;
+  mac?: string;
+  vendor?: string;
+  sources?: Array<{ tool: string; timestamp: number }>;
+}
+
+export interface TopologyPort {
+  host: string;
+  port: number;
+  protocol: string;
+  state: string;
+  service?: string;
+  version?: string;
+  last_seen?: number;
+  last_tool?: string;
+}
+
+export interface Topology {
+  hosts: TopologyHost[];
+  ports: TopologyPort[];
+  updated_at?: number;
+}
+
+export interface TopologyExportResponse {
+  success: boolean;
+  session_id?: string;
+  topology?: Topology | null;
+  message?: string;
+  error?: string;
+}
+
 export interface SessionSummary {
   session_id: string;
   name?: string;
@@ -67,6 +102,7 @@ export interface SessionSummary {
   }>;
   findings?: SessionFinding[];
   event_log?: SessionEvent[];
+  topology?: Topology | null;
   created_at: number;
   updated_at: number;
 }

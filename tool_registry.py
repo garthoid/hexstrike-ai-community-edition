@@ -167,6 +167,7 @@ TOOLS: Dict[str, dict] = {
         "params": {"target": {"required": True}},
         "optional": {"scan_type": "-sCV", "ports": "", "additional_args": "-T4 -Pn"},
         "effectiveness": 0.95,
+        "topology_capable": True,
     },
 
     "nmap_advanced": {
@@ -177,7 +178,8 @@ TOOLS: Dict[str, dict] = {
         "params": {"target": {"required": True}},
         "optional": {"scan_type": "-sS", "ports": "", "timing": "T4", "nse_scripts": "", "os_detection": False, "version_detection": False, "aggressive": False, "stealth": False, "additional_args": ""},
         "effectiveness": 0.97,
-        "parent_tool": "nmap"
+        "parent_tool": "nmap",
+        "topology_capable": True,
     },
 
     "masscan": {
