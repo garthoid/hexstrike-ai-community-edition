@@ -223,6 +223,19 @@
   background: linear-gradient(180deg, transparent, var(--accent), var(--accent-alt), var(--accent), transparent);
 }
 
+/* Settings divider — same centred-fade glow treatment as .sidebar::after, laid horizontally
+   over the border-top set in Sidebar.css so reduce-textures mode still has a plain line. */
+.sidebar-nav--bottom::before {
+  content: '';
+  position: absolute;
+  top: -1px;
+  left: 0;
+  right: 0;
+  height: 1.5px;
+  animation: flourish-pulse 4s ease infinite;
+  background: linear-gradient(90deg, transparent, var(--accent), var(--accent-alt), var(--accent), transparent);
+}
+
 /* Vivid themes get the faster rainbow-cycling sweep, matching their already-highest glow intensity */
 :root[data-theme='unicorn'] .topbar::after,
 :root[data-theme='synthwave'] .topbar::after {
@@ -232,8 +245,17 @@
   background-size: 200% auto;
 }
 
+:root[data-theme='unicorn'] .sidebar-nav--bottom::before,
+:root[data-theme='synthwave'] .sidebar-nav--bottom::before {
+  background: linear-gradient(90deg, transparent, var(--accent), var(--accent-alt), var(--accent-warm), var(--accent-alt), transparent);
+  background-size: 200% auto;
+  animation-name: rainbow-shift;
+  animation-duration: 4s;
+}
+
 :root[data-reduce-textures='1'] .topbar::after,
-:root[data-reduce-textures='1'] .sidebar::after {
+:root[data-reduce-textures='1'] .sidebar::after,
+:root[data-reduce-textures='1'] .sidebar-nav--bottom::before {
   display: none;
 }
 
@@ -241,7 +263,8 @@
 :root[data-theme='rose'] .topbar::after {
   animation-duration: 14s;
 }
-:root[data-theme='rose'] .sidebar::after {
+:root[data-theme='rose'] .sidebar::after,
+:root[data-theme='rose'] .sidebar-nav--bottom::before {
   animation-duration: 6s;
 }
 

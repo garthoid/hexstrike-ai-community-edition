@@ -56,6 +56,14 @@
   flex: 1;
 }
 
+.sidebar-nav--bottom {
+  position: relative;
+  flex: 0 0 auto;
+  margin-top: auto;
+  border-top: 1px solid var(--border);
+  transition: border-color var(--t-base) ease;
+}
+
 .sidebar-nav-item {
   position: relative;
   display: flex;

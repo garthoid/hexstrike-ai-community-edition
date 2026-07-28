@@ -43,9 +43,27 @@ export function Sidebar({
   onCloseMobile,
 }: SidebarProps) {
   const visibleEntries = NAV_ENTRIES.filter(entry => isPageEnabled(entry.id))
+  const mainEntries = visibleEntries.filter(entry => entry.id !== 'settings')
+  const settingsEntry = visibleEntries.find(entry => entry.id === 'settings')
   // Icon-only collapse is a desktop concept — the mobile drawer always shows full labels.
   const isMobileViewport = useIsMobileViewport()
   const effectiveCollapsed = collapsed && !isMobileViewport
+
+  function renderNavItem(entry: (typeof NAV_ENTRIES)[number]) {
+    const Icon = entry.icon
+    const active = isEntryActive(entry.id, page)
+    return (
+      <button
+        key={entry.id}
+        className={`sidebar-nav-item${active ? ' active' : ''}${effectiveCollapsed ? ' collapsed' : ''}`}
+        onClick={() => { setPage(entry.id); onCloseMobile() }}
+        title={entry.label}
+      >
+        <Icon size={14} className="sidebar-nav-icon" />
+        {!effectiveCollapsed && <span className="sidebar-nav-label">{entry.label}</span>}
+      </button>
+    )
+  }
 
   return (
     <aside
@@ -62,22 +80,14 @@ export function Sidebar({
       </div>
 
       <nav className="sidebar-nav">
-        {visibleEntries.map(entry => {
-          const Icon = entry.icon
-          const active = isEntryActive(entry.id, page)
-          return (
-            <button
-              key={entry.id}
-              className={`sidebar-nav-item${active ? ' active' : ''}${effectiveCollapsed ? ' collapsed' : ''}`}
-              onClick={() => { setPage(entry.id); onCloseMobile() }}
-              title={entry.label}
-            >
-              <Icon size={14} className="sidebar-nav-icon" />
-              {!effectiveCollapsed && <span className="sidebar-nav-label">{entry.label}</span>}
-            </button>
-          )
-        })}
+        {mainEntries.map(entry => renderNavItem(entry))}
       </nav>
+
+      {settingsEntry && (
+        <nav className="sidebar-nav sidebar-nav--bottom">
+          {renderNavItem(settingsEntry)}
+        </nav>
+      )}
     </aside>
   )
 }
