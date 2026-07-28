@@ -30,7 +30,6 @@ INSTALL_TOOLS=false
 INSTALL_BIG_PACKAGES=false
 UPDATE_SELF=false
 UPDATE_PYTHON_PACKAGES=false
-PIP_BOOTSTRAPPED=false
 INSTALL_AI_MODEL=false
 AI_SMALL_MODE=false
 AI_LARGE_MODE=false
@@ -84,28 +83,45 @@ update_self_repo() {
 
 
 
-ensure_pip_ready() {
-  if [[ "${PIP_BOOTSTRAPPED}" == true ]]; then
+ensure_uv_ready() {
+  if command -v uv >/dev/null 2>&1; then
     return
   fi
-  "${VENV_DIR}/bin/python3" -m pip --disable-pip-version-check install --quiet --upgrade pip
-  PIP_BOOTSTRAPPED=true
+
+  echo "uv not found. Installing via official install script..."
+  if ! curl -fsSL https://astral.sh/uv/install.sh | sh; then
+    echo "uv install failed. Install it manually: https://docs.astral.sh/uv/getting-started/installation/"
+    exit 1
+  fi
+  export PATH="${HOME}/.local/bin:${PATH}"
+
+  if ! command -v uv >/dev/null 2>&1; then
+    echo "uv still not found on PATH after install. Install it manually and re-run."
+    exit 1
+  fi
 }
 
-install_requirements_file() {
-  local requirements_file="$1"
-  local requirements_name
-  requirements_name="$(basename "${requirements_file}")"
-  local stamp_file="${VENV_DIR}/.app_python_deps_${requirements_name}.stamp"
+sync_python_deps() {
+  ensure_uv_ready
 
-  if [[ "${UPDATE_PYTHON_PACKAGES}" != true && -f "${stamp_file}" && "${stamp_file}" -nt "${requirements_file}" ]]; then
-    return
+  local -a extra_flags=()
+  if [[ "${INSTALL_TOOLS}" == true ]]; then
+    extra_flags+=(--extra tools)
+  fi
+  if [[ "${INSTALL_BIG_PACKAGES}" == true ]]; then
+    extra_flags+=(--extra big)
   fi
 
-  ensure_pip_ready
-  echo "Installing Python deps from: ${requirements_name}"
-  "${VENV_DIR}/bin/python3" -m pip --disable-pip-version-check install --quiet --progress-bar off -r "${requirements_file}"
-  touch "${stamp_file}"
+  export UV_PYTHON="${PYTHON_BIN}"
+  export UV_PROJECT_ENVIRONMENT="${VENV_DIR}"
+
+  if [[ "${UPDATE_PYTHON_PACKAGES}" == true ]]; then
+    echo "Refreshing lockfile and upgrading Python deps..."
+    uv lock --upgrade
+  fi
+
+  echo "Syncing Python deps${extra_flags:+ (${extra_flags[*]})}..."
+  uv sync "${extra_flags[@]}"
 }
 
 write_model_to_config_local() {
@@ -182,35 +198,21 @@ install_ollama_model() {
 run_setup() {
   update_self_repo
 
-  echo "[1/4] Preparing virtual environment..."
-  if [[ ! -d "${VENV_DIR}" ]]; then
-    "${PYTHON_BIN}" -m venv "${VENV_DIR}"
-  fi
-
-  echo "[2/4] Syncing Python dependencies... (may take a while on first run)"
-  install_requirements_file "${ROOT_DIR}/dependencies/requirements.txt"
-
-  if [[ "${INSTALL_TOOLS}" == true && -f "${ROOT_DIR}/dependencies/requirements-extra.txt" ]]; then
-    install_requirements_file "${ROOT_DIR}/dependencies/requirements-extra.txt"
-  fi
-
-  if [[ "${INSTALL_TOOLS}" == true && "${INSTALL_BIG_PACKAGES}" == true && -f "${ROOT_DIR}/dependencies/requirements-big.txt" ]]; then
-    echo "Installing big optional Python packages..."
-    install_requirements_file "${ROOT_DIR}/dependencies/requirements-big.txt"
-  fi
+  echo "[1/3] Syncing Python dependencies via uv... (may take a while on first run)"
+  sync_python_deps
 
   if [[ "${INSTALL_TOOLS}" == true ]]; then
-    echo "[3/4] Installing external tools via scripts/install_tools.sh..."
+    echo "[2/3] Installing external tools via scripts/install_tools.sh..."
     bash "${ROOT_DIR}/scripts/install_tools.sh"
   else
-    echo "[3/4] Skipping external tools (use -t to enable)."
+    echo "[2/3] Skipping external tools (use -t to enable)."
   fi
 
   if [[ "${INSTALL_AI_MODEL}" == true ]]; then
-    echo "[4/4] Setting up AI model..."
+    echo "[3/3] Setting up AI model..."
     install_ollama_model
   else
-    echo "[4/4] Skipping AI model setup (use -ai or -ai-small to enable)."
+    echo "[3/3] Skipping AI model setup (use -ai or -ai-small to enable)."
   fi
 
   echo "Setup complete."
@@ -297,7 +299,7 @@ while [[ $# -gt 0 ]]; do
       echo "                          (run scripts/install_tools.sh --help for category/dry-run options)"
       echo "  -b, --install-big-packages  Install heavy optional Python extras (implies -t)"
       echo "  -u, --update-git-tools  Pull latest for already-cloned git_tools repos (implies -t)"
-      echo "  -y, --update-python-packages  Force reinstall of Python requirements"
+      echo "  -y, --update-python-packages  Upgrade the uv lockfile and re-sync Python deps"
       echo "  -p, --python <bin>      Python binary to use (default: python3)"
       echo "  -ai                     Install Ollama + pull 9b model (~8.4 GB RAM)"
       echo "  -ai-small               Install Ollama + pull 4b model (~2.5 GB RAM)"

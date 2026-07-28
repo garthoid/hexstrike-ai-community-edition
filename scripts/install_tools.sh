@@ -26,7 +26,7 @@
 #    ./scripts/install_tools.sh --only web --dry-run
 #
 #  NOTES:
-#    - Python deps (requirements.txt) are handled separately: pip install -r requirements.txt
+#    - Python deps (pyproject.toml) are handled separately: uv sync --extra tools --extra big
 #    - GUI tools (Ghidra, Maltego, Binary Ninja, IDA) are skipped with guidance
 #    - All pip installs use --user flag (no root required)
 #    - Go packages install to ~/go/bin (add to PATH if not already set)
@@ -122,7 +122,7 @@ print_help() {
   echo "  ./scripts/install_tools.sh --only cloud --dry-run"
   echo ""
   echo -e "${BOLD}NOTES${RESET}"
-  echo "  • Python deps: handle separately with  pip3 install -r requirements.txt"
+  echo "  • Python deps: handle separately with  uv sync --extra tools --extra big"
   echo "  • Logs are written to: $LOG_FILE"
   echo "  • Go tools are installed to ~/go/bin — ensure it is in your PATH"
   echo "  • Rust/Cargo tools are installed to ~/.cargo/bin — ensure it is in your PATH"
@@ -1183,8 +1183,8 @@ install_binary() {
   install_tool_multi "upx" "upx" \
     "pkg:upx"
 
-  # pwntools and angr: note they are in requirements.txt
-  info "pwntools & angr — managed via requirements.txt (pip3 install -r requirements.txt)"
+  # pwntools and angr: note they are in the pyproject.toml "tools" extra
+  info "pwntools & angr — managed via pyproject.toml (uv sync --extra tools)"
 
   # GUI / manual-only tools
   skip_manual_install "Ghidra"       "https://ghidra-sre.org/"
@@ -1425,8 +1425,8 @@ install_ctf() {
     "pip:binwalk" \
     "pkg:binwalk"
 
-  # pwntools — managed by requirements.txt
-  info "pwntools — managed via requirements.txt"
+  # pwntools — managed by pyproject.toml "tools" extra
+  info "pwntools — managed via pyproject.toml (uv sync --extra tools)"
 
   # stegsolve note (Java GUI jar)
   if ! tool_exists stegsolve; then

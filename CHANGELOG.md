@@ -7,6 +7,9 @@
 - Toggle on the Run page to auto-export scan results, plus manual "Export to Topology" buttons on the Run page and session tool runs.
 - New "Topology" tab on the session detail page renders the graph.
 
+### Dependencies
+- Migrated Python dependency management from `dependencies/requirements*.txt` to `pyproject.toml` + `uv.lock`.
+
 ## 1.7.0 - phishfalcon (2026-07-28)
 
 ### Navigation

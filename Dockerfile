@@ -18,6 +18,10 @@ RUN apt-get update -qq && apt-get install -y --no-install-recommends \
     wget \
  && rm -rf /var/lib/apt/lists/*
 
+# ── Install uv (manages the Python venv nyxstrike.sh syncs into) ─────────────
+ENV UV_INSTALL_DIR=/usr/local/bin
+RUN curl -LsSf https://astral.sh/uv/install.sh | sh
+
 # ── Install all NyxStrike tool dependencies via nyxstrike.sh -t ──────────────
 WORKDIR /opt/nyxstrike
 

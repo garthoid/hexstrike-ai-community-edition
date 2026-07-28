@@ -15,9 +15,10 @@
 ### Environment setup
 
 ```bash
-python3 -m venv nyxstrike-env
+export UV_PROJECT_ENVIRONMENT=nyxstrike-env
+uv sync                              # core deps only
+uv sync --extra tools --extra big    # + external tool integrations
 source nyxstrike-env/bin/activate
-python3 -m pip install -r requirements.txt
 ```
 
 ### Run the server
