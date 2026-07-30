@@ -26,6 +26,7 @@ const VerifyPage        = lazy(() => import('../pages/verify/VerifyPage').then(m
 const SessionsPage      = lazy(() => import('../pages/sessions/SessionsPage'))
 const SessionDetailPage = lazy(() => import('../pages/sessions/SessionDetailPage'))
 const LootPage          = lazy(() => import('../pages/loot/LootPage'))
+const WorkbenchPage     = lazy(() => import('../pages/workbench/WorkbenchPage'))
 
 /** Minimal spinner shown while a lazy chunk is loading */
 function PageLoader() {
@@ -199,6 +200,7 @@ export function MainContent({
           />
         )}
         {page === 'loot' && <LootPage />}
+        {page === 'workbench' && <WorkbenchPage />}
         {page === 'logs' && (
           <LogsPage
             logLines={logLines}

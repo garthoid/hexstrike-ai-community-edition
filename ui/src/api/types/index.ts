@@ -138,3 +138,13 @@ export type {
   TopologyPort,
   TopologyExportResponse,
 } from './sessions';
+
+export type {
+  WorkbenchOperation,
+  WorkbenchOperationsResponse,
+  WorkbenchParamSpec,
+  WorkbenchRecipeStepInput,
+  WorkbenchRecipeStepResult,
+  WorkbenchRunRecipeResponse,
+  WorkbenchRunResponse,
+} from './workbench';

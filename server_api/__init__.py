@@ -15,6 +15,7 @@ from .web_framework import *
 from .web_scan import *
 from .active_directory import *
 from .burp_agent import *
+from .workbench import *
 
 def register_blueprints(app):
   """Register all API blueprints with the Flask app."""
@@ -121,3 +122,6 @@ def register_blueprints(app):
   app.register_blueprint(api_error_handling_classify_error_bp)
   app.register_blueprint(api_error_handling_parameter_adjustments_bp)
   app.register_blueprint(api_error_handling_alternative_tools_bp)
+
+  # Workbench
+  app.register_blueprint(api_workbench_bp)

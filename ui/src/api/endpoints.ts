@@ -78,6 +78,10 @@ import type {
   PluginsManifestResponse,
   PluginToggleResponse,
   ServerRestartResponse,
+  WorkbenchOperationsResponse,
+  WorkbenchRecipeStepInput,
+  WorkbenchRunRecipeResponse,
+  WorkbenchRunResponse,
 } from './types';
 
 type ProcessActionResponse = { success: boolean; message?: string; error?: string };
@@ -325,4 +329,11 @@ export const api = {
     renameSession: (chatSessionId: string, name: string) => patch<{ success: boolean }>(`/api/chat/sessions/${chatSessionId}`, { name }),
     getMessages: (chatSessionId: string) => get<ChatMessagesResponse>(`/api/chat/sessions/${chatSessionId}/messages`),
   },
+
+  // ── Workbench ────────────────────────────────────────────────────────────
+  workbenchOperations: () => get<WorkbenchOperationsResponse>('/api/workbench/operations'),
+  workbenchRun: (operationId: string, params: Record<string, unknown>) =>
+    post<WorkbenchRunResponse>(`/api/workbench/run/${operationId}`, params),
+  workbenchRunRecipe: (input: string, steps: WorkbenchRecipeStepInput[]) =>
+    post<WorkbenchRunRecipeResponse>('/api/workbench/run-recipe', { input, steps }),
 };

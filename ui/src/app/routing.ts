@@ -11,7 +11,8 @@ export type Page =
   | 'sessions'
   | 'session-detail'
   | 'loot'
-  | 'verify';
+  | 'verify'
+  | 'workbench';
 
 const VALID_PAGES = new Set<Page>([
   'dashboard',
@@ -27,6 +28,7 @@ const VALID_PAGES = new Set<Page>([
   'session-detail',
   'loot',
   'verify',
+  'workbench',
 ]);
 
 export function routeFromHash(): { page: Page; sessionId: string | null; toolName: string | null } {
