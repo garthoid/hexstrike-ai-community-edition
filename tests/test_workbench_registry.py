@@ -22,7 +22,9 @@ class TestDiscovery:
         assert len(OPERATIONS) > 0
 
     def test_expected_categories_present(self):
-        assert set(CATEGORIES) == {"encoding", "hashing", "ciphers", "compression", "analysis", "text"}
+        assert set(CATEGORIES) == {
+            "encoding", "hashing", "ciphers", "compression", "analysis", "text", "crypto", "networking",
+        }
 
     def test_every_operation_id_matches_its_dict_key(self):
         for op_id, op in OPERATIONS.items():

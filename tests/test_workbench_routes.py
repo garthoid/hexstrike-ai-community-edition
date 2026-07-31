@@ -126,3 +126,60 @@ class TestRunRecipeEndpoint:
         assert body["success"] is False
         assert body["steps"][0]["operation_id"] == "base64"
         assert "error" in body["steps"][0]
+
+
+class TestSavedRecipesEndpoints:
+    def _create(self, client, name="pytest-workbench-recipe", steps=None):
+        r = client.post(
+            "/api/workbench/recipes",
+            json={"name": name, "steps": steps or [{"operation_id": "base64", "params": {"mode": "encode"}}]},
+        )
+        body = r.get_json()
+        assert body["success"] is True
+        return body["recipe"]
+
+    def test_create_then_list_then_delete(self, client):
+        recipe = self._create(client)
+        try:
+            r = client.get("/api/workbench/recipes")
+            body = r.get_json()
+            assert body["success"] is True
+            assert any(rec["recipe_id"] == recipe["recipe_id"] for rec in body["recipes"])
+        finally:
+            client.delete(f"/api/workbench/recipes/{recipe['recipe_id']}")
+
+        r = client.get(f"/api/workbench/recipes/{recipe['recipe_id']}")
+        assert r.get_json()["success"] is False
+
+    def test_create_empty_name_returns_200_with_error(self, client):
+        r = client.post("/api/workbench/recipes", json={"name": "", "steps": []})
+        assert r.status_code == 200
+        body = r.get_json()
+        assert body["success"] is False
+
+    def test_get_unknown_recipe_returns_200_not_404(self, client):
+        r = client.get("/api/workbench/recipes/does_not_exist")
+        assert r.status_code == 200
+        body = r.get_json()
+        assert body["success"] is False
+
+    def test_update_renames_and_replaces_steps(self, client):
+        recipe = self._create(client)
+        try:
+            new_steps = [{"operation_id": "rot13", "params": {}}]
+            r = client.patch(
+                f"/api/workbench/recipes/{recipe['recipe_id']}",
+                json={"name": "renamed", "steps": new_steps},
+            )
+            body = r.get_json()
+            assert body["success"] is True
+            assert body["recipe"]["name"] == "renamed"
+            assert body["recipe"]["steps"] == new_steps
+        finally:
+            client.delete(f"/api/workbench/recipes/{recipe['recipe_id']}")
+
+    def test_delete_unknown_recipe_returns_200_not_404(self, client):
+        r = client.delete("/api/workbench/recipes/does_not_exist")
+        assert r.status_code == 200
+        body = r.get_json()
+        assert body["success"] is False

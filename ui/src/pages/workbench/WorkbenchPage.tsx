@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { FlaskConical, RefreshCw, Search, ChevronDown, ChevronRight, X } from 'lucide-react'
 import { api } from '../../api'
 import type { WorkbenchOperation } from '../../api'
@@ -36,6 +36,7 @@ export default function WorkbenchPage({
   onRecipeChanged,
 }: WorkbenchPageProps) {
   const [operations, setOperations] = useState<WorkbenchOperation[]>([])
+  const [categories, setCategories] = useState<string[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [selectedId, setSelectedId] = useState<string | null>(null)
@@ -44,6 +45,9 @@ export default function WorkbenchPage({
   const [recipe, setRecipe] = usePersistentState<RecipeStep[]>('nyxstrike_workbench_recipe', [])
   const [recipeInput, setRecipeInput] = usePersistentState<string>('nyxstrike_workbench_recipe_input', '')
   const [hydrated, setHydrated] = useState(!urlRecipe)
+  const [recipePast, setRecipePast] = useState<RecipeStep[][]>([])
+  const [recipeFuture, setRecipeFuture] = useState<RecipeStep[][]>([])
+  const searchInputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
     let cancelled = false
@@ -56,6 +60,7 @@ export default function WorkbenchPage({
           return
         }
         setOperations(res.operations)
+        setCategories(res.categories)
         setSelectedId(prev => prev ?? res.operations[0]?.id ?? null)
       })
       .catch(e => !cancelled && setError(String(e)))
@@ -98,8 +103,10 @@ export default function WorkbenchPage({
       list.push(op)
       groups.set(op.category, list)
     }
-    return Array.from(groups.entries()).sort(([a], [b]) => a.localeCompare(b))
-  }, [operations, search])
+    return categories
+      .map((category): [string, WorkbenchOperation[]] => [category, groups.get(category) ?? []])
+      .filter(([, ops]) => ops.length > 0)
+  }, [operations, categories, search])
 
   const selected = operations.find(op => op.id === selectedId) ?? null
 
@@ -112,6 +119,49 @@ export default function WorkbenchPage({
     setExpanded(prev => prev.includes(category) ? prev.filter(c => c !== category) : [...prev, category])
   }
 
+  function setRecipeTracked(action: RecipeStep[] | ((prev: RecipeStep[]) => RecipeStep[])) {
+    setRecipePast(prevPast => [...prevPast.slice(-49), recipe])
+    setRecipeFuture([])
+    setRecipe(action)
+  }
+
+  function undoRecipe() {
+    if (recipePast.length === 0) return
+    const previous = recipePast[recipePast.length - 1]
+    setRecipePast(recipePast.slice(0, -1))
+    setRecipeFuture([recipe, ...recipeFuture].slice(0, 50))
+    setRecipe(previous)
+  }
+
+  function redoRecipe() {
+    if (recipeFuture.length === 0) return
+    const [next, ...rest] = recipeFuture
+    setRecipePast([...recipePast.slice(-49), recipe])
+    setRecipeFuture(rest)
+    setRecipe(next)
+  }
+
+  useEffect(() => {
+    function onKeyDown(e: KeyboardEvent) {
+      const target = e.target as HTMLElement | null
+      const isTyping = !!target && (
+        target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.tagName === 'SELECT' || target.isContentEditable
+      )
+      if (!isTyping && e.key === '/') {
+        e.preventDefault()
+        searchInputRef.current?.focus()
+        return
+      }
+      if (!isTyping && (e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z') {
+        e.preventDefault()
+        if (e.shiftKey) redoRecipe()
+        else undoRecipe()
+      }
+    }
+    window.addEventListener('keydown', onKeyDown)
+    return () => window.removeEventListener('keydown', onKeyDown)
+  }, [recipe, recipePast, recipeFuture])
+
   function addToRecipe(operation: WorkbenchOperation, params: Record<string, string>, inputValue: string) {
     const step: RecipeStep = {
       stepId: crypto.randomUUID(),
@@ -119,7 +169,7 @@ export default function WorkbenchPage({
       operationName: operation.name,
       params,
     }
-    setRecipe(prev => [...prev, step])
+    setRecipeTracked(prev => [...prev, step])
     if (inputValue.trim()) {
       setRecipeInput(prev => (prev.trim() ? prev : inputValue))
     }
@@ -144,8 +194,9 @@ export default function WorkbenchPage({
             <div className="workbench-search">
               <Search size={13} className="workbench-search-icon" />
               <input
+                ref={searchInputRef}
                 className="workbench-search-input"
-                placeholder="Find an operation…"
+                placeholder="Find an operation… (/)"
                 value={search}
                 onChange={e => setSearch(e.target.value)}
               />
@@ -198,7 +249,7 @@ export default function WorkbenchPage({
           <aside className="workbench-recipe-col">
             <RecipePanel
               recipe={recipe}
-              setRecipe={setRecipe}
+              setRecipe={setRecipeTracked}
               operations={operations}
               input={recipeInput}
               setInput={setRecipeInput}

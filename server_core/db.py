@@ -20,6 +20,7 @@ Current tables:
   chat_messages       — individual messages within a chat thread
   credentials         — discovered credentials/hashes/keys/tokens (loot)
   loot                — non-credential artifacts (flags, files, configs)
+  workbench_recipes   — named/saved Workbench operation chains
 """
 
 import json
@@ -118,6 +119,7 @@ class NyxStrikeDB:
     # ── Auto-migrations ───────────────────────────────────────────────────────
     self._migrate_chat_messages_stats()
     self._migrate_credentials_loot()
+    self._migrate_workbench_recipes()
 
     logger.debug("db: tables verified")
 
@@ -183,6 +185,24 @@ class NyxStrikeDB:
       """)
       self._conn.commit()
       logger.debug("db: credentials/loot tables verified")
+
+  def _migrate_workbench_recipes(self) -> None:
+    """Create the workbench_recipes table if missing (existing DBs)."""
+    with self._lock:
+      self._conn.executescript("""
+        CREATE TABLE IF NOT EXISTS workbench_recipes (
+          id         INTEGER PRIMARY KEY AUTOINCREMENT,
+          recipe_id  TEXT UNIQUE NOT NULL,
+          name       TEXT NOT NULL,
+          steps      TEXT NOT NULL DEFAULT '[]',
+          created_at TEXT DEFAULT (datetime('now')),
+          updated_at TEXT DEFAULT (datetime('now'))
+        );
+
+        CREATE INDEX IF NOT EXISTS idx_workbench_recipes_name ON workbench_recipes(name);
+      """)
+      self._conn.commit()
+      logger.debug("db: workbench_recipes table verified")
 
   # ── Internal helpers ─────────────────────────────────────────────────────────
 
@@ -627,6 +647,69 @@ class NyxStrikeDB:
     """Delete a loot record."""
     with self._lock:
       self._conn.execute("DELETE FROM loot WHERE loot_id = ?", (loot_id,))
+      self._conn.commit()
+
+  # ── Workbench recipes ────────────────────────────────────────────────────────
+
+  def add_workbench_recipe(self, name: str, steps: List[Dict[str, Any]]) -> str:
+    """Insert a saved Workbench recipe and return its recipe_id."""
+    import uuid
+    recipe_id = f"recipe_{uuid.uuid4().hex[:8]}"
+    with self._lock:
+      self._conn.execute(
+        "INSERT INTO workbench_recipes (recipe_id, name, steps) VALUES (?, ?, ?)",
+        (recipe_id, name, json.dumps(steps)),
+      )
+      self._conn.commit()
+    return recipe_id
+
+  def get_workbench_recipe(self, recipe_id: str) -> Optional[Dict[str, Any]]:
+    """Return a single saved recipe or None."""
+    with self._lock:
+      cur = self._conn.execute("SELECT * FROM workbench_recipes WHERE recipe_id = ?", (recipe_id,))
+      row = self._row_to_dict(cur.fetchone())
+    if row and isinstance(row.get("steps"), str):
+      try:
+        row["steps"] = json.loads(row["steps"])
+      except Exception:
+        row["steps"] = []
+    return row
+
+  def list_workbench_recipes(self) -> List[Dict[str, Any]]:
+    """Return all saved recipes, most recently updated first."""
+    with self._lock:
+      cur = self._conn.execute("SELECT * FROM workbench_recipes ORDER BY updated_at DESC")
+      rows = self._rows_to_list(cur.fetchall())
+    for row in rows:
+      if isinstance(row.get("steps"), str):
+        try:
+          row["steps"] = json.loads(row["steps"])
+        except Exception:
+          row["steps"] = []
+    return rows
+
+  def update_workbench_recipe(self, recipe_id: str, **fields: Any) -> None:
+    """Update allowed fields on a saved recipe."""
+    allowed = {"name", "steps"}
+    updates = {k: v for k, v in fields.items() if k in allowed}
+    if not updates:
+      return
+    if "steps" in updates and isinstance(updates["steps"], list):
+      updates["steps"] = json.dumps(updates["steps"])
+    updates["updated_at"] = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
+    set_clause = ", ".join(f"{k} = ?" for k in updates)
+    values = list(updates.values()) + [recipe_id]
+    with self._lock:
+      self._conn.execute(
+        f"UPDATE workbench_recipes SET {set_clause} WHERE recipe_id = ?",
+        values,
+      )
+      self._conn.commit()
+
+  def delete_workbench_recipe(self, recipe_id: str) -> None:
+    """Delete a saved recipe."""
+    with self._lock:
+      self._conn.execute("DELETE FROM workbench_recipes WHERE recipe_id = ?", (recipe_id,))
       self._conn.commit()
 
   # ── Lifecycle ─────────────────────────────────────────────────────────────────

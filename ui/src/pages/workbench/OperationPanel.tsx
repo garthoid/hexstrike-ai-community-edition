@@ -60,8 +60,15 @@ export function OperationPanel({ operation, onAddToRecipe }: OperationPanelProps
 
   const canRun = !loading && operation.params.every(p => !p.required || values[p.name]?.trim())
 
+  function handleKeyDown(e: React.KeyboardEvent) {
+    if ((e.ctrlKey || e.metaKey) && e.key === 'Enter' && canRun) {
+      e.preventDefault()
+      void run()
+    }
+  }
+
   return (
-    <div className="workbench-op-body">
+    <div className="workbench-op-body" onKeyDown={handleKeyDown}>
       <div className="section-header">
         <h3>{operation.name}</h3>
       </div>
@@ -99,6 +106,7 @@ export function OperationPanel({ operation, onAddToRecipe }: OperationPanelProps
                   onChange={e => setValue(p.name, e.target.value)}
                 />
               )}
+              {p.help_text && <span className="workbench-field-hint">{p.help_text}</span>}
             </label>
           ))}
         </div>

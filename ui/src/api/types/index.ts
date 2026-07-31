@@ -143,8 +143,12 @@ export type {
   WorkbenchOperation,
   WorkbenchOperationsResponse,
   WorkbenchParamSpec,
+  WorkbenchRecipeDeleteResponse,
+  WorkbenchRecipeMutationResponse,
+  WorkbenchRecipesResponse,
   WorkbenchRecipeStepInput,
   WorkbenchRecipeStepResult,
   WorkbenchRunRecipeResponse,
   WorkbenchRunResponse,
+  WorkbenchSavedRecipe,
 } from './workbench';

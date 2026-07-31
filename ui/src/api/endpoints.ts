@@ -79,6 +79,9 @@ import type {
   PluginToggleResponse,
   ServerRestartResponse,
   WorkbenchOperationsResponse,
+  WorkbenchRecipeDeleteResponse,
+  WorkbenchRecipeMutationResponse,
+  WorkbenchRecipesResponse,
   WorkbenchRecipeStepInput,
   WorkbenchRunRecipeResponse,
   WorkbenchRunResponse,
@@ -336,4 +339,11 @@ export const api = {
     post<WorkbenchRunResponse>(`/api/workbench/run/${operationId}`, params),
   workbenchRunRecipe: (input: string, steps: WorkbenchRecipeStepInput[]) =>
     post<WorkbenchRunRecipeResponse>('/api/workbench/run-recipe', { input, steps }),
+  workbenchRecipes: () => get<WorkbenchRecipesResponse>('/api/workbench/recipes'),
+  createWorkbenchRecipe: (name: string, steps: WorkbenchRecipeStepInput[]) =>
+    post<WorkbenchRecipeMutationResponse>('/api/workbench/recipes', { name, steps }),
+  updateWorkbenchRecipe: (recipeId: string, payload: { name?: string; steps?: WorkbenchRecipeStepInput[] }) =>
+    patch<WorkbenchRecipeMutationResponse>(`/api/workbench/recipes/${recipeId}`, payload),
+  deleteWorkbenchRecipe: (recipeId: string) =>
+    del<WorkbenchRecipeDeleteResponse>(`/api/workbench/recipes/${recipeId}`),
 };

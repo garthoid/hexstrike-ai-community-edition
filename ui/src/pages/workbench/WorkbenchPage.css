@@ -246,6 +246,12 @@
   color: var(--text-dim);
 }
 
+.workbench-field-hint {
+  font-size: 10.5px;
+  color: var(--text-dim);
+  font-style: italic;
+}
+
 .workbench-field textarea.workbench-textarea {
   min-height: 80px;
 }
@@ -309,7 +315,63 @@
   font-style: italic;
 }
 
+/* ── Saved Recipes ────────────────────────────────────────────────────────── */
+
+.workbench-saved-recipes {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--border);
+}
+
+.workbench-saved-recipes-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.workbench-saved-recipe-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--bg-card2);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 5px 8px;
+  font-size: 12px;
+}
+
+.workbench-saved-recipe-row--edit { background: none; border: none; padding: 0; }
+
+.workbench-saved-recipe-name {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--text-h);
+}
+
+.workbench-saved-recipe-actions {
+  display: flex;
+  gap: 2px;
+  flex-shrink: 0;
+}
+
 /* ── Recipe ───────────────────────────────────────────────────────────────── */
+
+.workbench-recipe-step-drag {
+  display: flex;
+  align-items: center;
+  color: var(--text-dim);
+  cursor: grab;
+  flex-shrink: 0;
+}
+
+.workbench-recipe-step-wrap--dragging {
+  opacity: 0.4;
+}
 
 .workbench-recipe-steps {
   list-style: none;

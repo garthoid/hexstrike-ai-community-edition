@@ -1,5 +1,6 @@
 from flask import Blueprint, jsonify, request
 
+from server_core.singletons import db
 from server_core.workbench.registry import CATEGORIES, get_operation, list_operations
 
 api_workbench_bp = Blueprint("api_workbench", __name__)
@@ -63,3 +64,52 @@ def workbench_run_recipe():
         step_results.append({"operation_id": operation_id, "name": op.name, "output": current})
 
     return jsonify({"success": True, "output": current, "steps": step_results})
+
+
+@api_workbench_bp.route("/api/workbench/recipes", methods=["GET"])
+def workbench_list_recipes():
+    return jsonify({"success": True, "recipes": db.list_workbench_recipes()})
+
+
+@api_workbench_bp.route("/api/workbench/recipes", methods=["POST"])
+def workbench_create_recipe():
+    body = request.get_json(silent=True) or {}
+    name = (body.get("name") or "").strip()
+    if not name:
+        return jsonify({"success": False, "error": "Recipe name must not be empty"})
+    steps = body.get("steps") or []
+    recipe_id = db.add_workbench_recipe(name, steps)
+    return jsonify({"success": True, "recipe": db.get_workbench_recipe(recipe_id)})
+
+
+@api_workbench_bp.route("/api/workbench/recipes/<recipe_id>", methods=["GET"])
+def workbench_get_recipe(recipe_id: str):
+    recipe = db.get_workbench_recipe(recipe_id)
+    if recipe is None:
+        return jsonify({"success": False, "error": f"Unknown recipe: {recipe_id}"})
+    return jsonify({"success": True, "recipe": recipe})
+
+
+@api_workbench_bp.route("/api/workbench/recipes/<recipe_id>", methods=["PATCH"])
+def workbench_update_recipe(recipe_id: str):
+    if db.get_workbench_recipe(recipe_id) is None:
+        return jsonify({"success": False, "error": f"Unknown recipe: {recipe_id}"})
+    body = request.get_json(silent=True) or {}
+    fields = {}
+    if "name" in body:
+        name = (body.get("name") or "").strip()
+        if not name:
+            return jsonify({"success": False, "error": "Recipe name must not be empty"})
+        fields["name"] = name
+    if "steps" in body:
+        fields["steps"] = body.get("steps") or []
+    db.update_workbench_recipe(recipe_id, **fields)
+    return jsonify({"success": True, "recipe": db.get_workbench_recipe(recipe_id)})
+
+
+@api_workbench_bp.route("/api/workbench/recipes/<recipe_id>", methods=["DELETE"])
+def workbench_delete_recipe(recipe_id: str):
+    if db.get_workbench_recipe(recipe_id) is None:
+        return jsonify({"success": False, "error": f"Unknown recipe: {recipe_id}"})
+    db.delete_workbench_recipe(recipe_id)
+    return jsonify({"success": True})

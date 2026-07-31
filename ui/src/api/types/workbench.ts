@@ -48,3 +48,28 @@ export interface WorkbenchRunRecipeResponse {
   steps?: WorkbenchRecipeStepResult[];
   error?: string;
 }
+
+export interface WorkbenchSavedRecipe {
+  recipe_id: string;
+  name: string;
+  steps: WorkbenchRecipeStepInput[];
+  created_at: string;
+  updated_at: string;
+}
+
+export interface WorkbenchRecipesResponse {
+  success: boolean;
+  recipes: WorkbenchSavedRecipe[];
+  error?: string;
+}
+
+export interface WorkbenchRecipeMutationResponse {
+  success: boolean;
+  recipe?: WorkbenchSavedRecipe;
+  error?: string;
+}
+
+export interface WorkbenchRecipeDeleteResponse {
+  success: boolean;
+  error?: string;
+}

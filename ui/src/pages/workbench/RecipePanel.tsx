@@ -1,8 +1,11 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import type { Dispatch, SetStateAction } from 'react'
-import { ArrowUp, ArrowDown, X, Play, RefreshCw, Copy, Check, Workflow, Pencil } from 'lucide-react'
+import {
+  ArrowUp, ArrowDown, X, Play, RefreshCw, Copy, Check, Workflow, Pencil,
+  Save, FolderOpen, Trash2, GripVertical,
+} from 'lucide-react'
 import { api } from '../../api'
-import type { WorkbenchOperation, WorkbenchRecipeStepResult } from '../../api'
+import type { WorkbenchOperation, WorkbenchRecipeStepResult, WorkbenchSavedRecipe } from '../../api'
 
 export interface RecipeStep {
   stepId: string
@@ -27,6 +30,34 @@ export function RecipePanel({ recipe, setRecipe, operations, input, setInput }: 
   const [copied, setCopied] = useState(false)
   const [editingId, setEditingId] = useState<string | null>(null)
   const [editValues, setEditValues] = useState<Record<string, string>>({})
+  const [dragIndex, setDragIndex] = useState<number | null>(null)
+
+  const [savedRecipes, setSavedRecipes] = useState<WorkbenchSavedRecipe[]>([])
+  const [savedLoading, setSavedLoading] = useState(false)
+  const [savedError, setSavedError] = useState<string | null>(null)
+  const [savingAs, setSavingAs] = useState(false)
+  const [saveAsName, setSaveAsName] = useState('')
+  const [renamingRecipeId, setRenamingRecipeId] = useState<string | null>(null)
+  const [renameDraft, setRenameDraft] = useState('')
+
+  function loadSavedRecipes() {
+    setSavedLoading(true)
+    setSavedError(null)
+    api.workbenchRecipes()
+      .then(res => {
+        if (!res.success) {
+          setSavedError('Failed to load saved recipes.')
+          return
+        }
+        setSavedRecipes(res.recipes)
+      })
+      .catch(e => setSavedError(String(e)))
+      .finally(() => setSavedLoading(false))
+  }
+
+  useEffect(() => {
+    loadSavedRecipes()
+  }, [])
 
   function move(index: number, dir: -1 | 1) {
     setRecipe(prev => {
@@ -34,6 +65,16 @@ export function RecipePanel({ recipe, setRecipe, operations, input, setInput }: 
       const target = index + dir
       if (target < 0 || target >= next.length) return prev
       ;[next[index], next[target]] = [next[target], next[index]]
+      return next
+    })
+  }
+
+  function reorder(from: number, to: number) {
+    if (from === to) return
+    setRecipe(prev => {
+      const next = [...prev]
+      const [moved] = next.splice(from, 1)
+      next.splice(to, 0, moved)
       return next
     })
   }
@@ -88,6 +129,77 @@ export function RecipePanel({ recipe, setRecipe, operations, input, setInput }: 
     }).catch(() => {})
   }
 
+  function startSaveAs() {
+    setSaveAsName('')
+    setSavingAs(true)
+  }
+
+  function cancelSaveAs() {
+    setSavingAs(false)
+  }
+
+  async function confirmSaveAs() {
+    const name = saveAsName.trim()
+    if (!name) return
+    const res = await api.createWorkbenchRecipe(
+      name,
+      recipe.map(s => ({ operation_id: s.operationId, params: s.params }))
+    )
+    if (res.success) {
+      setSavingAs(false)
+      loadSavedRecipes()
+    } else {
+      setSavedError(res.error ?? 'Failed to save recipe.')
+    }
+  }
+
+  function loadSavedRecipe(saved: WorkbenchSavedRecipe) {
+    const loaded = saved.steps
+      .map((s): RecipeStep | null => {
+        const operation = operations.find(op => op.id === s.operation_id)
+        if (!operation) return null
+        return {
+          stepId: crypto.randomUUID(),
+          operationId: s.operation_id,
+          operationName: operation.name,
+          params: (s.params ?? {}) as Record<string, string>,
+        }
+      })
+      .filter((s): s is RecipeStep => s !== null)
+    setRecipe(loaded)
+    setEditingId(null)
+  }
+
+  function startRenameRecipe(saved: WorkbenchSavedRecipe) {
+    setRenamingRecipeId(saved.recipe_id)
+    setRenameDraft(saved.name)
+  }
+
+  function cancelRenameRecipe() {
+    setRenamingRecipeId(null)
+  }
+
+  async function confirmRenameRecipe(recipeId: string) {
+    const name = renameDraft.trim()
+    if (!name) return
+    const res = await api.updateWorkbenchRecipe(recipeId, { name })
+    if (res.success) {
+      setRenamingRecipeId(null)
+      loadSavedRecipes()
+    } else {
+      setSavedError(res.error ?? 'Failed to rename recipe.')
+    }
+  }
+
+  async function deleteSavedRecipe(recipeId: string) {
+    const res = await api.deleteWorkbenchRecipe(recipeId)
+    if (res.success) {
+      loadSavedRecipes()
+    } else {
+      setSavedError(res.error ?? 'Failed to delete recipe.')
+    }
+  }
+
   return (
     <section className={`workbench-recipe${recipe.length > 0 ? ' section' : ''}`}>
       {recipe.length > 0 && (
@@ -96,6 +208,78 @@ export function RecipePanel({ recipe, setRecipe, operations, input, setInput }: 
         </div>
       )}
       <div className="workbench-op-content">
+        <div className="workbench-saved-recipes">
+          <div className="workbench-saved-recipes-header">
+            <span className="workbench-field-label"><FolderOpen size={12} style={{ marginRight: 4, verticalAlign: -2 }} />Saved Recipes</span>
+            {recipe.length > 0 && !savingAs && (
+              <button className="icon-btn" onClick={startSaveAs} title="Save current recipe">
+                <Save size={12} />
+              </button>
+            )}
+          </div>
+
+          {savingAs && (
+            <div className="workbench-saved-recipe-row workbench-saved-recipe-row--edit">
+              <input
+                className="input input-full mono"
+                placeholder="Recipe name…"
+                value={saveAsName}
+                autoFocus
+                onChange={e => setSaveAsName(e.target.value)}
+                onKeyDown={e => {
+                  if (e.key === 'Enter') void confirmSaveAs()
+                  if (e.key === 'Escape') cancelSaveAs()
+                }}
+              />
+              <button className="icon-btn" onClick={() => void confirmSaveAs()} title="Confirm"><Check size={12} /></button>
+              <button className="icon-btn" onClick={cancelSaveAs} title="Cancel"><X size={12} /></button>
+            </div>
+          )}
+
+          {savedLoading && <div className="workbench-panel-empty-hint">Loading…</div>}
+          {savedError && <div className="verify-error">{savedError}</div>}
+
+          {!savedLoading && savedRecipes.length === 0 && !savingAs && (
+            <div className="workbench-panel-empty-hint">No saved recipes yet.</div>
+          )}
+
+          {savedRecipes.map(saved => (
+            <div key={saved.recipe_id} className="workbench-saved-recipe-row">
+              {renamingRecipeId === saved.recipe_id ? (
+                <>
+                  <input
+                    className="input input-full mono"
+                    value={renameDraft}
+                    autoFocus
+                    onChange={e => setRenameDraft(e.target.value)}
+                    onKeyDown={e => {
+                      if (e.key === 'Enter') void confirmRenameRecipe(saved.recipe_id)
+                      if (e.key === 'Escape') cancelRenameRecipe()
+                    }}
+                  />
+                  <button className="icon-btn" onClick={() => void confirmRenameRecipe(saved.recipe_id)} title="Confirm"><Check size={12} /></button>
+                  <button className="icon-btn" onClick={cancelRenameRecipe} title="Cancel"><X size={12} /></button>
+                </>
+              ) : (
+                <>
+                  <span className="workbench-saved-recipe-name mono" title={saved.name}>{saved.name}</span>
+                  <span className="workbench-saved-recipe-actions">
+                    <button className="icon-btn" onClick={() => loadSavedRecipe(saved)} title="Load into working recipe">
+                      <FolderOpen size={12} />
+                    </button>
+                    <button className="icon-btn" onClick={() => startRenameRecipe(saved)} title="Rename">
+                      <Pencil size={12} />
+                    </button>
+                    <button className="icon-btn" onClick={() => void deleteSavedRecipe(saved.recipe_id)} title="Delete">
+                      <Trash2 size={12} />
+                    </button>
+                  </span>
+                </>
+              )}
+            </div>
+          ))}
+        </div>
+
         {recipe.length === 0 ? (
           <div className="workbench-panel-empty">
             <Workflow size={28} color="var(--text-dim)" />
@@ -111,8 +295,23 @@ export function RecipePanel({ recipe, setRecipe, operations, input, setInput }: 
               const editableParams = operation?.params.filter(p => p.name !== 'input') ?? []
               const isEditing = editingId === step.stepId
               return (
-                <li key={step.stepId} className="workbench-recipe-step-wrap">
+                <li
+                  key={step.stepId}
+                  className={`workbench-recipe-step-wrap${dragIndex === i ? ' workbench-recipe-step-wrap--dragging' : ''}`}
+                  draggable
+                  onDragStart={() => setDragIndex(i)}
+                  onDragOver={e => e.preventDefault()}
+                  onDrop={e => {
+                    e.preventDefault()
+                    if (dragIndex !== null) reorder(dragIndex, i)
+                    setDragIndex(null)
+                  }}
+                  onDragEnd={() => setDragIndex(null)}
+                >
                   <div className="workbench-recipe-step">
+                    <span className="workbench-recipe-step-drag" title="Drag to reorder">
+                      <GripVertical size={12} />
+                    </span>
                     <span className="workbench-recipe-step-index">{i + 1}</span>
                     <span className="workbench-recipe-step-name">{step.operationName}</span>
                     {Object.keys(step.params).length > 0 && (
@@ -172,6 +371,7 @@ export function RecipePanel({ recipe, setRecipe, operations, input, setInput }: 
                               onChange={e => setEditValues(prev => ({ ...prev, [p.name]: e.target.value }))}
                             />
                           )}
+                          {p.help_text && <span className="workbench-field-hint">{p.help_text}</span>}
                         </label>
                       ))}
                       <div className="workbench-actions">
@@ -198,6 +398,12 @@ export function RecipePanel({ recipe, setRecipe, operations, input, setInput }: 
                 className="input workbench-textarea mono"
                 value={input}
                 onChange={e => setInput(e.target.value)}
+                onKeyDown={e => {
+                  if ((e.ctrlKey || e.metaKey) && e.key === 'Enter' && !loading) {
+                    e.preventDefault()
+                    void run()
+                  }
+                }}
                 rows={3}
               />
             </label>

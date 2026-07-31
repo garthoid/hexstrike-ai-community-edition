@@ -101,6 +101,19 @@ class TestHtmlEntities:
         assert run("html_entities", input=encoded, mode="decode")["output"] == original
 
 
+class TestBase85:
+    def test_round_trip(self):
+        encoded = run("base85", input="round trip me", mode="encode")["output"]
+        assert run("base85", input=encoded, mode="decode")["output"] == "round trip me"
+
+    def test_default_mode_is_encode(self):
+        assert run("base85", input="hello") == run("base85", input="hello", mode="encode")
+
+    def test_decode_invalid_raises(self):
+        with pytest.raises(ValueError):
+            run("base85", input="\x01\x02not valid", mode="decode")
+
+
 # ---------------------------------------------------------------------------
 # hashing
 # ---------------------------------------------------------------------------
@@ -187,6 +200,70 @@ class TestXorCipher:
 
 
 # ---------------------------------------------------------------------------
+# crypto
+# ---------------------------------------------------------------------------
+
+class TestAesCipher:
+    def test_gcm_round_trip(self):
+        encrypted = run("aes_cipher", input="hello world", mode="encrypt", cipher_mode="GCM", passphrase="secret")["output"]
+        result = run("aes_cipher", input=encrypted, mode="decrypt", cipher_mode="GCM", passphrase="secret")["output"]
+        assert result == "hello world"
+
+    def test_cbc_round_trip(self):
+        encrypted = run("aes_cipher", input="hello world", mode="encrypt", cipher_mode="CBC", passphrase="secret")["output"]
+        result = run("aes_cipher", input=encrypted, mode="decrypt", cipher_mode="CBC", passphrase="secret")["output"]
+        assert result == "hello world"
+
+    def test_wrong_passphrase_raises(self):
+        encrypted = run("aes_cipher", input="hello", mode="encrypt", cipher_mode="GCM", passphrase="right")["output"]
+        with pytest.raises(ValueError):
+            run("aes_cipher", input=encrypted, mode="decrypt", cipher_mode="GCM", passphrase="wrong")
+
+    def test_empty_passphrase_raises(self):
+        with pytest.raises(ValueError):
+            run("aes_cipher", input="hello", mode="encrypt", passphrase="")
+
+    def test_successive_encrypts_differ(self):
+        # random IV/nonce each time, so ciphertext should not be deterministic
+        a = run("aes_cipher", input="hello", mode="encrypt", cipher_mode="GCM", passphrase="k")["output"]
+        b = run("aes_cipher", input="hello", mode="encrypt", cipher_mode="GCM", passphrase="k")["output"]
+        assert a != b
+
+
+class TestRsaKeypair:
+    def test_generates_pem_private_and_public_key(self):
+        output = run("rsa_keypair", key_size="2048")["output"]
+        assert "-----BEGIN PRIVATE KEY-----" in output
+        assert "-----END PRIVATE KEY-----" in output
+        assert "-----BEGIN PUBLIC KEY-----" in output
+
+    def test_unsupported_key_size_raises(self):
+        with pytest.raises(ValueError):
+            run("rsa_keypair", key_size="1024")
+
+
+class TestRsaCipher:
+    def _keypair(self):
+        output = run("rsa_keypair", key_size="2048")["output"]
+        priv, _, pub = output.partition("-----END PRIVATE KEY-----")
+        return priv + "-----END PRIVATE KEY-----", pub.strip()
+
+    def test_round_trip(self):
+        priv, pub = self._keypair()
+        encrypted = run("rsa_cipher", input="top secret", mode="encrypt", pem_key=pub)["output"]
+        result = run("rsa_cipher", input=encrypted, mode="decrypt", pem_key=priv)["output"]
+        assert result == "top secret"
+
+    def test_invalid_pem_key_raises(self):
+        with pytest.raises(ValueError):
+            run("rsa_cipher", input="hi", mode="encrypt", pem_key="not a pem key")
+
+    def test_empty_pem_key_raises(self):
+        with pytest.raises(ValueError):
+            run("rsa_cipher", input="hi", mode="encrypt", pem_key="")
+
+
+# ---------------------------------------------------------------------------
 # compression
 # ---------------------------------------------------------------------------
 
@@ -258,6 +335,46 @@ class TestJwtDecode:
     def test_bad_segment_raises(self):
         with pytest.raises(ValueError):
             run("jwt_decode", input="not-base64.not-base64.sig")
+
+
+class TestRegexExtract:
+    def test_finds_all_matches(self):
+        assert run("regex_extract", input="a1 b2 c3", pattern=r"\d+")["output"] == "1\n2\n3"
+
+    def test_ignorecase_flag(self):
+        assert run("regex_extract", input="Hello hello", pattern="hello", flags="i")["output"] == "Hello\nhello"
+
+    def test_no_matches_returns_empty(self):
+        assert run("regex_extract", input="abc", pattern=r"\d+")["output"] == ""
+
+    def test_empty_pattern_raises(self):
+        with pytest.raises(ValueError):
+            run("regex_extract", input="abc", pattern="")
+
+    def test_invalid_pattern_raises(self):
+        with pytest.raises(ValueError):
+            run("regex_extract", input="abc", pattern="(")
+
+
+class TestTimestampConvert:
+    def test_epoch_to_iso(self):
+        assert run("timestamp_convert", input="0", mode="epoch_to_iso")["output"] == "1970-01-01T00:00:00Z"
+
+    def test_iso_to_epoch(self):
+        assert run("timestamp_convert", input="1970-01-01T00:00:00Z", mode="iso_to_epoch")["output"] == "0.0"
+
+    def test_round_trip(self):
+        iso = run("timestamp_convert", input="1700000000", mode="epoch_to_iso")["output"]
+        epoch = run("timestamp_convert", input=iso, mode="iso_to_epoch")["output"]
+        assert float(epoch) == 1700000000.0
+
+    def test_non_numeric_epoch_raises(self):
+        with pytest.raises(ValueError):
+            run("timestamp_convert", input="not-a-number", mode="epoch_to_iso")
+
+    def test_invalid_iso_raises(self):
+        with pytest.raises(ValueError):
+            run("timestamp_convert", input="not-a-date", mode="iso_to_epoch")
 
 
 # ---------------------------------------------------------------------------
@@ -346,3 +463,58 @@ class TestRandomStringGenerate:
     def test_unsupported_charset_raises(self):
         with pytest.raises(ValueError):
             run("random_string_generate", length=8, charset="not-a-real-charset")
+
+
+class TestCaseConvert:
+    def test_upper(self):
+        assert run("case_convert", input="hello", mode="upper")["output"] == "HELLO"
+
+    def test_snake_case(self):
+        assert run("case_convert", input="Hello World", mode="snake_case")["output"] == "hello_world"
+
+    def test_camel_case(self):
+        assert run("case_convert", input="hello world", mode="camelCase")["output"] == "helloWorld"
+
+    def test_unsupported_mode_raises(self):
+        with pytest.raises(ValueError):
+            run("case_convert", input="hello", mode="kebab_case")
+
+
+class TestLineTools:
+    def test_sort(self):
+        assert run("line_tools", input="b\na\nc", mode="sort")["output"] == "a\nb\nc"
+
+    def test_unique_preserves_first_occurrence_order(self):
+        assert run("line_tools", input="b\na\nb\nc", mode="unique")["output"] == "b\na\nc"
+
+    def test_reverse(self):
+        assert run("line_tools", input="a\nb\nc", mode="reverse")["output"] == "c\nb\na"
+
+    def test_unsupported_mode_raises(self):
+        with pytest.raises(ValueError):
+            run("line_tools", input="a\nb", mode="shuffle")
+
+
+# ---------------------------------------------------------------------------
+# networking
+# ---------------------------------------------------------------------------
+
+class TestCidrCalculator:
+    def test_computes_network_details(self):
+        output = run("cidr_calculator", input="10.0.0.0/24")["output"]
+        assert "Network: 10.0.0.0" in output
+        assert "Broadcast: 10.0.0.255" in output
+        assert "Usable hosts: 254" in output
+
+    def test_non_strict_host_bits_set(self):
+        # strict=False means a host address with bits set is normalized to its network
+        output = run("cidr_calculator", input="10.0.0.5/24")["output"]
+        assert "Network: 10.0.0.0" in output
+
+    def test_empty_input_raises(self):
+        with pytest.raises(ValueError):
+            run("cidr_calculator", input="")
+
+    def test_invalid_cidr_raises(self):
+        with pytest.raises(ValueError):
+            run("cidr_calculator", input="not-a-cidr")
