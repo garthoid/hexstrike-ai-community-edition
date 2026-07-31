@@ -1,8 +1,8 @@
 import { useState } from 'react'
 import type { Dispatch, SetStateAction } from 'react'
-import { ArrowUp, ArrowDown, X, Play, RefreshCw, Copy, Check, Workflow } from 'lucide-react'
+import { ArrowUp, ArrowDown, X, Play, RefreshCw, Copy, Check, Workflow, Pencil } from 'lucide-react'
 import { api } from '../../api'
-import type { WorkbenchRecipeStepResult } from '../../api'
+import type { WorkbenchOperation, WorkbenchRecipeStepResult } from '../../api'
 
 export interface RecipeStep {
   stepId: string
@@ -14,15 +14,18 @@ export interface RecipeStep {
 interface RecipePanelProps {
   recipe: RecipeStep[]
   setRecipe: Dispatch<SetStateAction<RecipeStep[]>>
+  operations: WorkbenchOperation[]
 }
 
-export function RecipePanel({ recipe, setRecipe }: RecipePanelProps) {
+export function RecipePanel({ recipe, setRecipe, operations }: RecipePanelProps) {
   const [input, setInput] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [output, setOutput] = useState<string | null>(null)
   const [steps, setSteps] = useState<WorkbenchRecipeStepResult[]>([])
   const [copied, setCopied] = useState(false)
+  const [editingId, setEditingId] = useState<string | null>(null)
+  const [editValues, setEditValues] = useState<Record<string, string>>({})
 
   function move(index: number, dir: -1 | 1) {
     setRecipe(prev => {
@@ -36,6 +39,21 @@ export function RecipePanel({ recipe, setRecipe }: RecipePanelProps) {
 
   function remove(index: number) {
     setRecipe(prev => prev.filter((_, i) => i !== index))
+    setEditingId(prev => (recipe[index]?.stepId === prev ? null : prev))
+  }
+
+  function startEdit(step: RecipeStep) {
+    setEditingId(step.stepId)
+    setEditValues({ ...step.params })
+  }
+
+  function cancelEdit() {
+    setEditingId(null)
+  }
+
+  function saveEdit(stepId: string) {
+    setRecipe(prev => prev.map(s => (s.stepId === stepId ? { ...s, params: editValues } : s)))
+    setEditingId(null)
   }
 
   async function run() {
@@ -81,28 +99,87 @@ export function RecipePanel({ recipe, setRecipe }: RecipePanelProps) {
           </div>
         ) : (
           <ol className="workbench-recipe-steps">
-            {recipe.map((step, i) => (
-              <li key={step.stepId} className="workbench-recipe-step">
-                <span className="workbench-recipe-step-index">{i + 1}</span>
-                <span className="workbench-recipe-step-name">{step.operationName}</span>
-                {Object.keys(step.params).length > 0 && (
-                  <span className="workbench-recipe-step-params mono">
-                    {Object.entries(step.params).map(([k, v]) => `${k}=${v}`).join(', ')}
-                  </span>
-                )}
-                <span className="workbench-recipe-step-actions">
-                  <button className="icon-btn" onClick={() => move(i, -1)} disabled={i === 0} title="Move up">
-                    <ArrowUp size={12} />
-                  </button>
-                  <button className="icon-btn" onClick={() => move(i, 1)} disabled={i === recipe.length - 1} title="Move down">
-                    <ArrowDown size={12} />
-                  </button>
-                  <button className="icon-btn" onClick={() => remove(i)} title="Remove">
-                    <X size={12} />
-                  </button>
-                </span>
-              </li>
-            ))}
+            {recipe.map((step, i) => {
+              const operation = operations.find(op => op.id === step.operationId)
+              const editableParams = operation?.params.filter(p => p.name !== 'input') ?? []
+              const isEditing = editingId === step.stepId
+              return (
+                <li key={step.stepId} className="workbench-recipe-step-wrap">
+                  <div className="workbench-recipe-step">
+                    <span className="workbench-recipe-step-index">{i + 1}</span>
+                    <span className="workbench-recipe-step-name">{step.operationName}</span>
+                    {Object.keys(step.params).length > 0 && (
+                      <span className="workbench-recipe-step-params mono">
+                        {Object.entries(step.params).map(([k, v]) => `${k}=${v}`).join(', ')}
+                      </span>
+                    )}
+                    <span className="workbench-recipe-step-actions">
+                      <button className="icon-btn" onClick={() => move(i, -1)} disabled={i === 0} title="Move up">
+                        <ArrowUp size={12} />
+                      </button>
+                      <button className="icon-btn" onClick={() => move(i, 1)} disabled={i === recipe.length - 1} title="Move down">
+                        <ArrowDown size={12} />
+                      </button>
+                      {editableParams.length > 0 && (
+                        <button
+                          className="icon-btn"
+                          onClick={() => (isEditing ? cancelEdit() : startEdit(step))}
+                          title="Edit settings"
+                        >
+                          <Pencil size={12} />
+                        </button>
+                      )}
+                      <button className="icon-btn" onClick={() => remove(i)} title="Remove">
+                        <X size={12} />
+                      </button>
+                    </span>
+                  </div>
+
+                  {isEditing && (
+                    <div className="workbench-recipe-step-edit">
+                      {editableParams.map(p => (
+                        <label key={p.name} className="workbench-field">
+                          <span className="workbench-field-label">{p.label}</span>
+                          {p.type === 'select' ? (
+                            <select
+                              className="verify-input workbench-select"
+                              value={editValues[p.name] ?? ''}
+                              onChange={e => setEditValues(prev => ({ ...prev, [p.name]: e.target.value }))}
+                            >
+                              {(p.choices ?? []).map(choice => (
+                                <option key={choice} value={choice}>{choice}</option>
+                              ))}
+                            </select>
+                          ) : p.type === 'textarea' ? (
+                            <textarea
+                              className="verify-input mono workbench-textarea"
+                              value={editValues[p.name] ?? ''}
+                              onChange={e => setEditValues(prev => ({ ...prev, [p.name]: e.target.value }))}
+                              rows={2}
+                            />
+                          ) : (
+                            <input
+                              className="verify-input mono"
+                              type={p.type === 'number' ? 'number' : 'text'}
+                              value={editValues[p.name] ?? ''}
+                              onChange={e => setEditValues(prev => ({ ...prev, [p.name]: e.target.value }))}
+                            />
+                          )}
+                        </label>
+                      ))}
+                      <div className="workbench-actions">
+                        <button className="workbench-secondary-btn" onClick={() => saveEdit(step.stepId)}>
+                          <Check size={13} /> Save
+                        </button>
+                        <button className="workbench-secondary-btn" onClick={cancelEdit}>
+                          <X size={13} /> Cancel
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </li>
+              )
+            })}
           </ol>
         )}
 

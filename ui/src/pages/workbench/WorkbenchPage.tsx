@@ -13,8 +13,8 @@ export default function WorkbenchPage() {
   const [error, setError] = useState<string | null>(null)
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [search, setSearch] = useState('')
-  const [collapsed, setCollapsed] = usePersistentState<string[]>('nyxstrike_workbench_collapsed_categories', [])
-  const [recipe, setRecipe] = useState<RecipeStep[]>([])
+  const [expanded, setExpanded] = usePersistentState<string[]>('nyxstrike_workbench_expanded_categories', [])
+  const [recipe, setRecipe] = usePersistentState<RecipeStep[]>('nyxstrike_workbench_recipe', [])
 
   useEffect(() => {
     let cancelled = false
@@ -28,9 +28,6 @@ export default function WorkbenchPage() {
         }
         setOperations(res.operations)
         setSelectedId(prev => prev ?? res.operations[0]?.id ?? null)
-        if (localStorage.getItem('nyxstrike_workbench_collapsed_categories') == null) {
-          setCollapsed(Array.from(new Set(res.operations.map(op => op.category))))
-        }
       })
       .catch(e => !cancelled && setError(String(e)))
       .finally(() => !cancelled && setLoading(false))
@@ -54,7 +51,7 @@ export default function WorkbenchPage() {
   const selected = operations.find(op => op.id === selectedId) ?? null
 
   function toggleCategory(category: string) {
-    setCollapsed(prev => prev.includes(category) ? prev.filter(c => c !== category) : [...prev, category])
+    setExpanded(prev => prev.includes(category) ? prev.filter(c => c !== category) : [...prev, category])
   }
 
   function addToRecipe(operation: WorkbenchOperation, params: Record<string, string>) {
@@ -107,7 +104,7 @@ export default function WorkbenchPage() {
             </div>
 
             {byCategory.map(([category, ops]) => {
-              const isCollapsed = search.trim() ? false : collapsed.includes(category)
+              const isCollapsed = search.trim() ? false : !expanded.includes(category)
               return (
                 <div key={category} className="workbench-category">
                   <button className="workbench-category-header" onClick={() => toggleCategory(category)}>
@@ -138,7 +135,7 @@ export default function WorkbenchPage() {
                 : <div className="workbench-empty">Select an operation to get started.</div>}
             </section>
 
-            <RecipePanel recipe={recipe} setRecipe={setRecipe} />
+            <RecipePanel recipe={recipe} setRecipe={setRecipe} operations={operations} />
           </div>
         </div>
       )}

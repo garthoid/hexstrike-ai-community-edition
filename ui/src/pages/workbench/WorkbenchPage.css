@@ -169,8 +169,6 @@
   color: var(--text-dim);
 }
 
-/* Override .verify-input's shared background with the dedicated input-field variable —
-   scoped to Workbench only; other pages still use .verify-input's card background. */
 .workbench-field input.verify-input,
 .workbench-field textarea.verify-input,
 .workbench-field select.verify-input {
@@ -185,6 +183,12 @@
 
 .workbench-select {
   width: fit-content;
+  cursor: pointer;
+}
+
+.workbench-select option {
+  background: var(--bg-input);
+  color: var(--text-h);
 }
 
 .workbench-actions {
@@ -294,6 +298,17 @@
   gap: 2px;
   margin-left: auto;
   flex-shrink: 0;
+}
+
+.workbench-recipe-step-edit {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 6px 0 0 26px;
+  padding: 10px;
+  background: var(--bg-card2);
+  border: 1px solid var(--border);
+  border-radius: 6px;
 }
 
 .workbench-recipe-trace {
