@@ -26,6 +26,7 @@ export interface WorkbenchOperationsResponse {
 export interface WorkbenchRunResponse {
   success: boolean;
   output?: string;
+  output_mime?: string;
   note?: string;
   error?: string;
 }
@@ -38,13 +39,23 @@ export interface WorkbenchRecipeStepInput {
 export interface WorkbenchRecipeStepResult {
   operation_id: string;
   name?: string;
+  input?: string;
   output?: string;
+  output_mime?: string;
   error?: string;
+}
+
+export interface WorkbenchRunRecipeOptions {
+  continueOnError?: boolean;
+  stopAfterStepIndex?: number;
+  stepInputOverrides?: Record<number, string>;
 }
 
 export interface WorkbenchRunRecipeResponse {
   success: boolean;
   output?: string;
+  output_mime?: string;
+  has_errors?: boolean;
   steps?: WorkbenchRecipeStepResult[];
   error?: string;
 }

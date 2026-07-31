@@ -3,7 +3,7 @@
 ## 1.8.0 - exploitotter (NEXT)
 
 ### Workbench
-- New "Workbench" page — local data-transform toolkit (encoding, hashing, ciphers, compression, analysis), no target or network required. Chain operations into a recipe, piping one output into the next.
+- New "Workbench" page — local data-transform toolkit (encoding, hashing, ciphers, compression, analysis and more), no target or network required. Chain operations into a recipe, piping one output into the next.
 
 ### Evidence chain-of-custody
 - Every tool run is now hash-chained (tamper-evident), including one-off runs made outside any session.

@@ -2,11 +2,13 @@ import { useEffect, useState } from 'react'
 import type { Dispatch, SetStateAction } from 'react'
 import {
   ArrowUp, ArrowDown, X, Play, RefreshCw, Copy, Check, Workflow, Pencil,
-  Save, FolderOpen, Trash2, GripVertical,
+  Save, FolderOpen, Trash2, GripVertical, SkipForward, Sparkles, Download,
 } from 'lucide-react'
 import { api } from '../../api'
 import type { WorkbenchOperation, WorkbenchRecipeStepResult, WorkbenchSavedRecipe } from '../../api'
 import { useDragReorder } from '../../hooks/useDragReorder'
+import { usePersistentState } from '../../hooks/usePersistentState'
+import { downloadWorkbenchOutput } from './fileIO'
 
 export interface RecipeStep {
   stepId: string
@@ -27,10 +29,16 @@ export function RecipePanel({ recipe, setRecipe, operations, input, setInput }: 
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [output, setOutput] = useState<string | null>(null)
+  const [outputMime, setOutputMime] = useState<string | undefined>(undefined)
+  const [hasErrors, setHasErrors] = useState(false)
   const [steps, setSteps] = useState<WorkbenchRecipeStepResult[]>([])
   const [copied, setCopied] = useState(false)
   const [editingId, setEditingId] = useState<string | null>(null)
   const [editValues, setEditValues] = useState<Record<string, string>>({})
+  const [continueOnError, setContinueOnError] = usePersistentState('nyxstrike_workbench_continue_on_error', false)
+  const [overrideEditingId, setOverrideEditingId] = useState<string | null>(null)
+  const [overrideDraft, setOverrideDraft] = useState('')
+  const [stepOverrides, setStepOverrides] = useState<Record<number, string>>({})
 
   const [savedRecipes, setSavedRecipes] = useState<WorkbenchSavedRecipe[]>([])
   const [savedLoading, setSavedLoading] = useState(false)
@@ -67,6 +75,7 @@ export function RecipePanel({ recipe, setRecipe, operations, input, setInput }: 
       ;[next[index], next[target]] = [next[target], next[index]]
       return next
     })
+    setStepOverrides({})
   }
 
   function reorderByStepId(draggedStepId: string, targetStepId: string) {
@@ -79,6 +88,7 @@ export function RecipePanel({ recipe, setRecipe, operations, input, setInput }: 
       next.splice(toIndex, 0, moved)
       return next
     })
+    setStepOverrides({})
   }
 
   const { dragHandlers, dragClassName } = useDragReorder(reorderByStepId)
@@ -86,6 +96,7 @@ export function RecipePanel({ recipe, setRecipe, operations, input, setInput }: 
   function remove(index: number) {
     setRecipe(prev => prev.filter((_, i) => i !== index))
     setEditingId(prev => (recipe[index]?.stepId === prev ? null : prev))
+    setStepOverrides({})
   }
 
   function startEdit(step: RecipeStep) {
@@ -102,27 +113,62 @@ export function RecipePanel({ recipe, setRecipe, operations, input, setInput }: 
     setEditingId(null)
   }
 
-  async function run() {
+  async function runRecipe(stopAfterStepIndex?: number) {
     setLoading(true)
     setError(null)
     setOutput(null)
+    setOutputMime(undefined)
+    setHasErrors(false)
     setSteps([])
     try {
       const res = await api.workbenchRunRecipe(
         input,
-        recipe.map(s => ({ operation_id: s.operationId, params: s.params }))
+        recipe.map(s => ({ operation_id: s.operationId, params: s.params })),
+        { continueOnError, stopAfterStepIndex, stepInputOverrides: stepOverrides }
       )
       setSteps(res.steps ?? [])
+      setHasErrors(!!res.has_errors)
       if (!res.success) {
         setError(res.error ?? 'Recipe failed.')
         return
       }
       setOutput(res.output ?? '')
+      setOutputMime(res.output_mime)
     } catch (e) {
       setError(String(e))
     } finally {
       setLoading(false)
     }
+  }
+
+  function run() {
+    return runRecipe(undefined)
+  }
+
+  function runToStep(index: number) {
+    return runRecipe(index)
+  }
+
+  function startOverride(index: number, current: string) {
+    setOverrideEditingId(String(index))
+    setOverrideDraft(stepOverrides[index] ?? current)
+  }
+
+  function cancelOverride() {
+    setOverrideEditingId(null)
+  }
+
+  function saveOverride(index: number) {
+    setStepOverrides(prev => ({ ...prev, [index]: overrideDraft }))
+    setOverrideEditingId(null)
+  }
+
+  function clearOverride(index: number) {
+    setStepOverrides(prev => {
+      const next = { ...prev }
+      delete next[index]
+      return next
+    })
   }
 
   function copyOutput() {
@@ -315,6 +361,11 @@ export function RecipePanel({ recipe, setRecipe, operations, input, setInput }: 
                         {Object.entries(step.params).map(([k, v]) => `${k}=${v}`).join(', ')}
                       </span>
                     )}
+                    {stepOverrides[i] !== undefined && (
+                      <span className="workbench-recipe-step-override-badge" title="This step's input is overridden for the next run">
+                        input overridden
+                      </span>
+                    )}
                     <span className="workbench-recipe-step-actions">
                       <button className="icon-btn" onClick={() => move(i, -1)} disabled={i === 0} title="Move up">
                         <ArrowUp size={12} />
@@ -331,11 +382,48 @@ export function RecipePanel({ recipe, setRecipe, operations, input, setInput }: 
                           <Pencil size={12} />
                         </button>
                       )}
+                      <button
+                        className="icon-btn"
+                        onClick={() => (overrideEditingId === String(i) ? cancelOverride() : startOverride(i, ''))}
+                        title="Override this step's input for debugging"
+                      >
+                        <Sparkles size={12} />
+                      </button>
+                      <button className="icon-btn" onClick={() => void runToStep(i)} disabled={loading} title="Run recipe up to this step">
+                        <SkipForward size={12} />
+                      </button>
                       <button className="icon-btn" onClick={() => remove(i)} title="Remove">
                         <X size={12} />
                       </button>
                     </span>
                   </div>
+
+                  {overrideEditingId === String(i) && (
+                    <div className="workbench-recipe-step-edit">
+                      <label className="workbench-field">
+                        <span className="workbench-field-label">Override input for this step</span>
+                        <textarea
+                          className="input workbench-textarea mono"
+                          value={overrideDraft}
+                          onChange={e => setOverrideDraft(e.target.value)}
+                          rows={2}
+                        />
+                      </label>
+                      <div className="workbench-actions">
+                        <button className="workbench-secondary-btn" onClick={() => saveOverride(i)}>
+                          <Check size={13} /> Save Override
+                        </button>
+                        <button className="workbench-secondary-btn" onClick={cancelOverride}>
+                          <X size={13} /> Cancel
+                        </button>
+                        {stepOverrides[i] !== undefined && (
+                          <button className="workbench-secondary-btn" onClick={() => clearOverride(i)}>
+                            <X size={13} /> Clear
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  )}
 
                   {isEditing && (
                     <div className="workbench-recipe-step-edit">
@@ -404,6 +492,15 @@ export function RecipePanel({ recipe, setRecipe, operations, input, setInput }: 
               />
             </label>
 
+            <label className="workbench-continue-toggle">
+              <input
+                type="checkbox"
+                checked={continueOnError}
+                onChange={e => setContinueOnError(e.target.checked)}
+              />
+              Continue on error
+            </label>
+
             <div className="workbench-actions">
               <button className="workbench-run-btn" onClick={run} disabled={loading}>
                 {loading ? <><RefreshCw size={13} className="spin" /> Running…</> : <><Play size={13} /> Run Recipe</>}
@@ -411,16 +508,35 @@ export function RecipePanel({ recipe, setRecipe, operations, input, setInput }: 
             </div>
 
             {error && <div className="verify-error">{error}</div>}
+            {hasErrors && !error && (
+              <div className="workbench-note">Some steps failed and were skipped (continue-on-error was on) — see the trace below.</div>
+            )}
 
             {steps.length > 0 && (
               <ol className="workbench-recipe-trace">
-                {steps.map((s, i) => (
-                  <li key={i} className={s.error ? 'workbench-recipe-trace-error' : ''}>
-                    <span className="workbench-recipe-step-index">{i + 1}</span>
-                    <span className="workbench-field-label">{s.name ?? s.operation_id}</span>
-                    <span className="mono">{s.error ? `Error: ${s.error}` : s.output}</span>
-                  </li>
-                ))}
+                {steps.map((s, i) => {
+                  const traceClass = s.error
+                    ? (continueOnError ? 'workbench-recipe-trace-error-continued' : 'workbench-recipe-trace-error')
+                    : ''
+                  return (
+                    <li key={i} className={traceClass}>
+                      <span className="workbench-recipe-step-index">{i + 1}</span>
+                      <span className="workbench-field-label">{s.name ?? s.operation_id}</span>
+                      {s.input !== undefined && (
+                        <span className="workbench-recipe-trace-input mono">in: {s.input.length > 120 ? `${s.input.slice(0, 120)}…` : s.input}</span>
+                      )}
+                      {s.error ? (
+                        <span className="mono">
+                          {continueOnError ? 'Skipped (chain continued): ' : 'Error: '}{s.error}
+                        </span>
+                      ) : s.output_mime?.startsWith('image/') ? (
+                        <img className="workbench-recipe-trace-image-thumb" src={`data:${s.output_mime},${s.output}`} alt="Step output" />
+                      ) : (
+                        <span className="mono">{s.output}</span>
+                      )}
+                    </li>
+                  )
+                })}
               </ol>
             )}
 
@@ -428,11 +544,24 @@ export function RecipePanel({ recipe, setRecipe, operations, input, setInput }: 
               <div className="workbench-output-wrap">
                 <div className="workbench-output-header">
                   <span className="workbench-field-label">Final Output</span>
-                  <button className="icon-btn" onClick={copyOutput} title="Copy output">
-                    {copied ? <Check size={12} color="var(--green)" /> : <Copy size={12} />}
-                  </button>
+                  <span className="workbench-output-actions">
+                    <button className="icon-btn" onClick={copyOutput} title="Copy output">
+                      {copied ? <Check size={12} color="var(--green)" /> : <Copy size={12} />}
+                    </button>
+                    <button
+                      className="icon-btn"
+                      onClick={() => downloadWorkbenchOutput(output, outputMime, 'recipe')}
+                      title="Download output"
+                    >
+                      <Download size={12} />
+                    </button>
+                  </span>
                 </div>
-                <pre className="verify-result-output mono">{output}</pre>
+                {outputMime?.startsWith('image/') ? (
+                  <img className="workbench-output-image" src={`data:${outputMime},${output}`} alt="Recipe output" />
+                ) : (
+                  <pre className="verify-result-output mono">{output}</pre>
+                )}
               </div>
             )}
           </>

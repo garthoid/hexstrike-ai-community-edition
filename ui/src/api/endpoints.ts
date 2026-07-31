@@ -83,6 +83,7 @@ import type {
   WorkbenchRecipeMutationResponse,
   WorkbenchRecipesResponse,
   WorkbenchRecipeStepInput,
+  WorkbenchRunRecipeOptions,
   WorkbenchRunRecipeResponse,
   WorkbenchRunResponse,
 } from './types';
@@ -337,8 +338,14 @@ export const api = {
   workbenchOperations: () => get<WorkbenchOperationsResponse>('/api/workbench/operations'),
   workbenchRun: (operationId: string, params: Record<string, unknown>) =>
     post<WorkbenchRunResponse>(`/api/workbench/run/${operationId}`, params),
-  workbenchRunRecipe: (input: string, steps: WorkbenchRecipeStepInput[]) =>
-    post<WorkbenchRunRecipeResponse>('/api/workbench/run-recipe', { input, steps }),
+  workbenchRunRecipe: (input: string, steps: WorkbenchRecipeStepInput[], options?: WorkbenchRunRecipeOptions) =>
+    post<WorkbenchRunRecipeResponse>('/api/workbench/run-recipe', {
+      input,
+      steps,
+      continue_on_error: options?.continueOnError,
+      stop_after_step_index: options?.stopAfterStepIndex,
+      step_input_overrides: options?.stepInputOverrides,
+    }),
   workbenchRecipes: () => get<WorkbenchRecipesResponse>('/api/workbench/recipes'),
   createWorkbenchRecipe: (name: string, steps: WorkbenchRecipeStepInput[]) =>
     post<WorkbenchRecipeMutationResponse>('/api/workbench/recipes', { name, steps }),

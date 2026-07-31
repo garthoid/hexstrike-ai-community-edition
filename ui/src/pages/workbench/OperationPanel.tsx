@@ -1,7 +1,8 @@
 import { useState } from 'react'
-import { Copy, Check, Play, RefreshCw, ListPlus } from 'lucide-react'
+import { Copy, Check, Play, RefreshCw, ListPlus, Download } from 'lucide-react'
 import { api } from '../../api'
 import type { WorkbenchOperation } from '../../api'
+import { downloadWorkbenchOutput } from './fileIO'
 
 interface OperationPanelProps {
   operation: WorkbenchOperation
@@ -15,6 +16,7 @@ export function OperationPanel({ operation, onAddToRecipe }: OperationPanelProps
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [output, setOutput] = useState<string | null>(null)
+  const [outputMime, setOutputMime] = useState<string | undefined>(undefined)
   const [note, setNote] = useState<string | null>(null)
   const [copied, setCopied] = useState(false)
   const [added, setAdded] = useState(false)
@@ -27,6 +29,7 @@ export function OperationPanel({ operation, onAddToRecipe }: OperationPanelProps
     setLoading(true)
     setError(null)
     setOutput(null)
+    setOutputMime(undefined)
     setNote(null)
     try {
       const res = await api.workbenchRun(operation.id, values)
@@ -35,6 +38,7 @@ export function OperationPanel({ operation, onAddToRecipe }: OperationPanelProps
         return
       }
       setOutput(res.output ?? '')
+      setOutputMime(res.output_mime)
       setNote(res.note ?? null)
     } catch (e) {
       setError(String(e))
@@ -126,11 +130,24 @@ export function OperationPanel({ operation, onAddToRecipe }: OperationPanelProps
           <div className="workbench-output-wrap">
             <div className="workbench-output-header">
               <span className="workbench-field-label">Output</span>
-              <button className="icon-btn" onClick={copyOutput} title="Copy output">
-                {copied ? <Check size={12} color="var(--green)" /> : <Copy size={12} />}
-              </button>
+              <span className="workbench-output-actions">
+                <button className="icon-btn" onClick={copyOutput} title="Copy output">
+                  {copied ? <Check size={12} color="var(--green)" /> : <Copy size={12} />}
+                </button>
+                <button
+                  className="icon-btn"
+                  onClick={() => downloadWorkbenchOutput(output, outputMime, operation.id)}
+                  title="Download output"
+                >
+                  <Download size={12} />
+                </button>
+              </span>
             </div>
-            <pre className="verify-result-output mono">{output}</pre>
+            {outputMime?.startsWith('image/') ? (
+              <img className="workbench-output-image" src={`data:${outputMime},${output}`} alt="Operation output" />
+            ) : (
+              <pre className="verify-result-output mono">{output}</pre>
+            )}
             {note && <div className="workbench-note">{note}</div>}
           </div>
         )}

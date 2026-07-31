@@ -148,6 +148,7 @@ export type {
   WorkbenchRecipesResponse,
   WorkbenchRecipeStepInput,
   WorkbenchRecipeStepResult,
+  WorkbenchRunRecipeOptions,
   WorkbenchRunRecipeResponse,
   WorkbenchRunResponse,
   WorkbenchSavedRecipe,

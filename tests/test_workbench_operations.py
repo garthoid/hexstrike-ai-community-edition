@@ -199,6 +199,32 @@ class TestXorCipher:
         assert recovered.decode("utf-8") == "secret message"
 
 
+class TestVigenereCipher:
+    def test_known_vector(self):
+        assert run("vigenere_cipher", input="ATTACKATDAWN", key="LEMON", mode="encrypt")["output"] == "LXFOPVEFRNHR"
+
+    def test_round_trip(self):
+        encrypted = run("vigenere_cipher", input="Hello, World!", key="key", mode="encrypt")["output"]
+        decrypted = run("vigenere_cipher", input=encrypted, key="key", mode="decrypt")["output"]
+        assert decrypted == "Hello, World!"
+
+    def test_case_preserved(self):
+        result = run("vigenere_cipher", input="HELLO", key="abc", mode="encrypt")["output"]
+        assert result.isupper()
+
+    def test_non_letters_pass_through(self):
+        result = run("vigenere_cipher", input="a-1!", key="b", mode="encrypt")["output"]
+        assert result == "b-1!"
+
+    def test_key_without_letters_raises(self):
+        with pytest.raises(ValueError):
+            run("vigenere_cipher", input="abc", key="123", mode="encrypt")
+
+    def test_unsupported_mode_raises(self):
+        with pytest.raises(ValueError):
+            run("vigenere_cipher", input="abc", key="key", mode="rot13")
+
+
 # ---------------------------------------------------------------------------
 # crypto
 # ---------------------------------------------------------------------------
@@ -335,6 +361,89 @@ class TestJwtDecode:
     def test_bad_segment_raises(self):
         with pytest.raises(ValueError):
             run("jwt_decode", input="not-base64.not-base64.sig")
+
+
+class TestJwtEncode:
+    def test_round_trips_with_decode(self):
+        token = run(
+            "jwt_encode",
+            input='{"sub": "1234567890", "name": "John Doe"}',
+            secret="secret",
+            algorithm="HS256",
+        )["output"]
+        decoded = run("jwt_decode", input=token)["output"]
+        assert '"name": "John Doe"' in decoded
+
+    def test_alg_none_produces_empty_signature_segment(self):
+        result = run("jwt_encode", input='{"sub": "1"}', algorithm="none")
+        header, payload, signature = result["output"].split(".")
+        assert signature == ""
+        assert "alg=none" in result["note"]
+
+    def test_bad_payload_json_raises(self):
+        with pytest.raises(ValueError):
+            run("jwt_encode", input="not json", secret="secret")
+
+    def test_unsupported_algorithm_raises(self):
+        with pytest.raises(ValueError):
+            run("jwt_encode", input="{}", secret="secret", algorithm="RS256")
+
+
+class TestJwtVerify:
+    def test_valid_secret_verifies(self):
+        token = run("jwt_encode", input='{"sub": "1"}', secret="secret", algorithm="HS256")["output"]
+        result = run("jwt_verify", input=token, secret="secret", algorithm="HS256")
+        assert '"valid": true' in result["output"]
+
+    def test_wrong_secret_does_not_verify_but_still_succeeds(self):
+        token = run("jwt_encode", input='{"sub": "1"}', secret="secret", algorithm="HS256")["output"]
+        result = run("jwt_verify", input=token, secret="wrong-secret", algorithm="HS256")
+        assert '"valid": false' in result["output"]
+
+    def test_malformed_token_raises(self):
+        with pytest.raises(ValueError):
+            run("jwt_verify", input="not.a.jwt.at.all", secret="secret")
+
+
+def _self_signed_pem(common_name: str = "example.com") -> str:
+    import datetime
+
+    from cryptography import x509
+    from cryptography.hazmat.primitives import hashes, serialization
+    from cryptography.hazmat.primitives.asymmetric import rsa
+    from cryptography.x509.oid import NameOID
+
+    key = rsa.generate_private_key(public_exponent=65537, key_size=2048)
+    subject = issuer = x509.Name([x509.NameAttribute(NameOID.COMMON_NAME, common_name)])
+    now = datetime.datetime.now(datetime.timezone.utc)
+    cert = (
+        x509.CertificateBuilder()
+        .subject_name(subject)
+        .issuer_name(issuer)
+        .public_key(key.public_key())
+        .serial_number(x509.random_serial_number())
+        .not_valid_before(now)
+        .not_valid_after(now + datetime.timedelta(days=365))
+        .add_extension(x509.SubjectAlternativeName([x509.DNSName(common_name)]), critical=False)
+        .sign(key, hashes.SHA256())
+    )
+    return cert.public_bytes(serialization.Encoding.PEM).decode("ascii")
+
+
+class TestX509Parse:
+    def test_parses_subject_issuer_and_validity(self):
+        output = run("x509_parse", input=_self_signed_pem("example.com"))["output"]
+        assert "example.com" in output
+        assert "not_valid_before" in output
+        assert "not_valid_after" in output
+
+    def test_includes_subject_alternative_names(self):
+        output = run("x509_parse", input=_self_signed_pem("sub.example.com"))["output"]
+        assert "sub.example.com" in output
+
+    def test_malformed_pem_raises(self):
+        with pytest.raises(ValueError):
+            run("x509_parse", input="not a certificate")
 
 
 class TestRegexExtract:
@@ -480,6 +589,32 @@ class TestCaseConvert:
             run("case_convert", input="hello", mode="kebab_case")
 
 
+class TestColorConvert:
+    def test_hex_to_rgb(self):
+        result = run("color_convert", input="#ff0000", from_format="hex", to_format="rgb")["output"]
+        assert result == "rgb(255, 0, 0)"
+
+    def test_shorthand_hex_to_rgb(self):
+        result = run("color_convert", input="#f00", from_format="hex", to_format="rgb")["output"]
+        assert result == "rgb(255, 0, 0)"
+
+    def test_rgb_to_hsl(self):
+        result = run("color_convert", input="rgb(255, 0, 0)", from_format="rgb", to_format="hsl")["output"]
+        assert result == "hsl(0, 100%, 50%)"
+
+    def test_hsl_to_hex(self):
+        result = run("color_convert", input="hsl(0, 100%, 50%)", from_format="hsl", to_format="hex")["output"]
+        assert result == "#ff0000"
+
+    def test_invalid_hex_raises(self):
+        with pytest.raises(ValueError):
+            run("color_convert", input="not-a-color", from_format="hex", to_format="rgb")
+
+    def test_out_of_range_rgb_raises(self):
+        with pytest.raises(ValueError):
+            run("color_convert", input="rgb(999, 0, 0)", from_format="rgb", to_format="hex")
+
+
 class TestLineTools:
     def test_sort(self):
         assert run("line_tools", input="b\na\nc", mode="sort")["output"] == "a\nb\nc"
@@ -518,3 +653,30 @@ class TestCidrCalculator:
     def test_invalid_cidr_raises(self):
         with pytest.raises(ValueError):
             run("cidr_calculator", input="not-a-cidr")
+
+
+# ---------------------------------------------------------------------------
+# compare
+# ---------------------------------------------------------------------------
+
+class TestTextDiff:
+    def test_identical_texts_produce_no_diff_lines(self):
+        output = run("text_diff", input="a\nb\nc", compare="a\nb\nc", mode="unified")["output"]
+        assert output == ""
+
+    def test_added_line_shown_in_unified_diff(self):
+        output = run("text_diff", input="a\nb", compare="a\nb\nc", mode="unified")["output"]
+        assert "+c" in output
+
+    def test_removed_line_shown_in_unified_diff(self):
+        output = run("text_diff", input="a\nb\nc", compare="a\nb", mode="unified")["output"]
+        assert "-c" in output
+
+    def test_line_by_line_mode_distinguishes_differing_pair(self):
+        output = run("text_diff", input="a\nb", compare="a\nc", mode="line-by-line")["output"]
+        assert "- b" in output
+        assert "+ c" in output
+
+    def test_unsupported_mode_raises(self):
+        with pytest.raises(ValueError):
+            run("text_diff", input="a", compare="b", mode="side-by-side")

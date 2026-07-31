@@ -308,6 +308,27 @@
   justify-content: space-between;
 }
 
+.workbench-output-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.workbench-output-image {
+  max-width: 100%;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: var(--bg-card2);
+}
+
+.workbench-recipe-trace-image-thumb {
+  max-height: 48px;
+  max-width: 100%;
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  vertical-align: middle;
+}
+
 .workbench-note {
   margin-top: 8px;
   font-size: 11.5px;
@@ -441,6 +462,8 @@
 
 .workbench-recipe-trace li {
   display: flex;
+  flex-wrap: wrap;
+  align-items: center;
   gap: 8px;
   padding: 4px 8px;
   border-left: 2px solid var(--border);
@@ -449,4 +472,35 @@
 .workbench-recipe-trace-error {
   border-left-color: var(--red, #e06c75) !important;
   color: var(--red, #e06c75);
+}
+
+.workbench-recipe-trace-error-continued {
+  border-left-color: var(--amber) !important;
+  color: var(--amber);
+}
+
+.workbench-recipe-trace-input {
+  flex-basis: 100%;
+  color: var(--text-dim);
+  opacity: 0.8;
+}
+
+.workbench-recipe-step-override-badge {
+  font-size: 10px;
+  color: var(--amber);
+  background: var(--amber-dim);
+  border: 1px solid var(--amber);
+  border-radius: 10px;
+  padding: 1px 6px;
+  flex-shrink: 0;
+}
+
+.workbench-continue-toggle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11.5px;
+  color: var(--text-dim);
+  cursor: pointer;
+  margin-top: 8px;
 }

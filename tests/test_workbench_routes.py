@@ -127,6 +127,85 @@ class TestRunRecipeEndpoint:
         assert body["steps"][0]["operation_id"] == "base64"
         assert "error" in body["steps"][0]
 
+    def test_trace_includes_input_field(self, client):
+        r = client.post(
+            "/api/workbench/run-recipe",
+            json={"input": "hello", "steps": [{"operation_id": "rot13", "params": {}}]},
+        )
+        body = r.get_json()
+        assert body["steps"][0]["input"] == "hello"
+
+    def test_continue_on_error_false_still_aborts(self, client):
+        r = client.post(
+            "/api/workbench/run-recipe",
+            json={
+                "input": "not valid base64 at all!!!",
+                "continue_on_error": False,
+                "steps": [
+                    {"operation_id": "base64", "params": {"mode": "decode"}},
+                    {"operation_id": "rot13", "params": {}},
+                ],
+            },
+        )
+        body = r.get_json()
+        assert body["success"] is False
+        assert len(body["steps"]) == 1
+
+    def test_continue_on_error_records_failure_and_keeps_going(self, client):
+        r = client.post(
+            "/api/workbench/run-recipe",
+            json={
+                "input": "not valid base64 at all!!!",
+                "continue_on_error": True,
+                "steps": [
+                    {"operation_id": "base64", "params": {"mode": "decode"}},
+                    {"operation_id": "rot13", "params": {}},
+                ],
+            },
+        )
+        assert r.status_code == 200
+        body = r.get_json()
+        assert body["success"] is True
+        assert body["has_errors"] is True
+        assert "error" in body["steps"][0]
+        # rot13 must have received the pre-failure value ("not valid base64 at all!!!"), not empty string
+        assert body["steps"][1]["input"] == "not valid base64 at all!!!"
+        assert body["output"] == body["steps"][1]["output"]
+
+    def test_stop_after_step_index_returns_partial_trace(self, client):
+        r = client.post(
+            "/api/workbench/run-recipe",
+            json={
+                "input": "hello",
+                "stop_after_step_index": 0,
+                "steps": [
+                    {"operation_id": "base64", "params": {"mode": "encode"}},
+                    {"operation_id": "rot13", "params": {}},
+                ],
+            },
+        )
+        body = r.get_json()
+        assert body["success"] is True
+        assert len(body["steps"]) == 1
+        assert body["output"] == "aGVsbG8="
+
+    def test_step_input_overrides_replaces_only_that_step(self, client):
+        r = client.post(
+            "/api/workbench/run-recipe",
+            json={
+                "input": "hello",
+                "step_input_overrides": {"1": "OVERRIDDEN"},
+                "steps": [
+                    {"operation_id": "base64", "params": {"mode": "encode"}},
+                    {"operation_id": "rot13", "params": {}},
+                ],
+            },
+        )
+        body = r.get_json()
+        assert body["success"] is True
+        assert body["steps"][1]["input"] == "OVERRIDDEN"
+        assert body["output"] != "hello"
+
 
 class TestSavedRecipesEndpoints:
     def _create(self, client, name="pytest-workbench-recipe", steps=None):

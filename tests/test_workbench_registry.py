@@ -23,7 +23,7 @@ class TestDiscovery:
 
     def test_expected_categories_present(self):
         assert set(CATEGORIES) == {
-            "encoding", "hashing", "ciphers", "compression", "analysis", "text", "crypto", "networking",
+            "encoding", "hashing", "ciphers", "compression", "analysis", "text", "crypto", "networking", "compare",
         }
 
     def test_every_operation_id_matches_its_dict_key(self):

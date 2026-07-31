@@ -38,32 +38,65 @@ def workbench_run(operation_id: str):
 def workbench_run_recipe():
     body = request.get_json(silent=True) or {}
     current = body.get("input", "")
+    current_mime = None
+    continue_on_error = bool(body.get("continue_on_error", False))
+    stop_after = body.get("stop_after_step_index")
+    overrides = body.get("step_input_overrides") or {}
     step_results = []
+    has_errors = False
 
-    for step in body.get("steps") or []:
+    steps = body.get("steps") or []
+    if stop_after is not None:
+        steps = steps[: int(stop_after) + 1]
+
+    def record_failure(operation_id, name, step_input, error):
+        entry = {"operation_id": operation_id, "input": step_input, "error": error}
+        if name is not None:
+            entry["name"] = name
+        step_results.append(entry)
+
+    for i, step in enumerate(steps):
         operation_id = step.get("operation_id")
         op = get_operation(operation_id)
+        step_input = overrides.get(str(i), current)
+
         if op is None:
             error = f"Unknown operation: {operation_id}"
-            step_results.append({"operation_id": operation_id, "error": error})
-            return jsonify({"success": False, "error": error, "steps": step_results})
+            record_failure(operation_id, None, step_input, error)
+            if not continue_on_error:
+                return jsonify({"success": False, "error": error, "steps": step_results})
+            has_errors = True
+            continue
 
         params = dict(step.get("params") or {})
-        params["input"] = current
+        params["input"] = step_input
         try:
             result = op.run(params)
         except ValueError as e:
-            step_results.append({"operation_id": operation_id, "name": op.name, "error": str(e)})
-            return jsonify({"success": False, "error": str(e), "steps": step_results})
+            record_failure(operation_id, op.name, step_input, str(e))
+            if not continue_on_error:
+                return jsonify({"success": False, "error": str(e), "steps": step_results})
+            has_errors = True
+            continue
         except Exception as e:
             error = f"Operation failed: {e}"
-            step_results.append({"operation_id": operation_id, "name": op.name, "error": error})
-            return jsonify({"success": False, "error": error, "steps": step_results})
+            record_failure(operation_id, op.name, step_input, error)
+            if not continue_on_error:
+                return jsonify({"success": False, "error": error, "steps": step_results})
+            has_errors = True
+            continue
 
         current = result.get("output", "")
-        step_results.append({"operation_id": operation_id, "name": op.name, "output": current})
+        current_mime = result.get("output_mime")
+        entry = {"operation_id": operation_id, "name": op.name, "input": step_input, "output": current}
+        if current_mime:
+            entry["output_mime"] = current_mime
+        step_results.append(entry)
 
-    return jsonify({"success": True, "output": current, "steps": step_results})
+    response = {"success": True, "output": current, "steps": step_results, "has_errors": has_errors}
+    if current_mime:
+        response["output_mime"] = current_mime
+    return jsonify(response)
 
 
 @api_workbench_bp.route("/api/workbench/recipes", methods=["GET"])
