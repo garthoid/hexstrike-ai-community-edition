@@ -1,13 +1,14 @@
 import { useEffect, useState } from 'react'
 import { PanelLeftClose, PanelLeftOpen } from 'lucide-react'
 import type { Page } from './routing'
-import { NAV_ENTRIES } from './navRegistry'
+import type { NavEntry } from './navRegistry'
 import './Sidebar.css'
 
 interface SidebarProps {
   page: Page
   setPage: (page: Page) => void
   isPageEnabled: (page: Page) => boolean
+  navEntries: NavEntry[]
   collapsed: boolean
   onToggleCollapsed: () => void
   mobileOpen: boolean
@@ -37,19 +38,20 @@ export function Sidebar({
   page,
   setPage,
   isPageEnabled,
+  navEntries,
   collapsed,
   onToggleCollapsed,
   mobileOpen,
   onCloseMobile,
 }: SidebarProps) {
-  const visibleEntries = NAV_ENTRIES.filter(entry => isPageEnabled(entry.id))
+  const visibleEntries = navEntries.filter(entry => isPageEnabled(entry.id))
   const mainEntries = visibleEntries.filter(entry => entry.id !== 'settings')
   const settingsEntry = visibleEntries.find(entry => entry.id === 'settings')
   // Icon-only collapse is a desktop concept — the mobile drawer always shows full labels.
   const isMobileViewport = useIsMobileViewport()
   const effectiveCollapsed = collapsed && !isMobileViewport
 
-  function renderNavItem(entry: (typeof NAV_ENTRIES)[number]) {
+  function renderNavItem(entry: NavEntry) {
     const Icon = entry.icon
     const active = isEntryActive(entry.id, page)
     return (

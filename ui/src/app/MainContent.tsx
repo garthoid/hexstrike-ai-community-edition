@@ -9,6 +9,7 @@ import type {
 import type { RunHistoryEntry } from '../shared/types'
 import type { ThemeId } from './themes'
 import type { Page } from './routing'
+import type { PageConfig } from '../hooks/usePageVisibility'
 
 // Eagerly loaded — always visible on any page
 import { DashboardPage } from '../pages/dashboard/DashboardPage'
@@ -71,6 +72,8 @@ interface MainContentProps {
   demoCpuHistory?: unknown
   isPageEnabled: (page: Page) => boolean
   togglePage: (page: Page) => void
+  orderedPageConfigs: PageConfig[]
+  reorderPage: (draggedId: string, targetId: string) => void
 }
 
 interface MainContentProps {
@@ -154,6 +157,8 @@ export function MainContent({
   demoCpuHistory,
   isPageEnabled,
   togglePage,
+  orderedPageConfigs,
+  reorderPage,
 }: MainContentProps) {
   return (
     <main className={`main${page === 'run' || page === 'workbench' ? ' main--flush' : ''}`}>
@@ -166,6 +171,8 @@ export function MainContent({
             setReduceTextureEffects={setReduceTextureEffects}
             isPageEnabled={isPageEnabled}
             togglePage={togglePage}
+            orderedPageConfigs={orderedPageConfigs}
+            reorderPage={reorderPage}
           />
         )}
         {page === 'help' && <HelpPage />}

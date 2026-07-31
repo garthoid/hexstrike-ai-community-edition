@@ -28,7 +28,7 @@ import './App.css'
 export default function App() {
   const [demo] = useState(isDemoMode)
 
-  const { isPageEnabled, togglePage } = usePageVisibility()
+  const { isPageEnabled, togglePage, orderedPageConfigs, orderedNavEntries, reorderPage } = usePageVisibility()
   const {
     page,
     activeSessionId,
@@ -143,6 +143,7 @@ export default function App() {
             page={page}
             setPage={setPage}
             isPageEnabled={isPageEnabled}
+            navEntries={orderedNavEntries}
             collapsed={sidebarCollapsed}
             onToggleCollapsed={() => setSidebarCollapsed(v => !v)}
             mobileOpen={sidebarMobileOpen}
@@ -191,6 +192,8 @@ export default function App() {
             demoSessions={demoSessions}
             isPageEnabled={isPageEnabled}
             togglePage={togglePage}
+            orderedPageConfigs={orderedPageConfigs}
+            reorderPage={reorderPage}
             demoCpuHistory={demoCpuHistory}
           />
         </div>

@@ -306,6 +306,7 @@ select.settings-input {
 }
 
 .settings-page-tile {
+  position: relative;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
@@ -318,6 +319,21 @@ select.settings-input {
   text-align: left;
   transition: border-color 0.15s, background 0.15s, opacity 0.15s;
   color: var(--text-h);
+}
+
+.settings-page-tile-drag {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  display: flex;
+  color: var(--text-dim);
+  cursor: grab;
+  opacity: 0.5;
+  transition: opacity 0.15s;
+}
+
+.settings-page-tile:hover .settings-page-tile-drag {
+  opacity: 1;
 }
 
 .settings-page-tile--on {

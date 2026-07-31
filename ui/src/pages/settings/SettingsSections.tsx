@@ -1,10 +1,11 @@
-import { Save, Plus, Trash2, Eye, EyeOff, CheckCircle, XCircle, Loader } from 'lucide-react'
+import { Save, Plus, Trash2, Eye, EyeOff, GripVertical, CheckCircle, XCircle, Loader } from 'lucide-react'
 import { useState } from 'react'
 import type { Settings, WordlistEntry, PersonalityPreset, BinaryPathTestResponse } from '../../api'
 import type { BinaryOverrideRow } from './useSettingsData'
 import { ActionButton } from '../../components/ActionButton'
 import { CollapsibleSection } from '../../components/CollapsibleSection'
-import { PAGE_CONFIGS, ALWAYS_VISIBLE_PAGES } from '../../hooks/usePageVisibility'
+import type { PageConfig } from '../../hooks/usePageVisibility'
+import { useDragReorder } from '../../hooks/useDragReorder'
 import type { Page } from '../../app/routing'
 
 function SettingsRow({ label, value, mono, accent }: {
@@ -538,27 +539,37 @@ export function ChatSettingsSection({
 export function PageVisibilitySection({
   isPageEnabled,
   togglePage,
+  orderedPageConfigs,
+  reorderPage,
 }: {
   isPageEnabled: (page: Page) => boolean
   togglePage: (page: Page) => void
+  orderedPageConfigs: PageConfig[]
+  reorderPage: (draggedId: string, targetId: string) => void
 }) {
+  const { dragHandlers, dragClassName } = useDragReorder(reorderPage)
+
   return (
     <CollapsibleSection title="Navigation Pages">
       <p className="settings-hint-inline" style={{ margin: '1rem 0', textAlign: 'center' }}>
-        Hide pages you don't use from the navigation bar.
+        Hide pages you don't use from the navigation bar, and drag tiles to reorder them.
         Your preferences are saved in this browser only.
       </p>
       <div className="settings-page-visibility-grid">
-        {PAGE_CONFIGS.filter(({ page }) => !ALWAYS_VISIBLE_PAGES.has(page)).map(({ page, label, description }) => {
+        {orderedPageConfigs.map(({ page, label, description }) => {
           const enabled = isPageEnabled(page)
           return (
             <button
               key={page}
               type="button"
-              className={`settings-page-tile${enabled ? ' settings-page-tile--on' : ' settings-page-tile--off'}`}
+              className={dragClassName(page, `settings-page-tile${enabled ? ' settings-page-tile--on' : ' settings-page-tile--off'}`)}
               onClick={() => togglePage(page)}
               title={enabled ? `Hide ${label}` : `Show ${label}`}
+              {...dragHandlers(page)}
             >
+              <span className="settings-page-tile-drag" title="Drag to reorder">
+                <GripVertical size={12} />
+              </span>
               <span className="settings-page-tile-icon">
                 {enabled ? <Eye size={14} /> : <EyeOff size={14} />}
               </span>

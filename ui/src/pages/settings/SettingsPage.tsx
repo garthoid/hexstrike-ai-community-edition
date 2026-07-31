@@ -11,6 +11,7 @@ import {
   WordlistsSection,
 } from './SettingsSections'
 import type { Page } from '../../app/routing'
+import type { PageConfig } from '../../hooks/usePageVisibility'
 import './SettingsPage.css'
 
 export default function SettingsPage({
@@ -20,6 +21,8 @@ export default function SettingsPage({
   setReduceTextureEffects,
   isPageEnabled,
   togglePage,
+  orderedPageConfigs,
+  reorderPage,
 }: {
   themeId: ThemeId
   setThemeId: (theme: ThemeId) => void
@@ -27,6 +30,8 @@ export default function SettingsPage({
   setReduceTextureEffects: (value: boolean) => void
   isPageEnabled: (page: Page) => boolean
   togglePage: (page: Page) => void
+  orderedPageConfigs: PageConfig[]
+  reorderPage: (draggedId: string, targetId: string) => void
 }) {
   const [themeModalOpen, setThemeModalOpen] = useState(false)
 
@@ -149,6 +154,8 @@ export default function SettingsPage({
       <PageVisibilitySection
         isPageEnabled={isPageEnabled}
         togglePage={togglePage}
+        orderedPageConfigs={orderedPageConfigs}
+        reorderPage={reorderPage}
       />
 
       <RuntimeConfigSection
