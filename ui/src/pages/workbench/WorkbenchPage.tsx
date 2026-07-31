@@ -7,7 +7,34 @@ import { OperationPanel } from './OperationPanel'
 import { RecipePanel, type RecipeStep } from './RecipePanel'
 import './WorkbenchPage.css'
 
-export default function WorkbenchPage() {
+function encodeRecipe(steps: RecipeStep[]): string {
+  return JSON.stringify(steps.map(s => [s.operationId, s.params]))
+}
+
+function decodeRecipe(json: string, operations: WorkbenchOperation[]): RecipeStep[] {
+  const pairs = JSON.parse(json) as [string, Record<string, string>][]
+  return pairs
+    .map((pair): RecipeStep | null => {
+      const [operationId, params] = pair
+      const operation = operations.find(op => op.id === operationId)
+      return operation ? { stepId: crypto.randomUUID(), operationId, operationName: operation.name, params } : null
+    })
+    .filter((s): s is RecipeStep => s !== null)
+}
+
+interface WorkbenchPageProps {
+  urlOperationId?: string | null
+  onOperationSelected?: (operationId: string | null) => void
+  urlRecipe?: string | null
+  onRecipeChanged?: (encodedRecipe: string | null) => void
+}
+
+export default function WorkbenchPage({
+  urlOperationId,
+  onOperationSelected,
+  urlRecipe,
+  onRecipeChanged,
+}: WorkbenchPageProps) {
   const [operations, setOperations] = useState<WorkbenchOperation[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -15,6 +42,8 @@ export default function WorkbenchPage() {
   const [search, setSearch] = useState('')
   const [expanded, setExpanded] = usePersistentState<string[]>('nyxstrike_workbench_expanded_categories', [])
   const [recipe, setRecipe] = usePersistentState<RecipeStep[]>('nyxstrike_workbench_recipe', [])
+  const [recipeInput, setRecipeInput] = usePersistentState<string>('nyxstrike_workbench_recipe_input', '')
+  const [hydrated, setHydrated] = useState(!urlRecipe)
 
   useEffect(() => {
     let cancelled = false
@@ -34,6 +63,30 @@ export default function WorkbenchPage() {
     return () => { cancelled = true }
   }, [])
 
+  useEffect(() => {
+    if (!urlOperationId || selectedId === urlOperationId) return
+    if (operations.some(op => op.id === urlOperationId)) {
+      setSelectedId(urlOperationId)
+    }
+  }, [urlOperationId, operations, selectedId])
+
+  useEffect(() => {
+    if (hydrated || operations.length === 0) return
+    if (urlRecipe) {
+      try {
+        setRecipe(decodeRecipe(urlRecipe, operations))
+      } catch {
+        setRecipe([])
+      }
+    }
+    setHydrated(true)
+  }, [operations, hydrated, urlRecipe])
+
+  useEffect(() => {
+    if (!hydrated) return
+    onRecipeChanged?.(recipe.length > 0 ? encodeRecipe(recipe) : null)
+  }, [recipe, hydrated])
+
   const byCategory = useMemo(() => {
     const q = search.trim().toLowerCase()
     const filtered = q
@@ -50,11 +103,16 @@ export default function WorkbenchPage() {
 
   const selected = operations.find(op => op.id === selectedId) ?? null
 
+  function selectOperation(operationId: string) {
+    setSelectedId(operationId)
+    onOperationSelected?.(operationId)
+  }
+
   function toggleCategory(category: string) {
     setExpanded(prev => prev.includes(category) ? prev.filter(c => c !== category) : [...prev, category])
   }
 
-  function addToRecipe(operation: WorkbenchOperation, params: Record<string, string>) {
+  function addToRecipe(operation: WorkbenchOperation, params: Record<string, string>, inputValue: string) {
     const step: RecipeStep = {
       stepId: crypto.randomUUID(),
       operationId: operation.id,
@@ -62,32 +120,27 @@ export default function WorkbenchPage() {
       params,
     }
     setRecipe(prev => [...prev, step])
+    if (inputValue.trim()) {
+      setRecipeInput(prev => (prev.trim() ? prev : inputValue))
+    }
   }
 
   return (
-    <div className="page-content">
-      <div className="workbench-page-header">
-        <h1 className="workbench-page-title">
-          <FlaskConical size={16} /> Workbench
-        </h1>
-        <p className="workbench-page-subtitle section-meta">
-          Quick, local data transforms — encoding, hashing, ciphers, compression, and analysis.
-          Runs entirely in-process, nothing leaves this session. Chain operations into a recipe
-          to pipe one output into the next.
-        </p>
-      </div>
-
+    <div className={`workbench-page${recipe.length > 0 ? ' workbench-page--recipe-active' : ''}`}>
       {loading && (
-        <div className="loading-state">
+        <div className="workbench-page-loading">
           <RefreshCw size={20} className="spin" color="var(--green)" />
         </div>
       )}
 
-      {error && <div className="workbench-error">{error}</div>}
+      {error && <div className="workbench-page-error">{error}</div>}
 
       {!loading && !error && (
-        <div className="workbench-layout">
-          <nav className="section workbench-sidebar">
+        <>
+          <nav className="workbench-sidebar">
+            <div className="workbench-sidebar-title">
+              <FlaskConical size={14} /> Workbench
+            </div>
             <div className="workbench-search">
               <Search size={13} className="workbench-search-icon" />
               <input
@@ -115,7 +168,7 @@ export default function WorkbenchPage() {
                     <button
                       key={op.id}
                       className={`workbench-op-btn${op.id === selectedId ? ' workbench-op-btn--active' : ''}`}
-                      onClick={() => setSelectedId(op.id)}
+                      onClick={() => selectOperation(op.id)}
                     >
                       {op.name}
                     </button>
@@ -129,15 +182,29 @@ export default function WorkbenchPage() {
           </nav>
 
           <div className="workbench-main">
-            <section className="section workbench-panel">
+            <section className={`workbench-panel${selected ? ' section' : ''}`}>
               {selected
                 ? <OperationPanel key={selected.id} operation={selected} onAddToRecipe={addToRecipe} />
-                : <div className="workbench-empty">Select an operation to get started.</div>}
+                : (
+                  <div className="workbench-panel-empty">
+                    <FlaskConical size={28} color="var(--text-dim)" />
+                    <span className="workbench-panel-empty-title">Select an operation</span>
+                    <span className="workbench-panel-empty-hint">Pick something from the sidebar to get started.</span>
+                  </div>
+                )}
             </section>
-
-            <RecipePanel recipe={recipe} setRecipe={setRecipe} operations={operations} />
           </div>
-        </div>
+
+          <aside className="workbench-recipe-col">
+            <RecipePanel
+              recipe={recipe}
+              setRecipe={setRecipe}
+              operations={operations}
+              input={recipeInput}
+              setInput={setRecipeInput}
+            />
+          </aside>
+        </>
       )}
     </div>
   )

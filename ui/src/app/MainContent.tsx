@@ -87,6 +87,10 @@ interface MainContentProps {
   onCommandToolHandled?: () => void
   urlToolName?: string | null
   onToolSelected?: (toolName: string | null) => void
+  urlWorkbenchOperationId?: string | null
+  onWorkbenchOperationSelected?: (operationId: string | null) => void
+  urlWorkbenchRecipe?: string | null
+  onWorkbenchRecipeChanged?: (encodedRecipe: string | null) => void
   openSessionDetail: (sessionId: string) => void
   activeSessionId: string | null
   setPage: (page: Page) => void
@@ -124,6 +128,10 @@ export function MainContent({
   onCommandToolHandled,
   urlToolName,
   onToolSelected,
+  urlWorkbenchOperationId,
+  onWorkbenchOperationSelected,
+  urlWorkbenchRecipe,
+  onWorkbenchRecipeChanged,
   openSessionDetail,
   activeSessionId,
   setPage,
@@ -148,7 +156,7 @@ export function MainContent({
   togglePage,
 }: MainContentProps) {
   return (
-    <main className={`main${page === 'run' ? ' main--flush' : ''}`}>
+    <main className={`main${page === 'run' || page === 'workbench' ? ' main--flush' : ''}`}>
       <Suspense fallback={<PageLoader />}>
         {page === 'settings' && (
           <SettingsPage
@@ -200,7 +208,14 @@ export function MainContent({
           />
         )}
         {page === 'loot' && <LootPage />}
-        {page === 'workbench' && <WorkbenchPage />}
+        {page === 'workbench' && (
+          <WorkbenchPage
+            urlOperationId={urlWorkbenchOperationId}
+            onOperationSelected={onWorkbenchOperationSelected}
+            urlRecipe={urlWorkbenchRecipe}
+            onRecipeChanged={onWorkbenchRecipeChanged}
+          />
+        )}
         {page === 'logs' && (
           <LogsPage
             logLines={logLines}

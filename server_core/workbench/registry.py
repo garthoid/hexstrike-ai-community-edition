@@ -23,6 +23,7 @@ class ParamSpec:
     default: Any = ""
     choices: Optional[List[str]] = None
     help_text: str = ""
+    hidden: bool = False
 
     def to_dict(self) -> dict:
         d = {
@@ -35,6 +36,8 @@ class ParamSpec:
         }
         if self.choices:
             d["choices"] = self.choices
+        if self.hidden:
+            d["hidden"] = self.hidden
         return d
 
 

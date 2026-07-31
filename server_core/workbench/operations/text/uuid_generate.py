@@ -16,15 +16,10 @@ OPERATION = Operation(
     id="uuid_generate",
     category="text",
     name="UUID Generator",
-    description="Generate a random (v4) or time-based (v1) UUID. Ignores any input text.",
+    description="Generate a random (v4) or time-based (v1) UUID.",
     run=run,
     params=[
-        ParamSpec(
-            name="input",
-            label="Input",
-            type="text",
-            help_text="Not used by this operation — kept so it can sit in a recipe.",
-        ),
+        ParamSpec(name="input", label="Input", type="text", hidden=True),
         ParamSpec(name="version", label="Version", type="select", choices=["4", "1"], default="4"),
     ],
 )

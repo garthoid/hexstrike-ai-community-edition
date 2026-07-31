@@ -15,10 +15,11 @@ interface RecipePanelProps {
   recipe: RecipeStep[]
   setRecipe: Dispatch<SetStateAction<RecipeStep[]>>
   operations: WorkbenchOperation[]
+  input: string
+  setInput: Dispatch<SetStateAction<string>>
 }
 
-export function RecipePanel({ recipe, setRecipe, operations }: RecipePanelProps) {
-  const [input, setInput] = useState('')
+export function RecipePanel({ recipe, setRecipe, operations, input, setInput }: RecipePanelProps) {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [output, setOutput] = useState<string | null>(null)
@@ -88,14 +89,20 @@ export function RecipePanel({ recipe, setRecipe, operations }: RecipePanelProps)
   }
 
   return (
-    <section className="section workbench-recipe">
-      <div className="section-header">
-        <h3><Workflow size={14} style={{ marginRight: 6, verticalAlign: -2 }} />Recipe</h3>
-      </div>
+    <section className={`workbench-recipe${recipe.length > 0 ? ' section' : ''}`}>
+      {recipe.length > 0 && (
+        <div className="section-header">
+          <h3><Workflow size={14} style={{ marginRight: 6, verticalAlign: -2 }} />Recipe</h3>
+        </div>
+      )}
       <div className="workbench-op-content">
         {recipe.length === 0 ? (
-          <div className="workbench-empty">
-            Use "Add to Recipe" on any operation to chain it here — each step's output feeds the next step's input.
+          <div className="workbench-panel-empty">
+            <Workflow size={28} color="var(--text-dim)" />
+            <span className="workbench-panel-empty-title">No recipe yet</span>
+            <span className="workbench-panel-empty-hint">
+              Use "Add to Recipe" on any operation to chain it here — each step's output feeds the next step's input.
+            </span>
           </div>
         ) : (
           <ol className="workbench-recipe-steps">
@@ -142,7 +149,7 @@ export function RecipePanel({ recipe, setRecipe, operations }: RecipePanelProps)
                           <span className="workbench-field-label">{p.label}</span>
                           {p.type === 'select' ? (
                             <select
-                              className="verify-input workbench-select"
+                              className="input input-full"
                               value={editValues[p.name] ?? ''}
                               onChange={e => setEditValues(prev => ({ ...prev, [p.name]: e.target.value }))}
                             >
@@ -152,14 +159,14 @@ export function RecipePanel({ recipe, setRecipe, operations }: RecipePanelProps)
                             </select>
                           ) : p.type === 'textarea' ? (
                             <textarea
-                              className="verify-input mono workbench-textarea"
+                              className="input workbench-textarea mono"
                               value={editValues[p.name] ?? ''}
                               onChange={e => setEditValues(prev => ({ ...prev, [p.name]: e.target.value }))}
                               rows={2}
                             />
                           ) : (
                             <input
-                              className="verify-input mono"
+                              className="input input-full mono"
                               type={p.type === 'number' ? 'number' : 'text'}
                               value={editValues[p.name] ?? ''}
                               onChange={e => setEditValues(prev => ({ ...prev, [p.name]: e.target.value }))}
@@ -188,7 +195,7 @@ export function RecipePanel({ recipe, setRecipe, operations }: RecipePanelProps)
             <label className="workbench-field">
               <span className="workbench-field-label">Input</span>
               <textarea
-                className="verify-input mono workbench-textarea"
+                className="input workbench-textarea mono"
                 value={input}
                 onChange={e => setInput(e.target.value)}
                 rows={3}
@@ -207,6 +214,7 @@ export function RecipePanel({ recipe, setRecipe, operations }: RecipePanelProps)
               <ol className="workbench-recipe-trace">
                 {steps.map((s, i) => (
                   <li key={i} className={s.error ? 'workbench-recipe-trace-error' : ''}>
+                    <span className="workbench-recipe-step-index">{i + 1}</span>
                     <span className="workbench-field-label">{s.name ?? s.operation_id}</span>
                     <span className="mono">{s.error ? `Error: ${s.error}` : s.output}</span>
                   </li>

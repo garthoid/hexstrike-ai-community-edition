@@ -29,7 +29,20 @@ export default function App() {
   const [demo] = useState(isDemoMode)
 
   const { isPageEnabled, togglePage } = usePageVisibility()
-  const { page, activeSessionId, activeToolName, sidebarMobileOpen, setSidebarMobileOpen, setPage, openSessionDetail, setActiveToolName } = useAppRouting(isPageEnabled)
+  const {
+    page,
+    activeSessionId,
+    activeToolName,
+    activeWorkbenchOperationId,
+    activeWorkbenchRecipe,
+    sidebarMobileOpen,
+    setSidebarMobileOpen,
+    setPage,
+    openSessionDetail,
+    setActiveToolName,
+    setActiveWorkbenchOperationId,
+    setActiveWorkbenchRecipe,
+  } = useAppRouting(isPageEnabled)
 
   const [sidebarCollapsed, setSidebarCollapsed] = usePersistentState('nyxstrike_sidebar_collapsed', false)
   useEscapeClose(sidebarMobileOpen, () => setSidebarMobileOpen(false))
@@ -153,6 +166,10 @@ export default function App() {
             onCommandToolHandled={clearCommandToolRequest}
             urlToolName={activeToolName}
             onToolSelected={setActiveToolName}
+            urlWorkbenchOperationId={activeWorkbenchOperationId}
+            onWorkbenchOperationSelected={setActiveWorkbenchOperationId}
+            urlWorkbenchRecipe={activeWorkbenchRecipe}
+            onWorkbenchRecipeChanged={setActiveWorkbenchRecipe}
             openSessionDetail={openSessionDetail}
             activeSessionId={activeSessionId}
             setPage={setPage}

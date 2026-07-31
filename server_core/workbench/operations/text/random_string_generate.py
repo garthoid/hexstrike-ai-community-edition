@@ -31,15 +31,10 @@ OPERATION = Operation(
     id="random_string_generate",
     category="text",
     name="Random String Generator",
-    description="Generate a cryptographically random string. Ignores any input text.",
+    description="Generate a cryptographically random string.",
     run=run,
     params=[
-        ParamSpec(
-            name="input",
-            label="Input",
-            type="text",
-            help_text="Not used by this operation — kept so it can sit in a recipe.",
-        ),
+        ParamSpec(name="input", label="Input", type="text", hidden=True),
         ParamSpec(name="length", label="Length", type="number", default=16),
         ParamSpec(
             name="charset",

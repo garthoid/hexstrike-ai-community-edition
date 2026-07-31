@@ -8,7 +8,6 @@
   --bg: #0d0f14;
   --bg-card: #13161e;
   --bg-card2: #191c26;
-  --bg-input: #10131a;
   --border: #252836;
 
   --text: #8b95a8;
@@ -124,3 +123,40 @@ html, body {
 .text-blue { color: var(--blue); }
 .text-dim { color: var(--text-dim); }
 .text-h { color: var(--text-h); }
+
+.input {
+  background: var(--bg-card2);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--text-h);
+  padding: 8px 12px;
+  font-size: 12.5px;
+  outline: none;
+}
+.input:focus { border-color: var(--green); }
+.input::placeholder { color: var(--text-dim); }
+.input-full { width: 100%; min-width: 0; }
+
+textarea.input {
+  width: 100%;
+  min-height: 80px;
+  resize: vertical;
+}
+
+select.input {
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  padding-right: 30px;
+  background-image:
+    linear-gradient(45deg, transparent 50%, var(--text-dim) 50%),
+    linear-gradient(135deg, var(--text-dim) 50%, transparent 50%);
+  background-position:
+    calc(100% - 18px) center,
+    calc(100% - 13px) center;
+  background-size: 5px 5px, 5px 5px;
+  background-repeat: no-repeat;
+}
+select.input:-moz-focusring { color: transparent; text-shadow: 0 0 0 var(--text-h); }
+select.input option { background: var(--bg-card2); color: var(--text-h); }

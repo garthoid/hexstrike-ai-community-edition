@@ -1,11 +1,15 @@
 import { useEffect, useState } from 'react'
-import { routeFromHash, type Page } from './routing'
+import { buildWorkbenchHash, routeFromHash, type Page } from './routing'
 
 export function useAppRouting(isPageEnabled: (page: Page) => boolean) {
   const initialRoute = routeFromHash()
   const [page, setPageState] = useState<Page>(initialRoute.page)
   const [activeSessionId, setActiveSessionId] = useState<string | null>(initialRoute.sessionId)
   const [activeToolName, setActiveToolNameState] = useState<string | null>(initialRoute.toolName)
+  const [activeWorkbenchOperationId, setActiveWorkbenchOperationIdState] = useState<string | null>(
+    initialRoute.workbenchOperationId
+  )
+  const [activeWorkbenchRecipe, setActiveWorkbenchRecipeState] = useState<string | null>(initialRoute.workbenchRecipe)
   const [sidebarMobileOpen, setSidebarMobileOpen] = useState(false)
 
   function setPage(p: Page) {
@@ -14,6 +18,8 @@ export function useAppRouting(isPageEnabled: (page: Page) => boolean) {
     setPageState(p)
     setActiveSessionId(null)
     setActiveToolNameState(null)
+    setActiveWorkbenchOperationIdState(null)
+    setActiveWorkbenchRecipeState(null)
     setSidebarMobileOpen(false)
   }
 
@@ -22,6 +28,8 @@ export function useAppRouting(isPageEnabled: (page: Page) => boolean) {
     setPageState('session-detail')
     setActiveSessionId(sessionId)
     setActiveToolNameState(null)
+    setActiveWorkbenchOperationIdState(null)
+    setActiveWorkbenchRecipeState(null)
     setSidebarMobileOpen(false)
   }
 
@@ -32,6 +40,16 @@ export function useAppRouting(isPageEnabled: (page: Page) => boolean) {
     setActiveToolNameState(toolName)
   }
 
+  function setActiveWorkbenchOperationId(operationId: string | null) {
+    window.location.hash = buildWorkbenchHash(operationId, activeWorkbenchRecipe)
+    setActiveWorkbenchOperationIdState(operationId)
+  }
+
+  function setActiveWorkbenchRecipe(recipeJson: string | null) {
+    window.location.hash = buildWorkbenchHash(activeWorkbenchOperationId, recipeJson)
+    setActiveWorkbenchRecipeState(recipeJson)
+  }
+
   // Keep state in sync if the user presses Back/Forward
   useEffect(() => {
     function onHashChange() {
@@ -39,6 +57,8 @@ export function useAppRouting(isPageEnabled: (page: Page) => boolean) {
       setPageState(route.page)
       setActiveSessionId(route.sessionId)
       setActiveToolNameState(route.toolName)
+      setActiveWorkbenchOperationIdState(route.workbenchOperationId)
+      setActiveWorkbenchRecipeState(route.workbenchRecipe)
       setSidebarMobileOpen(false)
     }
     window.addEventListener('hashchange', onHashChange)
@@ -56,10 +76,14 @@ export function useAppRouting(isPageEnabled: (page: Page) => boolean) {
     page,
     activeSessionId,
     activeToolName,
+    activeWorkbenchOperationId,
+    activeWorkbenchRecipe,
     sidebarMobileOpen,
     setSidebarMobileOpen,
     setPage,
     openSessionDetail,
     setActiveToolName,
+    setActiveWorkbenchOperationId,
+    setActiveWorkbenchRecipe,
   }
 }

@@ -6,6 +6,7 @@ export interface WorkbenchParamSpec {
   default: string | number;
   help_text: string;
   choices?: string[];
+  hidden?: boolean;
 }
 
 export interface WorkbenchOperation {

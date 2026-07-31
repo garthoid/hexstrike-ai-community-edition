@@ -5,7 +5,7 @@ import type { WorkbenchOperation } from '../../api'
 
 interface OperationPanelProps {
   operation: WorkbenchOperation
-  onAddToRecipe: (operation: WorkbenchOperation, params: Record<string, string>) => void
+  onAddToRecipe: (operation: WorkbenchOperation, params: Record<string, string>, inputValue: string) => void
 }
 
 export function OperationPanel({ operation, onAddToRecipe }: OperationPanelProps) {
@@ -52,8 +52,8 @@ export function OperationPanel({ operation, onAddToRecipe }: OperationPanelProps
   }
 
   function addToRecipe() {
-    const { input: _input, ...rest } = values
-    onAddToRecipe(operation, rest)
+    const { input: rawInput, ...rest } = values
+    onAddToRecipe(operation, rest, rawInput ?? '')
     setAdded(true)
     setTimeout(() => setAdded(false), 1500)
   }
@@ -69,12 +69,12 @@ export function OperationPanel({ operation, onAddToRecipe }: OperationPanelProps
         <p className="verify-tool-desc">{operation.description}</p>
 
         <div className="workbench-form">
-          {operation.params.map(p => (
+          {operation.params.filter(p => !p.hidden).map(p => (
             <label key={p.name} className="workbench-field">
               <span className="workbench-field-label">{p.label}{p.required ? ' *' : ''}</span>
               {p.type === 'textarea' && (
                 <textarea
-                  className="verify-input mono workbench-textarea"
+                  className="input workbench-textarea mono"
                   value={values[p.name] ?? ''}
                   onChange={e => setValue(p.name, e.target.value)}
                   rows={4}
@@ -82,7 +82,7 @@ export function OperationPanel({ operation, onAddToRecipe }: OperationPanelProps
               )}
               {p.type === 'select' && (
                 <select
-                  className="verify-input workbench-select"
+                  className="input input-full"
                   value={values[p.name] ?? ''}
                   onChange={e => setValue(p.name, e.target.value)}
                 >
@@ -93,7 +93,7 @@ export function OperationPanel({ operation, onAddToRecipe }: OperationPanelProps
               )}
               {(p.type === 'text' || p.type === 'number') && (
                 <input
-                  className="verify-input mono"
+                  className="input input-full mono"
                   type={p.type}
                   value={values[p.name] ?? ''}
                   onChange={e => setValue(p.name, e.target.value)}
