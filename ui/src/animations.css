@@ -61,6 +61,22 @@
   100% { transform: scale(1)   rotate(360deg); opacity: 0.7; }
 }
 
+/* ── Drag reorder ────────────────────────────────────────────────────────── */
+.drag-reorder-item {
+  transition: opacity 0.15s, transform 0.15s;
+}
+
+.drag-reorder-item--dragging {
+  opacity: 0.4;
+  transform: scale(0.97);
+}
+
+.drag-reorder-item--drag-over {
+  outline: 2px solid var(--green);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
 /* ── Reduced motion ──────────────────────────────────────────────────────── */
 /* Honour the OS-level motion preference for every animation/transition in the app. */
 @media (prefers-reduced-motion: reduce) {

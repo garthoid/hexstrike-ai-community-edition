@@ -6,6 +6,7 @@ import {
 } from 'lucide-react'
 import { api } from '../../api'
 import type { WorkbenchOperation, WorkbenchRecipeStepResult, WorkbenchSavedRecipe } from '../../api'
+import { useDragReorder } from '../../hooks/useDragReorder'
 
 export interface RecipeStep {
   stepId: string
@@ -30,7 +31,6 @@ export function RecipePanel({ recipe, setRecipe, operations, input, setInput }: 
   const [copied, setCopied] = useState(false)
   const [editingId, setEditingId] = useState<string | null>(null)
   const [editValues, setEditValues] = useState<Record<string, string>>({})
-  const [dragIndex, setDragIndex] = useState<number | null>(null)
 
   const [savedRecipes, setSavedRecipes] = useState<WorkbenchSavedRecipe[]>([])
   const [savedLoading, setSavedLoading] = useState(false)
@@ -69,15 +69,19 @@ export function RecipePanel({ recipe, setRecipe, operations, input, setInput }: 
     })
   }
 
-  function reorder(from: number, to: number) {
-    if (from === to) return
+  function reorderByStepId(draggedStepId: string, targetStepId: string) {
     setRecipe(prev => {
       const next = [...prev]
-      const [moved] = next.splice(from, 1)
-      next.splice(to, 0, moved)
+      const fromIndex = next.findIndex(s => s.stepId === draggedStepId)
+      const toIndex = next.findIndex(s => s.stepId === targetStepId)
+      if (fromIndex === -1 || toIndex === -1) return prev
+      const [moved] = next.splice(fromIndex, 1)
+      next.splice(toIndex, 0, moved)
       return next
     })
   }
+
+  const { dragHandlers, dragClassName } = useDragReorder(reorderByStepId)
 
   function remove(index: number) {
     setRecipe(prev => prev.filter((_, i) => i !== index))
@@ -297,16 +301,8 @@ export function RecipePanel({ recipe, setRecipe, operations, input, setInput }: 
               return (
                 <li
                   key={step.stepId}
-                  className={`workbench-recipe-step-wrap${dragIndex === i ? ' workbench-recipe-step-wrap--dragging' : ''}`}
-                  draggable
-                  onDragStart={() => setDragIndex(i)}
-                  onDragOver={e => e.preventDefault()}
-                  onDrop={e => {
-                    e.preventDefault()
-                    if (dragIndex !== null) reorder(dragIndex, i)
-                    setDragIndex(null)
-                  }}
-                  onDragEnd={() => setDragIndex(null)}
+                  className={dragClassName(step.stepId, 'workbench-recipe-step-wrap')}
+                  {...dragHandlers(step.stepId)}
                 >
                   <div className="workbench-recipe-step">
                     <span className="workbench-recipe-step-drag" title="Drag to reorder">
