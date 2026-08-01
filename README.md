@@ -49,6 +49,8 @@ Open [http://localhost:8888](http://localhost:8888) to access the dashboard.
 
 Connect NyxStrike to any MCP-compatible AI client — OpenCode, Cursor, Claude Desktop, VS Code Copilot, Roo Code, and more.
 
+> Open [http://localhost:8888/#/help](http://localhost:8888/#/help) for help with configurations.
+
 ### Universal MCP Command
 
 ```bash
