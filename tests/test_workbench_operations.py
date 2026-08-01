@@ -114,6 +114,54 @@ class TestBase85:
             run("base85", input="\x01\x02not valid", mode="decode")
 
 
+class TestPunycode:
+    def test_decode(self):
+        assert run("punycode", input="xn--mnchen-3ya.de", mode="decode")["output"] == "münchen.de"
+
+    def test_encode(self):
+        assert run("punycode", input="münchen.de", mode="encode")["output"] == "xn--mnchen-3ya.de"
+
+    def test_default_mode_is_decode(self):
+        assert run("punycode", input="xn--mnchen-3ya.de") == run("punycode", input="xn--mnchen-3ya.de", mode="decode")
+
+    def test_label_too_long_raises(self):
+        with pytest.raises(ValueError):
+            run("punycode", input="a" * 70 + ".com", mode="encode")
+
+    def test_non_ascii_decode_input_raises(self):
+        with pytest.raises(ValueError):
+            run("punycode", input="xn--é.com", mode="decode")
+
+    def test_empty_input_raises(self):
+        with pytest.raises(ValueError):
+            run("punycode", input="")
+
+
+class TestCharcodeConvert:
+    def test_to_charcode_decimal(self):
+        assert run("charcode_convert", input="AB", mode="to_charcode")["output"] == "65 66"
+
+    def test_to_charcode_hex(self):
+        assert run("charcode_convert", input="AB", mode="to_charcode", base="hexadecimal")["output"] == "41 42"
+
+    def test_round_trip(self):
+        codes = run("charcode_convert", input="hello!", mode="to_charcode")["output"]
+        assert run("charcode_convert", input=codes, mode="from_charcode")["output"] == "hello!"
+
+    def test_custom_delimiter(self):
+        codes = run("charcode_convert", input="AB", mode="to_charcode", delimiter=",")["output"]
+        assert codes == "65,66"
+        assert run("charcode_convert", input=codes, mode="from_charcode", delimiter=",")["output"] == "AB"
+
+    def test_from_charcode_empty_raises(self):
+        with pytest.raises(ValueError):
+            run("charcode_convert", input="", mode="from_charcode")
+
+    def test_from_charcode_invalid_token_raises(self):
+        with pytest.raises(ValueError):
+            run("charcode_convert", input="65 zz", mode="from_charcode")
+
+
 # ---------------------------------------------------------------------------
 # hashing
 # ---------------------------------------------------------------------------
@@ -154,6 +202,27 @@ class TestHmacDigest:
     def test_unsupported_algorithm_raises(self):
         with pytest.raises(ValueError):
             run("hmac_digest", input="msg", key="k", algorithm="md6")
+
+
+class TestChecksum:
+    def test_crc32_matches_zlib(self):
+        import zlib
+
+        expected = f"{zlib.crc32(b'hello'):08x}"
+        assert run("checksum", input="hello", algorithm="crc32")["output"] == expected
+
+    def test_adler32_matches_zlib(self):
+        import zlib
+
+        expected = f"{zlib.adler32(b'hello'):08x}"
+        assert run("checksum", input="hello", algorithm="adler32")["output"] == expected
+
+    def test_default_algorithm_is_crc32(self):
+        assert run("checksum", input="hello") == run("checksum", input="hello", algorithm="crc32")
+
+    def test_unsupported_algorithm_raises(self):
+        with pytest.raises(ValueError):
+            run("checksum", input="hello", algorithm="md5")
 
 
 # ---------------------------------------------------------------------------
@@ -486,6 +555,97 @@ class TestTimestampConvert:
             run("timestamp_convert", input="not-a-date", mode="iso_to_epoch")
 
 
+class TestHashIdentify:
+    def test_identifies_md5_length_hash(self):
+        output = run("hash_identify", input="5d41402abc4b2a76b9719d911017c592")["output"]
+        assert "MD5" in output
+
+    def test_identifies_sha256_length_hash(self):
+        output = run("hash_identify", input="a" * 64)["output"]
+        assert "SHA-256" in output
+
+    def test_identifies_bcrypt_prefix(self):
+        output = run("hash_identify", input="$2b$12$" + "a" * 53)["output"]
+        assert output == "bcrypt"
+
+    def test_no_match_reports_unknown(self):
+        assert run("hash_identify", input="not a hash at all")["output"] == "No known hash format matched."
+
+    def test_empty_input_raises(self):
+        with pytest.raises(ValueError):
+            run("hash_identify", input="")
+
+
+class TestUrlParse:
+    def test_parses_components(self):
+        output = run("url_parse", input="https://user:pass@example.com:8443/a/b?x=1&y=2#frag")["output"]
+        assert "Scheme: https" in output
+        assert "Host: example.com" in output
+        assert "Port: 8443" in output
+        assert "Username: user" in output
+        assert "Password: pass" in output
+        assert "Path: /a/b" in output
+        assert "x = 1" in output
+        assert "y = 2" in output
+        assert "Fragment: frag" in output
+
+    def test_path_defaults_to_root(self):
+        assert "Path: /" in run("url_parse", input="https://example.com")["output"]
+
+    def test_missing_scheme_raises(self):
+        with pytest.raises(ValueError):
+            run("url_parse", input="example.com/path")
+
+    def test_empty_input_raises(self):
+        with pytest.raises(ValueError):
+            run("url_parse", input="")
+
+
+class TestBasicAuth:
+    def test_encode(self):
+        assert run("basic_auth", input="user:pass", mode="encode")["output"] == "Basic dXNlcjpwYXNz"
+
+    def test_decode(self):
+        assert run("basic_auth", input="Basic dXNlcjpwYXNz", mode="decode")["output"] == "user:pass"
+
+    def test_decode_without_prefix(self):
+        assert run("basic_auth", input="dXNlcjpwYXNz", mode="decode")["output"] == "user:pass"
+
+    def test_default_mode_is_decode(self):
+        assert run("basic_auth", input="dXNlcjpwYXNz") == run("basic_auth", input="dXNlcjpwYXNz", mode="decode")
+
+    def test_encode_without_colon_raises(self):
+        with pytest.raises(ValueError):
+            run("basic_auth", input="userpass", mode="encode")
+
+    def test_decode_invalid_base64_raises(self):
+        with pytest.raises(ValueError):
+            run("basic_auth", input="not valid base64!!!", mode="decode")
+
+    def test_decode_without_colon_raises(self):
+        import base64
+
+        token = base64.b64encode(b"nocolonhere").decode("ascii")
+        with pytest.raises(ValueError):
+            run("basic_auth", input=token, mode="decode")
+
+
+class TestQueryStringBuild:
+    def test_builds_query_string(self):
+        assert run("query_string_build", input="a=1\nb=hello world")["output"] == "a=1&b=hello+world"
+
+    def test_strips_blank_lines(self):
+        assert run("query_string_build", input="a=1\n\nb=2")["output"] == "a=1&b=2"
+
+    def test_missing_equals_raises(self):
+        with pytest.raises(ValueError):
+            run("query_string_build", input="not-a-pair")
+
+    def test_empty_input_raises(self):
+        with pytest.raises(ValueError):
+            run("query_string_build", input="")
+
+
 # ---------------------------------------------------------------------------
 # text
 # ---------------------------------------------------------------------------
@@ -653,6 +813,40 @@ class TestCidrCalculator:
     def test_invalid_cidr_raises(self):
         with pytest.raises(ValueError):
             run("cidr_calculator", input="not-a-cidr")
+
+
+class TestUnixPermissions:
+    def test_octal_to_symbolic(self):
+        assert run("unix_permissions", input="755")["output"] == "rwxr-xr-x"
+
+    def test_symbolic_to_octal(self):
+        assert run("unix_permissions", input="rwxr-xr-x")["output"] == "755"
+
+    def test_symbolic_with_leading_file_type_char(self):
+        assert run("unix_permissions", input="-rwxr-xr-x")["output"] == "755"
+
+    def test_setuid_round_trip(self):
+        symbolic = run("unix_permissions", input="4755")["output"]
+        assert symbolic == "rwsr-xr-x"
+        assert run("unix_permissions", input=symbolic)["output"] == "4755"
+
+    def test_setuid_without_exec_uses_capital_s(self):
+        symbolic = run("unix_permissions", input="4655")["output"]
+        assert symbolic == "rwSr-xr-x"
+        assert run("unix_permissions", input=symbolic)["output"] == "4655"
+
+    def test_sticky_bit_round_trip(self):
+        symbolic = run("unix_permissions", input="1777")["output"]
+        assert symbolic == "rwxrwxrwt"
+        assert run("unix_permissions", input=symbolic)["output"] == "1777"
+
+    def test_invalid_input_raises(self):
+        with pytest.raises(ValueError):
+            run("unix_permissions", input="not-permissions")
+
+    def test_empty_input_raises(self):
+        with pytest.raises(ValueError):
+            run("unix_permissions", input="")
 
 
 # ---------------------------------------------------------------------------
