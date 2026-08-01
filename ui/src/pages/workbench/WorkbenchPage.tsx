@@ -130,9 +130,11 @@ export default function WorkbenchPage({
           entry[1].filter(op => op.name.toLowerCase().includes(q) || op.description.toLowerCase().includes(q)),
         ])
       : visibleByCategory
-    const base = filteredVisible.filter(([, ops]) => ops.length > 0)
-    if (q) return base
+    if (q) return filteredVisible.filter(([, ops]) => ops.length > 0)
     const favoriteOps = visibleByCategory.flatMap(([, ops]) => ops).filter(op => isFavorite(op.id))
+    const base = filteredVisible
+      .map((entry): [string, WorkbenchOperation[]] => [entry[0], entry[1].filter(op => !isFavorite(op.id))])
+      .filter(([, ops]) => ops.length > 0)
     return favoriteOps.length > 0 ? [[FAVORITES_CATEGORY, favoriteOps] as [string, WorkbenchOperation[]], ...base] : base
   }, [visibleByCategory, search, isFavorite])
 
