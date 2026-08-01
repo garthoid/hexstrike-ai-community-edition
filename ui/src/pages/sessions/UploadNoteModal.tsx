@@ -1,8 +1,8 @@
-import { useEffect, useRef, useState } from 'react'
-import { createPortal } from 'react-dom'
+import { useRef, useState } from 'react'
 import { FileText, Upload, AlertTriangle } from 'lucide-react'
 import { api } from '../../api'
 import { formatBytes } from '../../shared/utils'
+import { Sheet } from '../../components/Sheet'
 
 function slugify(raw: string): string {
   return raw
@@ -35,15 +35,6 @@ export function UploadNoteModal({
   const [error, setError] = useState<string | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const dropRef = useRef<HTMLDivElement>(null)
-
-  // Escape closes
-  useEffect(() => {
-    function onKey(e: KeyboardEvent) {
-      if (e.key === 'Escape' && !uploading) onClose()
-    }
-    window.addEventListener('keydown', onKey)
-    return () => window.removeEventListener('keydown', onKey)
-  }, [uploading, onClose])
 
   function pickFile(f: File) {
     setFile(f)
@@ -89,21 +80,42 @@ export function UploadNoteModal({
 
   const effectiveName = (slugify(noteName) || 'uploaded-note') + '.md'
 
-  return createPortal(
-    <div
-      className="modal-backdrop"
-      onClick={e => { if (e.target === e.currentTarget && !uploading) onClose() }}
-    >
-      <div className="modal upload-note-modal" role="dialog" aria-modal="true" aria-label="Upload note">
-        {/* Header */}
-        <div className="modal-header upload-note-modal-header">
-          <div className="modal-title-row">
-            <span className="note-modal-icon"><Upload size={13} /></span>
-            <span className="modal-name">Upload note</span>
-          </div>
-          <button className="modal-close" onClick={onClose} disabled={uploading} title="Close">×</button>
+  return (
+    <Sheet
+      isOpen
+      onClose={onClose}
+      disableClose={uploading}
+      title={
+        <>
+          <span className="note-modal-icon"><Upload size={13} /></span>
+          <span className="modal-name">Upload note</span>
+        </>
+      }
+      footer={
+        <div className="upload-note-modal-footer">
+          <button className="session-action-btn" onClick={onClose} disabled={uploading}>
+            Cancel
+          </button>
+          {conflict ? (
+            <button
+              className="session-action-btn session-action-btn--danger"
+              onClick={() => void doUpload(true)}
+              disabled={uploading}
+            >
+              {uploading ? 'Uploading…' : 'Overwrite'}
+            </button>
+          ) : (
+            <button
+              className="session-action-btn session-action-btn--primary"
+              onClick={() => void doUpload(false)}
+              disabled={!file || uploading}
+            >
+              {uploading ? 'Uploading…' : 'Upload'}
+            </button>
+          )}
         </div>
-
+      }
+    >
         {/* Body */}
         <div className="upload-note-modal-body">
 
@@ -195,32 +207,6 @@ export function UploadNoteModal({
             </div>
           )}
         </div>
-
-        {/* Footer */}
-        <div className="upload-note-modal-footer">
-          <button className="session-action-btn" onClick={onClose} disabled={uploading}>
-            Cancel
-          </button>
-          {conflict ? (
-            <button
-              className="session-action-btn session-action-btn--danger"
-              onClick={() => void doUpload(true)}
-              disabled={uploading}
-            >
-              {uploading ? 'Uploading…' : 'Overwrite'}
-            </button>
-          ) : (
-            <button
-              className="session-action-btn session-action-btn--primary"
-              onClick={() => void doUpload(false)}
-              disabled={!file || uploading}
-            >
-              {uploading ? 'Uploading…' : 'Upload'}
-            </button>
-          )}
-        </div>
-      </div>
-    </div>,
-    document.body
+    </Sheet>
   )
 }

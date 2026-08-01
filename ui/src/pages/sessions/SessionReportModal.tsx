@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Download, FileText, Brain, Archive, RefreshCw } from 'lucide-react'
 import { api } from '../../api'
-import { useEscapeClose } from '../../hooks/useEscapeClose'
+import { Sheet } from '../../components/Sheet'
 import { reportGenStart, reportGenDone, reportGenError } from '../../app/reportGeneration'
 import type { SessionSummary } from '../../api'
 
@@ -19,8 +19,6 @@ function todaySlug(): string {
 }
 
 export function SessionReportModal({ isOpen, session, onClose, llmAvailable = false }: Props) {
-  useEscapeClose(isOpen, onClose)
-
   const [mode, setMode] = useState<ReportMode>('structured')
   const [includeNotes, setIncludeNotes] = useState(false)
   const [includeEventLog, setIncludeEventLog] = useState(true)
@@ -141,17 +139,18 @@ export function SessionReportModal({ isOpen, session, onClose, llmAvailable = fa
   }
 
   return (
-    <div className="report-modal-overlay" onClick={e => { if (e.target === e.currentTarget) onClose() }}>
-      <div className="report-modal">
-        <div className="report-modal-header">
-          <div className="modal-title-row">
-            <FileText size={14} />
-            <span className="modal-name">Generate Report</span>
-            <span className="section-meta mono">{session.target}</span>
-          </div>
-          <button className="modal-close" onClick={onClose}>×</button>
-        </div>
-
+    <Sheet
+      isOpen
+      onClose={onClose}
+      size="lg"
+      title={
+        <>
+          <FileText size={14} />
+          <span className="modal-name">Generate Report</span>
+          <span className="section-meta mono">{session.target}</span>
+        </>
+      }
+    >
         <div className="report-modal-tabs">
           <button
             className={`report-modal-tab${mode === 'structured' ? ' report-modal-tab--active' : ''}`}
@@ -260,7 +259,6 @@ export function SessionReportModal({ isOpen, session, onClose, llmAvailable = fa
             </div>
           )}
         </div>
-      </div>
-    </div>
+    </Sheet>
   )
 }

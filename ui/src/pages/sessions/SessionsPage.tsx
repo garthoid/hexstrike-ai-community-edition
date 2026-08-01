@@ -15,9 +15,9 @@ import {
 import { KpiStrip } from '../../components/KpiStrip'
 import { ConfirmActionModal } from '../../components/ConfirmActionModal'
 import { InformationModal } from '../../components/InformationModal'
+import { Sheet } from '../../components/Sheet'
 import { useToast } from '../../components/ToastProvider'
 import { BrowserPage } from '../../components/layout/BrowserPage'
-import { useEscapeClose } from '../../hooks/useEscapeClose'
 import { START_MODES, type StartMode } from './constants'
 import { StartSessionModal } from './SessionsSections'
 import { SessionsSetupNav } from './SessionsSetupNav'
@@ -80,8 +80,6 @@ export default function SessionsPage({ demoData, onOpenSession }: SessionsPagePr
     onError: msg => setError(msg),
     onLoadingDone: () => setLoading(false),
   })
-
-  useEscapeClose(Boolean(editingTemplateId), closeTemplateEditor)
 
   useEffect(() => {
     sessionsCacheView = sessionsView
@@ -596,80 +594,75 @@ export default function SessionsPage({ demoData, onOpenSession }: SessionsPagePr
       />
 
       {editingTemplate && (
-        <div className="modal-backdrop" onClick={e => { if (e.target === e.currentTarget) closeTemplateEditor() }}>
-          <div className="modal modal--wide">
-            <div className="modal-header">
-              <div className="modal-title-row">
-                <span className="modal-name">Edit Template</span>
-              </div>
-              <button className="modal-close" onClick={closeTemplateEditor}>x</button>
+        <Sheet
+          isOpen
+          onClose={closeTemplateEditor}
+          title={<span className="modal-name">Edit Template</span>}
+          size="lg"
+        >
+          <div className="session-start-form">
+            <label className="mono" htmlFor="template-name-input">Template name *</label>
+            <input
+              id="template-name-input"
+              className="search-input mono"
+              value={editTemplateName}
+              onChange={e => setEditTemplateName(e.target.value)}
+              placeholder="Template name"
+            />
+          </div>
+
+          <div className="template-editor-grid">
+            <div className="template-editor-col">
+              <span className="modal-label">Tools in template</span>
+              {editTemplateSteps.length === 0 ? (
+                <div className="tasks-empty tasks-empty--compact">
+                  <p>No tools selected yet.</p>
+                </div>
+              ) : (
+                <div className="template-step-list">
+                  {editTemplateSteps.map((step, idx) => (
+                    <div key={`${step.tool}:${idx}`} className="template-step-row">
+                      <span className="mono">{step.tool}</span>
+                      <button className="session-remove-tool" onClick={() => removeToolFromEditedTemplate(idx)}>x</button>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
-            <div className="modal-body">
-              <div className="session-start-form">
-                <label className="mono" htmlFor="template-name-input">Template name *</label>
-                <input
-                  id="template-name-input"
-                  className="search-input mono"
-                  value={editTemplateName}
-                  onChange={e => setEditTemplateName(e.target.value)}
-                  placeholder="Template name"
-                />
-              </div>
 
-              <div className="template-editor-grid">
-                <div className="template-editor-col">
-                  <span className="modal-label">Tools in template</span>
-                  {editTemplateSteps.length === 0 ? (
-                    <div className="tasks-empty tasks-empty--compact">
-                      <p>No tools selected yet.</p>
-                    </div>
-                  ) : (
-                    <div className="template-step-list">
-                      {editTemplateSteps.map((step, idx) => (
-                        <div key={`${step.tool}:${idx}`} className="template-step-row">
-                          <span className="mono">{step.tool}</span>
-                          <button className="session-remove-tool" onClick={() => removeToolFromEditedTemplate(idx)}>x</button>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-
-                <div className="template-editor-col">
-                  <span className="modal-label">Add tools</span>
-                  <input
-                    className="search-input mono"
-                    value={editToolSearch}
-                    onChange={e => setEditToolSearch(e.target.value)}
-                    placeholder="Search tools"
-                  />
-                  <div className="session-add-tool-list">
-                    {addToolCandidates.map(tool => (
-                      <button
-                        key={`edit-template-tool:${tool.name}`}
-                        className="session-add-tool-item"
-                        onClick={() => addToolToEditedTemplate(tool.name)}
-                      >
-                        <span className="mono">{tool.name}</span>
-                        <span>{tool.category}</span>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              </div>
-
-              {editTemplateError && <div className="run-error">{editTemplateError}</div>}
-
-              <div className="session-start-actions">
-                <button className="session-action-btn" onClick={closeTemplateEditor}>Cancel</button>
-                <button className="session-run-btn" onClick={saveTemplateEdits} disabled={savingTemplate}>
-                  {savingTemplate ? <RefreshCw size={13} className="spin" /> : <Pencil size={13} />}
-                  {savingTemplate ? 'Saving…' : 'Save Template'}
-                </button>
+            <div className="template-editor-col">
+              <span className="modal-label">Add tools</span>
+              <input
+                className="search-input mono"
+                value={editToolSearch}
+                onChange={e => setEditToolSearch(e.target.value)}
+                placeholder="Search tools"
+              />
+              <div className="session-add-tool-list">
+                {addToolCandidates.map(tool => (
+                  <button
+                    key={`edit-template-tool:${tool.name}`}
+                    className="session-add-tool-item"
+                    onClick={() => addToolToEditedTemplate(tool.name)}
+                  >
+                    <span className="mono">{tool.name}</span>
+                    <span>{tool.category}</span>
+                  </button>
+                ))}
               </div>
             </div>
           </div>
-        </div>
+
+          {editTemplateError && <div className="run-error">{editTemplateError}</div>}
+
+          <div className="session-start-actions">
+            <button className="session-action-btn" onClick={closeTemplateEditor}>Cancel</button>
+            <button className="session-run-btn" onClick={saveTemplateEdits} disabled={savingTemplate}>
+              {savingTemplate ? <RefreshCw size={13} className="spin" /> : <Pencil size={13} />}
+              {savingTemplate ? 'Saving…' : 'Save Template'}
+            </button>
+          </div>
+        </Sheet>
       )}
 
       <ConfirmActionModal

@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react'
-import { createPortal } from 'react-dom'
 import SimpleMDE from 'react-simplemde-editor'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
@@ -7,6 +6,7 @@ import { FileText, Edit2, Eye, Trash2, Download, Save } from 'lucide-react'
 import { RefreshCw } from 'lucide-react'
 import { api } from '../../api'
 import type { SessionNote } from '../../api/types'
+import { Sheet } from '../../components/Sheet'
 import 'easymde/dist/easymde.min.css'
 
 type ModalMode = 'view' | 'edit'
@@ -60,15 +60,6 @@ export function NoteModal({
     return () => { cancelled = true }
   }, [sessionId, note.filename, note.folder, isNew, pushToast])
 
-  // Escape key closes (unless saving)
-  useEffect(() => {
-    function onKey(e: KeyboardEvent) {
-      if (e.key === 'Escape' && !saving) onClose()
-    }
-    window.addEventListener('keydown', onKey)
-    return () => window.removeEventListener('keydown', onKey)
-  }, [saving, onClose])
-
   async function save() {
     setSaving(true)
     setSaveError(null)
@@ -103,20 +94,18 @@ export function NoteModal({
     ? `/api/sessions/${sessionId}/notes/${note.filename}?folder=${encodeURIComponent(note.folder)}&download=1`
     : `/api/sessions/${sessionId}/notes/${note.filename}?download=1`
 
-  return createPortal(
-    <div
-      className="modal-backdrop note-modal-backdrop"
-      onClick={e => { if (e.target === e.currentTarget && !saving) onClose() }}
-    >
-      <div className="modal note-modal" role="dialog" aria-modal="true" aria-label={displayPath}>
-        {/* Header */}
-        <div className="modal-header note-modal-header">
-          <div className="modal-title-row">
-            <span className="note-modal-icon">
-              <FileText size={13} />
-            </span>
-            <span className="modal-name note-modal-name">{displayPath}</span>
-          </div>
+  return (
+    <Sheet
+      isOpen
+      onClose={onClose}
+      disableClose={saving}
+      className="note-modal"
+      title={
+        <>
+          <span className="note-modal-icon">
+            <FileText size={13} />
+          </span>
+          <span className="modal-name note-modal-name">{displayPath}</span>
           <div className="note-modal-header-actions">
             {/* Folder select — only in edit mode and when there are folders */}
             {mode === 'edit' && allFolders.length > 0 && (
@@ -185,69 +174,57 @@ export function NoteModal({
                 </button>
               </>
             )}
-            <button
-              className="modal-close note-modal-close"
-              onClick={onClose}
-              disabled={saving}
-              title="Close"
-            >
-              ×
-            </button>
+          </div>
+        </>
+      }
+    >
+      {/* Save error stays inline — user must see it without the modal closing */}
+      {saveError && (
+        <div className="session-notes-error">{saveError}</div>
+      )}
+
+      {loading ? (
+        <p className="section-meta section-meta--padded">Loading…</p>
+      ) : mode === 'view' ? (
+        <div className="session-notes-read-body note-modal-read-body">
+          {content.trim() ? (
+            <ReactMarkdown remarkPlugins={[remarkGfm]}>{content}</ReactMarkdown>
+          ) : (
+            <p className="notes-empty-text">
+              This note is empty. Click Edit to start writing.
+            </p>
+          )}
+        </div>
+      ) : (
+        <div className="note-modal-editor-wrap">
+          {!editorReady && (
+            <div className="editor-loading" aria-label="Loading editor…">
+              <RefreshCw size={22} className="spin" color="var(--green)" />
+            </div>
+          )}
+          <div className={editorReady ? 'editor-ready' : undefined}
+               style={editorReady ? undefined : { position: 'absolute', visibility: 'hidden', pointerEvents: 'none', width: '100%' }}>
+            <SimpleMDE
+              value={content}
+              onChange={setContent}
+              getMdeInstance={() => setEditorReady(true)}
+              options={{
+                spellChecker: false,
+                autofocus: true,
+                placeholder: 'Write your notes in markdown…',
+                status: ['lines', 'words'],
+                toolbar: [
+                  'bold', 'italic', 'heading', '|',
+                  'quote', 'unordered-list', 'ordered-list', '|',
+                  'link', 'code', 'table', '|',
+                  'preview', 'side-by-side', 'fullscreen', '|',
+                  'guide',
+                ],
+              }}
+            />
           </div>
         </div>
-
-        {/* Body */}
-        <div className="note-modal-body">
-          {/* Save error stays inline — user must see it without the modal closing */}
-          {saveError && (
-            <div className="session-notes-error">{saveError}</div>
-          )}
-
-          {loading ? (
-            <p className="section-meta section-meta--padded">Loading…</p>
-          ) : mode === 'view' ? (
-            <div className="session-notes-read-body note-modal-read-body">
-              {content.trim() ? (
-                <ReactMarkdown remarkPlugins={[remarkGfm]}>{content}</ReactMarkdown>
-              ) : (
-                <p className="notes-empty-text">
-                  This note is empty. Click Edit to start writing.
-                </p>
-              )}
-            </div>
-          ) : (
-            <div className="note-modal-editor-wrap">
-              {!editorReady && (
-                <div className="editor-loading" aria-label="Loading editor…">
-                  <RefreshCw size={22} className="spin" color="var(--green)" />
-                </div>
-              )}
-              <div className={editorReady ? 'editor-ready' : undefined}
-                   style={editorReady ? undefined : { position: 'absolute', visibility: 'hidden', pointerEvents: 'none', width: '100%' }}>
-                <SimpleMDE
-                  value={content}
-                  onChange={setContent}
-                  getMdeInstance={() => setEditorReady(true)}
-                  options={{
-                    spellChecker: false,
-                    autofocus: true,
-                    placeholder: 'Write your notes in markdown…',
-                    status: ['lines', 'words'],
-                    toolbar: [
-                      'bold', 'italic', 'heading', '|',
-                      'quote', 'unordered-list', 'ordered-list', '|',
-                      'link', 'code', 'table', '|',
-                      'preview', 'side-by-side', 'fullscreen', '|',
-                      'guide',
-                    ],
-                  }}
-                />
-              </div>
-            </div>
-          )}
-        </div>
-      </div>
-    </div>,
-    document.body
+      )}
+    </Sheet>
   )
 }

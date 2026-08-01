@@ -1,11 +1,10 @@
 import { useState } from 'react'
-import { createPortal } from 'react-dom'
 import { Send } from 'lucide-react'
 import { ActionButton } from './ActionButton'
-import { useEscapeClose } from '../hooks/useEscapeClose'
 import { api } from '../api'
 import type { LootType } from '../api'
 import { useToast } from './ToastProvider'
+import { Sheet } from './Sheet'
 
 const LOOT_TYPES: LootType[] = [
   'flag', 'file', 'config', 'hash', 'key', 'secret', 'screenshot', 'other',
@@ -26,10 +25,6 @@ export function SendToLootModal({ isOpen, onClose, defaultTitle, content }: Send
   const [tagsInput, setTagsInput] = useState('')
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
-
-  useEscapeClose(isOpen && !saving, onClose)
-
-  if (!isOpen) return null
 
   async function handleSave() {
     if (!title.trim()) {
@@ -54,57 +49,55 @@ export function SendToLootModal({ isOpen, onClose, defaultTitle, content }: Send
     onClose()
   }
 
-  return createPortal(
-    <div className="modal-backdrop" onClick={e => { if (e.target === e.currentTarget && !saving) onClose() }}>
-      <div className="modal send-to-loot-modal" role="dialog" aria-modal="true" aria-label="Send to Loot">
-        <div className="modal-header">
-          <div className="modal-title-row">
-            <span className="modal-icon modal-icon--accent" aria-hidden="true">
-              <Send size={14} />
-            </span>
-            <span className="modal-name">Send to Loot</span>
-          </div>
-        </div>
+  return (
+    <Sheet
+      isOpen={isOpen}
+      onClose={onClose}
+      disableClose={saving}
+      title={
+        <>
+          <span className="modal-icon modal-icon--accent" aria-hidden="true">
+            <Send size={14} />
+          </span>
+          <span className="modal-name">Send to Loot</span>
+        </>
+      }
+    >
+      <label className="workbench-field">
+        <span className="workbench-field-label">Title</span>
+        <input className="input input-full" value={title} onChange={e => setTitle(e.target.value)} autoFocus />
+      </label>
 
-        <div className="modal-body">
-          <label className="workbench-field">
-            <span className="workbench-field-label">Title</span>
-            <input className="input input-full" value={title} onChange={e => setTitle(e.target.value)} autoFocus />
-          </label>
+      <label className="workbench-field">
+        <span className="workbench-field-label">Type</span>
+        <select className="input input-full" value={lootType} onChange={e => setLootType(e.target.value as LootType)}>
+          {LOOT_TYPES.map(t => <option key={t} value={t}>{t}</option>)}
+        </select>
+      </label>
 
-          <label className="workbench-field">
-            <span className="workbench-field-label">Type</span>
-            <select className="input input-full" value={lootType} onChange={e => setLootType(e.target.value as LootType)}>
-              {LOOT_TYPES.map(t => <option key={t} value={t}>{t}</option>)}
-            </select>
-          </label>
+      <label className="workbench-field">
+        <span className="workbench-field-label">Content</span>
+        <textarea
+          className="input workbench-textarea mono"
+          value={body}
+          onChange={e => setBody(e.target.value)}
+          rows={6}
+        />
+      </label>
 
-          <label className="workbench-field">
-            <span className="workbench-field-label">Content</span>
-            <textarea
-              className="input workbench-textarea mono"
-              value={body}
-              onChange={e => setBody(e.target.value)}
-              rows={6}
-            />
-          </label>
+      <label className="workbench-field">
+        <span className="workbench-field-label">Tags (comma separated)</span>
+        <input className="input input-full" value={tagsInput} onChange={e => setTagsInput(e.target.value)} />
+      </label>
 
-          <label className="workbench-field">
-            <span className="workbench-field-label">Tags (comma separated)</span>
-            <input className="input input-full" value={tagsInput} onChange={e => setTagsInput(e.target.value)} />
-          </label>
+      {error && <div className="verify-error">{error}</div>}
 
-          {error && <div className="verify-error">{error}</div>}
-
-          <div className="confirm-action-buttons">
-            <ActionButton variant="default" onClick={onClose} disabled={saving}>Cancel</ActionButton>
-            <ActionButton variant="success" onClick={() => { void handleSave() }} disabled={saving}>
-              {saving ? 'Saving…' : 'Save to Loot'}
-            </ActionButton>
-          </div>
-        </div>
+      <div className="confirm-action-buttons">
+        <ActionButton variant="default" onClick={onClose} disabled={saving}>Cancel</ActionButton>
+        <ActionButton variant="success" onClick={() => { void handleSave() }} disabled={saving}>
+          {saving ? 'Saving…' : 'Save to Loot'}
+        </ActionButton>
       </div>
-    </div>,
-    document.body
+    </Sheet>
   )
 }

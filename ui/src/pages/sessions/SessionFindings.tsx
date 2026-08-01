@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react'
-import { createPortal } from 'react-dom'
 import { Plus, Trash2, Edit2, Shield, Search, X } from 'lucide-react'
 import { api } from '../../api'
+import { Sheet } from '../../components/Sheet'
 import type { SessionSummary, SessionFinding, CreateFindingPayload } from '../../api'
 
 const SEVERITIES = ['critical', 'high', 'medium', 'low', 'info'] as const
@@ -184,40 +184,37 @@ function EditFindingModal({ finding, saving, error, onSave, onClose }: EditFindi
     onSave(finding.finding_id, payload)
   }
 
-  return createPortal(
-    <div
-      className="modal-backdrop finding-modal-backdrop"
-      onClick={e => { if (e.target === e.currentTarget && !saving) onClose() }}
+  return (
+    <Sheet
+      isOpen
+      onClose={onClose}
+      disableClose={saving}
+      title={
+        <>
+          <Shield size={13} />
+          <span className="modal-name">Edit Finding</span>
+        </>
+      }
     >
-      <div className="modal finding-modal" role="dialog" aria-modal="true" aria-label="Edit Finding">
-        <div className="modal-header finding-modal-header">
-          <div className="modal-title-row">
-            <Shield size={13} />
-            <span className="modal-name">Edit Finding</span>
-          </div>
-          <button className="modal-close" onClick={onClose} disabled={saving}>×</button>
-        </div>
-        <FindingForm
-          title={form.title ?? ''}
-          severity={form.severity ?? 'info'}
-          status={form.status ?? 'open'}
-          description={form.description ?? ''}
-          tool={form.tool ?? ''}
-          cve={form.cve ?? ''}
-          evidence={form.evidence ?? ''}
-          recommendation={form.recommendation ?? ''}
-          tagsInput={tagsInput}
-          saving={saving}
-          error={error}
-          showStatus
-          onChange={handleChange}
-          onTagsChange={setTagsInput}
-          onSave={handleSave}
-          onCancel={onClose}
-        />
-      </div>
-    </div>,
-    document.body
+      <FindingForm
+        title={form.title ?? ''}
+        severity={form.severity ?? 'info'}
+        status={form.status ?? 'open'}
+        description={form.description ?? ''}
+        tool={form.tool ?? ''}
+        cve={form.cve ?? ''}
+        evidence={form.evidence ?? ''}
+        recommendation={form.recommendation ?? ''}
+        tagsInput={tagsInput}
+        saving={saving}
+        error={error}
+        showStatus
+        onChange={handleChange}
+        onTagsChange={setTagsInput}
+        onSave={handleSave}
+        onCancel={onClose}
+      />
+    </Sheet>
   )
 }
 
@@ -369,38 +366,35 @@ export function SessionFindings({
         )}
       </div>
 
-      {showForm && createPortal(
-        <div
-          className="modal-backdrop finding-modal-backdrop"
-          onClick={e => { if (e.target === e.currentTarget) { setShowForm(false); setError(null) } }}
+      {showForm && (
+        <Sheet
+          isOpen
+          onClose={() => { setShowForm(false); setError(null) }}
+          disableClose={saving}
+          title={
+            <>
+              <Shield size={13} />
+              <span className="modal-name">Add Finding</span>
+            </>
+          }
         >
-          <div className="modal finding-modal" role="dialog" aria-modal="true" aria-label="Add Finding">
-            <div className="modal-header finding-modal-header">
-              <div className="modal-title-row">
-                <Shield size={13} />
-                <span className="modal-name">Add Finding</span>
-              </div>
-              <button className="modal-close" onClick={() => { setShowForm(false); setError(null) }}>×</button>
-            </div>
-            <FindingForm
-              title={form.title}
-              severity={form.severity}
-              description={form.description ?? ''}
-              tool={form.tool ?? ''}
-              cve={form.cve ?? ''}
-              evidence={form.evidence ?? ''}
-              recommendation={form.recommendation ?? ''}
-              tagsInput={tagsInput}
-              saving={saving}
-              error={error}
-              onChange={updateAddForm}
-              onTagsChange={setTagsInput}
-              onSave={saveFinding}
-              onCancel={() => { setShowForm(false); setError(null) }}
-            />
-          </div>
-        </div>,
-        document.body
+          <FindingForm
+            title={form.title}
+            severity={form.severity}
+            description={form.description ?? ''}
+            tool={form.tool ?? ''}
+            cve={form.cve ?? ''}
+            evidence={form.evidence ?? ''}
+            recommendation={form.recommendation ?? ''}
+            tagsInput={tagsInput}
+            saving={saving}
+            error={error}
+            onChange={updateAddForm}
+            onTagsChange={setTagsInput}
+            onSave={saveFinding}
+            onCancel={() => { setShowForm(false); setError(null) }}
+          />
+        </Sheet>
       )}
 
       {visible.length === 0 && (

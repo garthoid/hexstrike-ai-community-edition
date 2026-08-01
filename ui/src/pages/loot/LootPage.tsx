@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { ConfirmActionModal } from '../../components/ConfirmActionModal'
+import { Sheet } from '../../components/Sheet'
 import { useToast } from '../../components/ToastProvider'
 import { BrowserPage } from '../../components/layout/BrowserPage'
 import {
@@ -399,31 +400,28 @@ function CredModal({ item, saving, error, onSave, onClose }: CredModalProps) {
     setForm(p => ({ ...p, [key]: value }))
   }
 
-  return createPortal(
-    <div
-      className="modal-backdrop loot-modal-backdrop"
-      onClick={e => { if (e.target === e.currentTarget && !saving) onClose() }}
+  return (
+    <Sheet
+      isOpen
+      onClose={onClose}
+      disableClose={saving}
+      title={
+        <>
+          <KeyRound size={13} />
+          <span className="modal-name">{item ? 'Edit Credential' : 'Add Credential'}</span>
+        </>
+      }
     >
-      <div className="modal loot-modal" role="dialog" aria-modal="true">
-        <div className="modal-header loot-modal-header">
-          <div className="modal-title-row">
-            <KeyRound size={13} />
-            <span className="modal-name">{item ? 'Edit Credential' : 'Add Credential'}</span>
-          </div>
-          <button className="modal-close" onClick={onClose} disabled={saving}>×</button>
-        </div>
-        <CredForm
-          form={form}
-          saving={saving}
-          error={error}
-          saveLabel={item ? 'Save Changes' : 'Add Credential'}
-          onChange={handleChange}
-          onSave={() => onSave(form)}
-          onCancel={onClose}
-        />
-      </div>
-    </div>,
-    document.body
+      <CredForm
+        form={form}
+        saving={saving}
+        error={error}
+        saveLabel={item ? 'Save Changes' : 'Add Credential'}
+        onChange={handleChange}
+        onSave={() => onSave(form)}
+        onCancel={onClose}
+      />
+    </Sheet>
   )
 }
 
@@ -446,31 +444,28 @@ function LootModal({ item, saving, error, onSave, onClose }: LootModalProps) {
     setForm(p => ({ ...p, [key]: value }))
   }
 
-  return createPortal(
-    <div
-      className="modal-backdrop loot-modal-backdrop"
-      onClick={e => { if (e.target === e.currentTarget && !saving) onClose() }}
+  return (
+    <Sheet
+      isOpen
+      onClose={onClose}
+      disableClose={saving}
+      title={
+        <>
+          <Package size={13} />
+          <span className="modal-name">{item ? 'Edit Loot' : 'Add Loot'}</span>
+        </>
+      }
     >
-      <div className="modal loot-modal" role="dialog" aria-modal="true">
-        <div className="modal-header loot-modal-header">
-          <div className="modal-title-row">
-            <Package size={13} />
-            <span className="modal-name">{item ? 'Edit Loot' : 'Add Loot'}</span>
-          </div>
-          <button className="modal-close" onClick={onClose} disabled={saving}>×</button>
-        </div>
-        <LootForm
-          form={form}
-          saving={saving}
-          error={error}
-          saveLabel={item ? 'Save Changes' : 'Add Loot'}
-          onChange={handleChange}
-          onSave={() => onSave(form)}
-          onCancel={onClose}
-        />
-      </div>
-    </div>,
-    document.body
+      <LootForm
+        form={form}
+        saving={saving}
+        error={error}
+        saveLabel={item ? 'Save Changes' : 'Add Loot'}
+        onChange={handleChange}
+        onSave={() => onSave(form)}
+        onCancel={onClose}
+      />
+    </Sheet>
   )
 }
 

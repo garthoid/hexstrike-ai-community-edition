@@ -2,7 +2,7 @@ import { RefreshCw, Target } from 'lucide-react'
 import { useEffect, useMemo, useRef } from 'react'
 import type { AttackChainStep } from '../../api'
 import type { StartMode } from './constants'
-import { useEscapeClose } from '../../hooks/useEscapeClose'
+import { Sheet } from '../../components/Sheet'
 
 export function StartSessionModal({
   startMode,
@@ -67,94 +67,86 @@ export function StartSessionModal({
     return () => window.cancelAnimationFrame(frame)
   }, [startMode.key])
 
-  useEscapeClose(true, onClose)
-
   return (
-    <div className="modal-backdrop" onClick={e => { if (e.target === e.currentTarget) onClose() }}>
-      <div className="modal">
-        <div className="modal-header">
-          <div className="modal-title-row">
-            <span className="modal-name">Start {startMode.title}</span>
-          </div>
-          <button className="modal-close" onClick={onClose}>x</button>
-        </div>
-        <div className="modal-body">
-          <p className="modal-desc">{startMode.modalDescription}</p>
-          <div className="modal-section">
-            <span className="modal-label">Typical Tooling</span>
-            <div className="modal-params">
-              {modalTools.length === 0 && <span className="modal-param mono">none preloaded</span>}
-              {modalTools.map(tool => (
-                <span key={tool} className="modal-param mono">{tool}</span>
-              ))}
-            </div>
-          </div>
-          {startMode.key === 'from_template' && (
-            <div className="session-start-form">
-              <label className="mono">Template *</label>
-              <select
-                ref={templateSelectRef}
-                name="session-template"
-                className="session-objective-select"
-                value={selectedTemplateId}
-                onChange={e => setSelectedTemplateId(e.target.value)}
-              >
-                <option value="">Select template</option>
-                {templates.map(template => (
-                  <option key={template.template_id} value={template.template_id}>{template.name}</option>
-                ))}
-              </select>
-            </div>
-          )}
-          {startMode.key === 'intelligence' && (
-            <div className="session-start-form">
-              <label className="mono">Precision</label>
-              <select
-                name="session-intelligence-precision"
-                className="session-objective-select"
-                value={intelligencePrecision}
-                onChange={e => setIntelligencePrecision(e.target.value as 'quick' | 'comprehensive' | 'stealth')}
-              >
-                <option value="quick">Quick (fewest tools)</option>
-                <option value="comprehensive">Comprehensive (safer coverage)</option>
-                <option value="stealth">Stealth (low-noise)</option>
-              </select>
-            </div>
-          )}
-          <div className="session-start-form">
-            <label className="mono" htmlFor="session-target-input">Target *</label>
-            <input
-              id="session-target-input"
-              ref={targetInputRef}
-              className="search-input mono"
-              value={modalTarget}
-              onChange={e => setModalTarget(e.target.value)}
-              placeholder={startMode.placeholder}
-            />
-            <label className="mono" htmlFor="session-note-input">Note (optional)</label>
-            <textarea
-              id="session-note-input"
-              className="session-step-params mono"
-              rows={3}
-              value={modalNote}
-              onChange={e => setModalNote(e.target.value)}
-              placeholder="Context for this run"
-            />
-            {modalError && <div className="run-error">{modalError}</div>}
-            <div className="session-start-actions">
-              <button className="session-action-btn" onClick={onClose}>Cancel</button>
-              <button
-                className="session-run-btn"
-                onClick={onSubmit}
-                disabled={creatingSession}
-              >
-                {creatingSession ? <RefreshCw size={13} className="spin" /> : <Target size={13} />}
-                {creatingSession ? 'Starting…' : (submitLabel || 'Start Session')}
-              </button>
-            </div>
-          </div>
+    <Sheet
+      isOpen
+      onClose={onClose}
+      title={<span className="modal-name">Start {startMode.title}</span>}
+    >
+      <p className="modal-desc">{startMode.modalDescription}</p>
+      <div className="modal-section">
+        <span className="modal-label">Typical Tooling</span>
+        <div className="modal-params">
+          {modalTools.length === 0 && <span className="modal-param mono">none preloaded</span>}
+          {modalTools.map(tool => (
+            <span key={tool} className="modal-param mono">{tool}</span>
+          ))}
         </div>
       </div>
-    </div>
+      {startMode.key === 'from_template' && (
+        <div className="session-start-form">
+          <label className="mono">Template *</label>
+          <select
+            ref={templateSelectRef}
+            name="session-template"
+            className="session-objective-select"
+            value={selectedTemplateId}
+            onChange={e => setSelectedTemplateId(e.target.value)}
+          >
+            <option value="">Select template</option>
+            {templates.map(template => (
+              <option key={template.template_id} value={template.template_id}>{template.name}</option>
+            ))}
+          </select>
+        </div>
+      )}
+      {startMode.key === 'intelligence' && (
+        <div className="session-start-form">
+          <label className="mono">Precision</label>
+          <select
+            name="session-intelligence-precision"
+            className="session-objective-select"
+            value={intelligencePrecision}
+            onChange={e => setIntelligencePrecision(e.target.value as 'quick' | 'comprehensive' | 'stealth')}
+          >
+            <option value="quick">Quick (fewest tools)</option>
+            <option value="comprehensive">Comprehensive (safer coverage)</option>
+            <option value="stealth">Stealth (low-noise)</option>
+          </select>
+        </div>
+      )}
+      <div className="session-start-form">
+        <label className="mono" htmlFor="session-target-input">Target *</label>
+        <input
+          id="session-target-input"
+          ref={targetInputRef}
+          className="search-input mono"
+          value={modalTarget}
+          onChange={e => setModalTarget(e.target.value)}
+          placeholder={startMode.placeholder}
+        />
+        <label className="mono" htmlFor="session-note-input">Note (optional)</label>
+        <textarea
+          id="session-note-input"
+          className="session-step-params mono"
+          rows={3}
+          value={modalNote}
+          onChange={e => setModalNote(e.target.value)}
+          placeholder="Context for this run"
+        />
+        {modalError && <div className="run-error">{modalError}</div>}
+        <div className="session-start-actions">
+          <button className="session-action-btn" onClick={onClose}>Cancel</button>
+          <button
+            className="session-run-btn"
+            onClick={onSubmit}
+            disabled={creatingSession}
+          >
+            {creatingSession ? <RefreshCw size={13} className="spin" /> : <Target size={13} />}
+            {creatingSession ? 'Starting…' : (submitLabel || 'Start Session')}
+          </button>
+        </div>
+      </div>
+    </Sheet>
   )
 }
