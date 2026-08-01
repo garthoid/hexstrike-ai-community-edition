@@ -1,5 +1,21 @@
 /* ── Reports Page ────────────────────────────────────────────────────────────── */
 
+.reports-page-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  padding: 24px;
+}
+
+.reports-page .section {
+  background: none;
+  border: none;
+  border-radius: 0;
+  overflow: visible;
+}
+
 /* Timeline */
 .reports-timeline-wrap {
   display: flex;

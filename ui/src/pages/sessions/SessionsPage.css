@@ -38,8 +38,6 @@
 .sessions-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-  gap: 12px;
-  padding: 4px 0;
 }
 
 .session-start-form {

@@ -389,7 +389,7 @@ export default function WorkbenchPage({
             )}
             main={(
               <div className="workbench-main">
-                <section className={`workbench-panel${selected ? ' section' : ''}`}>
+                <section className="workbench-panel">
                   {selected
                     ? (
                       <OperationPanel

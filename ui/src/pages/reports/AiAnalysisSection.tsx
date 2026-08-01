@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { Brain, RefreshCw } from 'lucide-react'
 import { api } from '../../api'
 import type { LlmSession, LlmVulnerability } from '../../api/types/llm'
@@ -117,12 +117,11 @@ function SessionRow({ session }: SessionRowProps) {
 }
 
 export function AiAnalysisSection() {
-  const [sectionOpen, setSectionOpen] = useState(false)
   const [sessions, setSessions] = useState<LlmSession[] | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  async function load() {
+  const load = useCallback(async () => {
     setLoading(true)
     setError(null)
     try {
@@ -133,75 +132,59 @@ export function AiAnalysisSection() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [])
 
-  function handleToggle() {
-    if (!sectionOpen && sessions === null) {
-      void load()
-    }
-    setSectionOpen(o => !o)
-  }
+  useEffect(() => { void load() }, [load])
 
   return (
     <section className="section">
-      <div className="section-header" style={{ cursor: 'pointer' }} onClick={handleToggle}>
+      <div className="section-header">
         <h3>
-          <CollapseChevron open={sectionOpen} size={13} className="section-chevron" />
           <Brain size={15} style={{ verticalAlign: 'middle', marginRight: 6 }} />
           AI Analysis Reports
           {sessions !== null && (
             <span className="badge" style={{ marginLeft: 8 }}>{sessions.length}</span>
           )}
         </h3>
-        {sectionOpen && (
-          <button
-            className="icon-btn"
-            onClick={e => { e.stopPropagation(); void load() }}
-            title="Refresh"
-          >
-            <RefreshCw size={14} className={loading ? 'spin' : undefined} />
-          </button>
-        )}
+        <button className="icon-btn" onClick={() => void load()} title="Refresh">
+          <RefreshCw size={14} className={loading ? 'spin' : undefined} />
+        </button>
       </div>
 
-      {sectionOpen && (
-        <>
-          {loading && sessions === null && (
-            <div className="tasks-empty">
-              <RefreshCw size={24} className="spin" color="var(--text-dim)" />
-              <p>Loading AI analysis reports…</p>
-            </div>
-          )}
+      {loading && sessions === null && (
+        <div className="tasks-empty">
+          <RefreshCw size={24} className="spin" color="var(--text-dim)" />
+          <p>Loading AI analysis reports…</p>
+        </div>
+      )}
 
-          {error && (
-            <div className="tasks-empty">
-              <p style={{ color: 'var(--red)' }}>{error}</p>
-            </div>
-          )}
+      {error && (
+        <div className="tasks-empty">
+          <p style={{ color: 'var(--red)' }}>{error}</p>
+        </div>
+      )}
 
-          {sessions !== null && sessions.length === 0 && !loading && (
-            <div className="tasks-empty">
-              <Brain size={32} color="var(--text-dim)" />
-              <p>No AI analysis reports yet. Run the AI Analyze step inside a session.</p>
-            </div>
-          )}
+      {sessions !== null && sessions.length === 0 && !loading && (
+        <div className="tasks-empty">
+          <Brain size={32} color="var(--text-dim)" />
+          <p>No AI analysis reports yet. Run the AI Analyze step inside a session.</p>
+        </div>
+      )}
 
-          {sessions !== null && sessions.length > 0 && (
-            <div className="reports-table">
-              <div className="ai-report-thead">
-                <span></span>
-                <span>Target</span>
-                <span>Risk</span>
-                <span>Session</span>
-                <span>Date</span>
-                <span>Model</span>
-              </div>
-              {sessions.map(s => (
-                <SessionRow key={s.session_id} session={s} />
-              ))}
-            </div>
-          )}
-        </>
+      {sessions !== null && sessions.length > 0 && (
+        <div className="reports-table">
+          <div className="ai-report-thead">
+            <span></span>
+            <span>Target</span>
+            <span>Risk</span>
+            <span>Session</span>
+            <span>Date</span>
+            <span>Model</span>
+          </div>
+          {sessions.map(s => (
+            <SessionRow key={s.session_id} session={s} />
+          ))}
+        </div>
       )}
     </section>
   )
