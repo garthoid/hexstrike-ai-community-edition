@@ -1,8 +1,9 @@
 /* ── Settings Page ───────────────────────────────────────────────────────── */
-.settings-page {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
+.settings-page .section {
+  background: none;
+  border: none;
+  border-radius: 0;
+  overflow: visible;
 }
 
 .settings-appearance-row {
@@ -38,10 +39,6 @@
   font-size: 18px;
 }
 
-.settings-appearance-btn {
-  margin-top: 6px;
-}
-
 .settings-appearance-card--clickable {
   cursor: pointer;
   transition: border-color 0.15s, box-shadow 0.15s, transform 0.12s;
@@ -57,18 +54,25 @@
   outline-offset: 2px;
 }
 
+.settings-maintenance-card.settings-appearance-card--clickable:hover {
+  border-color: color-mix(in srgb, var(--warning) 42%, var(--border));
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--warning) 22%, transparent);
+}
+
+.settings-appearance-card--disabled {
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+.settings-appearance-card--disabled:hover {
+  border-color: color-mix(in srgb, var(--warning) 26%, var(--border));
+  box-shadow: none;
+}
+
 .settings-appearance-tap-hint {
   margin-top: 6px;
   font-size: 11px;
   color: var(--text-dim);
-}
-
-.settings-appearance-actions {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 8px;
-  margin-top: 2px;
 }
 
 .settings-grid {

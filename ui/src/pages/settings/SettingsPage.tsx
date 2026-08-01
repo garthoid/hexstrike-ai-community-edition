@@ -10,6 +10,8 @@ import {
   ServerEnvironmentSection,
   WordlistsSection,
 } from './SettingsSections'
+import { SettingsSectionNav, type SettingsSection } from './SettingsSectionNav'
+import { BrowserPage } from '../../components/layout/BrowserPage'
 import type { Page } from '../../app/routing'
 import type { PageConfig } from '../../hooks/usePageVisibility'
 import './SettingsPage.css'
@@ -34,6 +36,7 @@ export default function SettingsPage({
   reorderPage: (draggedId: string, targetId: string) => void
 }) {
   const [themeModalOpen, setThemeModalOpen] = useState(false)
+  const [section, setSection] = useState<SettingsSection>('server')
 
   const {
     settings,
@@ -101,7 +104,7 @@ export default function SettingsPage({
   if (!settings) return null
 
   return (
-    <div className="settings-page">
+    <>
       <ThemePickerModal
         isOpen={themeModalOpen}
         themeId={themeId}
@@ -111,104 +114,135 @@ export default function SettingsPage({
         onClose={() => setThemeModalOpen(false)}
       />
 
-      <div className="kpi-row settings-appearance-row">
-        <div
-          className="stat-card settings-appearance-card settings-appearance-card--action settings-appearance-card--clickable"
-          role="button"
-          tabIndex={0}
-          onClick={() => setThemeModalOpen(true)}
-          onKeyDown={e => {
-            if (e.key === 'Enter' || e.key === ' ') {
-              e.preventDefault()
-              setThemeModalOpen(true)
-            }
-          }}
-          title="Open theme picker"
-        >
-          <div className="stat-icon" style={{ color: 'var(--accent)' }}><Palette size={20} /></div>
-          <div className="stat-body settings-appearance-body">
-            <div className="stat-label">Appearance</div>
-            <div className="stat-value settings-appearance-value">{THEME_OPTIONS.find(t => t.id === themeId)?.label ?? themeId}</div>
-            <div className="stat-sub">Preview and apply a theme instantly</div>
-            <div className="settings-appearance-tap-hint mono">Click card to open picker</div>
-          </div>
-        </div>
+      <BrowserPage
+        className="settings-page"
+        top={(
+          <div className="kpi-row settings-appearance-row">
+            <div
+              className="stat-card settings-appearance-card settings-appearance-card--action settings-appearance-card--clickable"
+              role="button"
+              tabIndex={0}
+              onClick={() => setThemeModalOpen(true)}
+              onKeyDown={e => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault()
+                  setThemeModalOpen(true)
+                }
+              }}
+              title="Open theme picker"
+            >
+              <div className="stat-icon" style={{ color: 'var(--accent)' }}><Palette size={20} /></div>
+              <div className="stat-body settings-appearance-body">
+                <div className="stat-label">Appearance</div>
+                <div className="stat-value settings-appearance-value">{THEME_OPTIONS.find(t => t.id === themeId)?.label ?? themeId}</div>
+                <div className="stat-sub">Preview and apply a theme instantly</div>
+                <div className="settings-appearance-tap-hint mono">Click card to open picker</div>
+              </div>
+            </div>
 
-        <div className="stat-card settings-appearance-card settings-maintenance-card">
-          <div className="stat-icon" style={{ color: 'var(--warning)' }}><Trash2 size={20} /></div>
-          <div className="stat-body settings-appearance-body">
-            <div className="stat-label">Maintenance</div>
-            <div className="stat-value settings-appearance-value">Cache</div>
-            <div className="stat-sub">Clear cached tool results and force fresh data</div>
-            <div className="settings-appearance-actions">
-              <button className="btn-secondary settings-appearance-btn" onClick={clearCache} disabled={clearingCache}>
-                {clearingCache ? 'Clearing…' : 'Clear Cache'}
-              </button>
+            <div
+              className={`stat-card settings-appearance-card settings-maintenance-card settings-appearance-card--clickable${clearingCache ? ' settings-appearance-card--disabled' : ''}`}
+              role="button"
+              tabIndex={0}
+              onClick={() => { if (!clearingCache) clearCache() }}
+              onKeyDown={e => {
+                if ((e.key === 'Enter' || e.key === ' ') && !clearingCache) {
+                  e.preventDefault()
+                  clearCache()
+                }
+              }}
+              title="Clear all cached tool results"
+            >
+              <div className="stat-icon" style={{ color: 'var(--warning)' }}>
+                {clearingCache ? <RefreshCw size={20} className="spin" /> : <Trash2 size={20} />}
+              </div>
+              <div className="stat-body settings-appearance-body">
+                <div className="stat-label">Maintenance</div>
+                <div className="stat-value settings-appearance-value">Cache</div>
+                <div className="stat-sub">Clear cached tool results and force fresh data</div>
+                <div className="settings-appearance-tap-hint mono">
+                  {clearingCache ? 'Clearing…' : 'Click card to clear cache'}
+                </div>
+              </div>
             </div>
           </div>
-        </div>
-      </div>
+        )}
+        nav={<SettingsSectionNav section={section} setSection={setSection} />}
+        main={(
+          <div className="browser-main">
+            <div className="browser-scroll">
+              {section === 'server' && <ServerEnvironmentSection settings={settings} />}
 
-      <ServerEnvironmentSection settings={settings} />
+              {section === 'pages' && (
+                <PageVisibilitySection
+                  isPageEnabled={isPageEnabled}
+                  togglePage={togglePage}
+                  orderedPageConfigs={orderedPageConfigs}
+                  reorderPage={reorderPage}
+                />
+              )}
 
-      <PageVisibilitySection
-        isPageEnabled={isPageEnabled}
-        togglePage={togglePage}
-        orderedPageConfigs={orderedPageConfigs}
-        reorderPage={reorderPage}
+              {section === 'runtime' && (
+                <RuntimeConfigSection
+                  timeout={timeout}
+                  requestTimeout={requestTimeout}
+                  inactivityTimeout={inactivityTimeout}
+                  maxRuntime={maxRuntime}
+                  cacheSize={cacheSize}
+                  cacheTtl={cacheTtl}
+                  toolTtl={toolTtl}
+                  setTimeout_={setTimeout_}
+                  setRequestTimeout={setRequestTimeout}
+                  setInactivityTimeout={setInactivityTimeout}
+                  setMaxRuntime={setMaxRuntime}
+                  setCacheSize={setCacheSize}
+                  setCacheTtl={setCacheTtl}
+                  setToolTtl={setToolTtl}
+                  binaryPathOverrides={binaryPathOverrides}
+                  onAddBinaryOverride={addBinaryOverride}
+                  onRemoveBinaryOverride={removeBinaryOverride}
+                  onUpdateBinaryOverride={updateBinaryOverride}
+                  onTestBinaryOverride={testBinaryOverride}
+                  saving={saving}
+                  onSave={saveRuntime}
+                />
+              )}
+
+              {section === 'wordlists' && (
+                <WordlistsSection
+                  wordlistsDraft={wordlistsDraft}
+                  wordlistsSaving={wordlistsSaving}
+                  onAddWordlist={addWordlist}
+                  onSaveWordlists={saveWordlists}
+                  onUpdateWordlist={updateWordlist}
+                  onRemoveWordlist={removeWordlist}
+                  withCurrentTypeOption={withCurrentTypeOption}
+                  withCurrentSpeedOption={withCurrentSpeedOption}
+                  withCurrentCoverageOption={withCurrentCoverageOption}
+                />
+              )}
+
+              {section === 'chat' && (
+                <ChatSettingsSection
+                  chatPersonality={chatPersonality}
+                  setChatPersonality={setChatPersonality}
+                  customPrompt={customPrompt}
+                  setCustomPrompt={setCustomPrompt}
+                  personalityPresets={personalityPresets}
+                  summarizationThreshold={summarizationThreshold}
+                  setSummarizationThreshold={setSummarizationThreshold}
+                  contextInjectionChars={contextInjectionChars}
+                  setContextInjectionChars={setContextInjectionChars}
+                  llmThink={llmThink}
+                  setLlmThink={setLlmThink}
+                  saving={saving}
+                  onSave={saveChatSettings}
+                />
+              )}
+            </div>
+          </div>
+        )}
       />
-
-      <RuntimeConfigSection
-        timeout={timeout}
-        requestTimeout={requestTimeout}
-        inactivityTimeout={inactivityTimeout}
-        maxRuntime={maxRuntime}
-        cacheSize={cacheSize}
-        cacheTtl={cacheTtl}
-        toolTtl={toolTtl}
-        setTimeout_={setTimeout_}
-        setRequestTimeout={setRequestTimeout}
-        setInactivityTimeout={setInactivityTimeout}
-        setMaxRuntime={setMaxRuntime}
-        setCacheSize={setCacheSize}
-        setCacheTtl={setCacheTtl}
-        setToolTtl={setToolTtl}
-        binaryPathOverrides={binaryPathOverrides}
-        onAddBinaryOverride={addBinaryOverride}
-        onRemoveBinaryOverride={removeBinaryOverride}
-        onUpdateBinaryOverride={updateBinaryOverride}
-        onTestBinaryOverride={testBinaryOverride}
-        saving={saving}
-        onSave={saveRuntime}
-      />
-
-      <WordlistsSection
-        wordlistsDraft={wordlistsDraft}
-        wordlistsSaving={wordlistsSaving}
-        onAddWordlist={addWordlist}
-        onSaveWordlists={saveWordlists}
-        onUpdateWordlist={updateWordlist}
-        onRemoveWordlist={removeWordlist}
-        withCurrentTypeOption={withCurrentTypeOption}
-        withCurrentSpeedOption={withCurrentSpeedOption}
-        withCurrentCoverageOption={withCurrentCoverageOption}
-      />
-
-      <ChatSettingsSection
-        chatPersonality={chatPersonality}
-        setChatPersonality={setChatPersonality}
-        customPrompt={customPrompt}
-        setCustomPrompt={setCustomPrompt}
-        personalityPresets={personalityPresets}
-        summarizationThreshold={summarizationThreshold}
-        setSummarizationThreshold={setSummarizationThreshold}
-        contextInjectionChars={contextInjectionChars}
-        setContextInjectionChars={setContextInjectionChars}
-        llmThink={llmThink}
-        setLlmThink={setLlmThink}
-        saving={saving}
-        onSave={saveChatSettings}
-      />
-    </div>
+    </>
   )
 }

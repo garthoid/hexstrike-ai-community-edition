@@ -77,6 +77,7 @@ export function ServerEnvironmentSection({ settings }: { settings: Settings }) {
     <CollapsibleSection
       title="Server Environment"
       badge={<span className="badge">read-only</span>}
+      defaultOpen
     >
       <div className="settings-grid">
         <SettingsRow label="Host" value={settings.server.host} mono />
@@ -189,6 +190,7 @@ export function RuntimeConfigSection({
     <CollapsibleSection
       title="Runtime Config"
       badge={<span className="section-meta">changes apply immediately</span>}
+      defaultOpen
     >
       <div className="settings-grid">
         <SettingsField
@@ -362,6 +364,7 @@ export function WordlistsSection({
     <CollapsibleSection
       title="Wordlists"
       badge={<span className="badge">{wordlistsDraft.length}</span>}
+      defaultOpen
     >
       <div className="settings-actions" style={{ justifyContent: 'flex-end', marginBottom: '10px' }}>
         <ActionButton variant="default" onClick={onAddWordlist} disabled={wordlistsSaving}>
@@ -475,6 +478,7 @@ export function ChatSettingsSection({
     <CollapsibleSection
       title="Chat Widget"
       badge={<span className="section-meta">changes apply immediately</span>}
+      defaultOpen
     >
       <div className="settings-grid">
         <div className="settings-field">
@@ -550,7 +554,7 @@ export function PageVisibilitySection({
   const { dragHandlers, dragClassName } = useDragReorder(reorderPage)
 
   return (
-    <CollapsibleSection title="Navigation Pages">
+    <CollapsibleSection title="Navigation Pages" defaultOpen>
       <p className="settings-hint-inline" style={{ margin: '1rem 0', textAlign: 'center' }}>
         Hide pages you don't use from the navigation bar, and drag tiles to reorder them.
         Your preferences are saved in this browser only.
