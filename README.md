@@ -7,9 +7,7 @@
 
 ### AI-powered offensive security orchestration engine
 
-### ⚡ From target → recon → exploit chain in minutes
-
-⭐ If NyxStrike improves your workflow, consider starring the repo — it helps others discover it.
+#### ⚡ From target → recon → exploit chain in minutes
 
 [![Python](https://img.shields.io/badge/Python-3.13%2B-blue.svg)](https://www.python.org/)
 [![License](https://img.shields.io/badge/License-AGPLv3-green.svg)](LICENSE)
