@@ -1,12 +1,14 @@
-import { lazy, Suspense } from 'react'
-import { XCircle } from 'lucide-react'
+import { useState } from 'react'
+import { XCircle, Settings2, Plus } from 'lucide-react'
 import { type WebDashboardResponse, type Tool } from '../../api'
-import type { RunHistoryEntry, HistoryPoint } from '../../shared/types'
-import { KpiSection } from './KpiSection'
-import { ToolAvailabilitySection } from './ToolAvailabilitySection'
+import type { RunHistoryEntry } from '../../shared/types'
+import { ActionButton } from '../../components/ActionButton'
+import { InformationModal } from '../../components/InformationModal'
+import { useDragReorder } from '../../hooks/useDragReorder'
+import { useWidgetLayout } from '../../hooks/useWidgetLayout'
+import type { DashboardWidgetContext } from '../../app/widgetRegistry'
+import { WidgetFrame } from './WidgetFrame'
 import './DashboardPage.css'
-
-const ResourceSection = lazy(() => import('./ResourceSection').then(m => ({ default: m.ResourceSection })))
 
 // ─── Dashboard Page ───────────────────────────────────────────────────────────
 
@@ -22,6 +24,13 @@ interface DashboardPageProps {
 }
 
 export function DashboardPage({ health, tools, runHistory, loading, error, toolCategories, demo, demoCpuHistory }: DashboardPageProps) {
+  const [isCustomizing, setIsCustomizing] = useState(false)
+  const [isAddOpen, setIsAddOpen] = useState(false)
+  const { enabledWidgets, availableWidgets, addWidget, removeWidget, reorderWidget } = useWidgetLayout()
+  const { dragHandlers, dragClassName } = useDragReorder(reorderWidget)
+
+  const ctx: DashboardWidgetContext = { health, tools, runHistory, toolCategories, demo, demoCpuHistory }
+
   return (
     <>
       {loading && !health && (
@@ -37,14 +46,66 @@ export function DashboardPage({ health, tools, runHistory, loading, error, toolC
         </div>
       )}
 
-      <KpiSection health={health} tools={tools} runHistory={runHistory} />
-      <Suspense fallback={<div className="loading-state"><div className="spin spin--sm spin--green" /></div>}>
-        <ResourceSection
-          demoResources={demo ? health?.resources : undefined}
-          demoHistory={demo ? demoCpuHistory as HistoryPoint[] | undefined : undefined}
-        />
-      </Suspense>
-      <ToolAvailabilitySection health={health} tools={tools} toolCategories={toolCategories} />
+      <div className="dashboard-toolbar">
+        <ActionButton variant={isCustomizing ? 'success' : 'default'} onClick={() => setIsCustomizing(prev => !prev)}>
+          <Settings2 size={14} /> {isCustomizing ? 'Done' : 'Customize'}
+        </ActionButton>
+        {isCustomizing && (
+          <ActionButton variant="default" onClick={() => setIsAddOpen(true)}>
+            <Plus size={14} /> Add Widget
+          </ActionButton>
+        )}
+      </div>
+
+      {enabledWidgets.length === 0 && (
+        <div className="dashboard-empty-state">
+          <p>No widgets on your dashboard.</p>
+          <ActionButton variant="success" onClick={() => setIsAddOpen(true)}>
+            <Plus size={14} /> Add Widget
+          </ActionButton>
+        </div>
+      )}
+
+      {enabledWidgets.map(widget => (
+        <WidgetFrame
+          key={widget.id}
+          id={widget.id}
+          label={widget.label}
+          isCustomizing={isCustomizing}
+          dragHandlers={dragHandlers}
+          dragClassName={dragClassName}
+          onRemove={removeWidget}
+        >
+          {widget.render(ctx)}
+        </WidgetFrame>
+      ))}
+
+      <InformationModal isOpen={isAddOpen} title="Add Widget" onClose={() => setIsAddOpen(false)}>
+        {availableWidgets.length === 0 ? (
+          <p className="modal-desc">All available widgets are already on your dashboard.</p>
+        ) : (
+          <div className="dashboard-add-widget-list">
+            {availableWidgets.map(w => {
+              const Icon = w.icon
+              return (
+                <button
+                  key={w.id}
+                  type="button"
+                  className="dashboard-add-widget-item"
+                  onClick={() => { addWidget(w.id); setIsAddOpen(false) }}
+                >
+                  <span className="dashboard-add-widget-icon"><Icon size={16} /></span>
+                  <span className="dashboard-add-widget-text">
+                    <span className="dashboard-add-widget-label">{w.label}</span>
+                    <span className="dashboard-add-widget-desc">{w.description}</span>
+                  </span>
+                  <Plus size={14} />
+                </button>
+              )
+            })}
+          </div>
+        )}
+      </InformationModal>
 
       <div className="dashboard-signature-wrap">
         <span className="dashboard-signature mono">
