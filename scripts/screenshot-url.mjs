@@ -2,16 +2,21 @@
 // Copyright (c) 2026 CommonHuman-Lab
 //
 // screenshot-url.mjs — screenshot a single page of the NyxStrike dashboard,
-// for quick visual checks while iterating on UI changes.
+// for quick visual checks while iterating on UI changes. Optionally click an
+// element and/or press a key first, to capture interactive states (modals,
+// sheets, dropdowns) rather than just the page's initial load state.
 //
 // Usage:
-//   node scripts/screenshot-url.mjs <hash-route-or-url> [output.png] [--theme=<id>] [--no-demo]
+//   node scripts/screenshot-url.mjs <hash-route-or-url> [output.png] [--theme=<id>] [--no-demo] [--click=<selector>] [--press=<key>] [--wait-for=<selector>]
 //
 // Examples:
 //   node scripts/screenshot-url.mjs '#/tools'
 //   node scripts/screenshot-url.mjs '#/tools' tools.png --theme=synthwave
 //   node scripts/screenshot-url.mjs http://localhost:5173/#/loot loot.png
 //   node scripts/screenshot-url.mjs '#/settings' --no-demo
+//   # Click the first tool card and capture the detail Sheet that slides in:
+//   node scripts/screenshot-url.mjs '#/tools' sheet.png --click=".registry-card--clickable" --wait-for=".sheet"
+//   # Then close it and confirm Escape works (chain a second invocation with --press=Escape).
 //
 // Env vars (all optional):
 //   BASE_URL             default http://localhost:5173
@@ -38,8 +43,17 @@ const THEME_STORAGE_KEY = "nyxstrike_theme";
 
 const rawArgs = process.argv.slice(2);
 const themeArg = rawArgs.find((a) => a.startsWith("--theme="));
+const clickArg = rawArgs.find((a) => a.startsWith("--click="));
+const pressArg = rawArgs.find((a) => a.startsWith("--press="));
+const waitForArg = rawArgs.find((a) => a.startsWith("--wait-for="));
 const noDemo = rawArgs.includes("--no-demo");
-const positional = rawArgs.filter((a) => !a.startsWith("--theme=") && a !== "--no-demo");
+const positional = rawArgs.filter((a) =>
+  !a.startsWith("--theme=") && !a.startsWith("--click=") && !a.startsWith("--press=") &&
+  !a.startsWith("--wait-for=") && a !== "--no-demo"
+);
+const clickSelector = clickArg ? clickArg.slice("--click=".length) : null;
+const pressKey = pressArg ? pressArg.slice("--press=".length) : null;
+const waitForSelector = waitForArg ? waitForArg.slice("--wait-for=".length) : null;
 
 const target = positional[0];
 if (!target) {
@@ -81,9 +95,32 @@ if (themeId) {
   }, [THEME_STORAGE_KEY, themeId]);
 }
 
+const consoleErrors = [];
+page.on("console", (msg) => { if (msg.type() === "error") consoleErrors.push(msg.text()); });
+page.on("pageerror", (err) => consoleErrors.push("pageerror: " + err.message));
+
 await page.goto(url, { waitUntil: "networkidle" });
 await page.waitForTimeout(600);
+
+if (clickSelector) {
+  await page.locator(clickSelector).first().click();
+}
+if (waitForSelector) {
+  await page.waitForSelector(waitForSelector, { timeout: 5000 });
+}
+if (pressKey) {
+  await page.keyboard.press(pressKey);
+}
+if (clickSelector || pressKey) {
+  await page.waitForTimeout(300);
+}
+
 await page.screenshot({ path: outPath, fullPage: FULL_PAGE });
 await browser.close();
 
 console.log("Saved screenshot to", outPath);
+if (consoleErrors.length > 0) {
+  console.log("console/page errors:", consoleErrors.length);
+  console.log(consoleErrors.join("\n"));
+  process.exit(1);
+}
