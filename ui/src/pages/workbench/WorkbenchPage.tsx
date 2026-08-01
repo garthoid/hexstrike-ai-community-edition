@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { FlaskConical, RefreshCw, Search, ChevronDown, ChevronRight, X, Settings2, RotateCcw, Star, Database, Layers } from 'lucide-react'
+import { FlaskConical, RefreshCw, Search, ChevronDown, ChevronRight, ChevronsDownUp, X, Settings2, RotateCcw, Star, Database, Layers } from 'lucide-react'
 import { api } from '../../api'
 import type { WorkbenchOperation } from '../../api'
 import { usePersistentState } from '../../hooks/usePersistentState'
@@ -62,6 +62,7 @@ export default function WorkbenchPage({
   const [isCustomizing, setIsCustomizing] = useState(false)
   const [pendingReset, setPendingReset] = useState(false)
   const searchInputRef = useRef<HTMLInputElement>(null)
+  const operationRefs = useRef<Record<string, HTMLButtonElement | null>>({})
 
   const {
     allByCategory,
@@ -142,6 +143,19 @@ export default function WorkbenchPage({
 
   const selected = operations.find(op => op.id === selectedId) ?? null
 
+  useEffect(() => {
+    if (!selectedId) return
+    const op = operations.find(o => o.id === selectedId)
+    if (!op) return
+    const category = favorites.includes(selectedId) ? FAVORITES_CATEGORY : op.category
+    setExpanded(prev => (prev.length === 1 && prev[0] === category ? prev : [category]))
+  }, [selectedId, operations, favorites])
+
+  useEffect(() => {
+    if (!selectedId) return
+    operationRefs.current[selectedId]?.scrollIntoView({ block: 'nearest' })
+  }, [selectedId, expanded])
+
   function selectOperation(operationId: string) {
     setSelectedId(operationId)
     setPendingInitialInput(null)
@@ -149,7 +163,11 @@ export default function WorkbenchPage({
   }
 
   function toggleCategory(category: string) {
-    setExpanded(prev => prev.includes(category) ? prev.filter(c => c !== category) : [...prev, category])
+    setExpanded(prev => (prev.length === 1 && prev[0] === category ? [] : [category]))
+  }
+
+  function collapseAll() {
+    setExpanded([])
   }
 
   function setRecipeTracked(action: RecipeStep[] | ((prev: RecipeStep[]) => RecipeStep[])) {
@@ -255,6 +273,16 @@ export default function WorkbenchPage({
                     <FlaskConical size={14} /> Workbench
                   </span>
                   <div className="workbench-sidebar-title-actions">
+                    {!isCustomizing && expanded.length > 0 && (
+                      <button
+                        type="button"
+                        className="workbench-reset-link-btn"
+                        onClick={collapseAll}
+                        title="Collapse all categories"
+                      >
+                        <ChevronsDownUp size={12} />
+                      </button>
+                    )}
                     {isCustomizing && (
                       <button
                         type="button"
@@ -315,24 +343,29 @@ export default function WorkbenchPage({
                             {isCollapsed ? <ChevronRight size={12} /> : <ChevronDown size={12} />}
                             <span className="workbench-category-label">{category.replace(/_/g, ' ')}</span>
                           </button>
-                          {!isCollapsed && ops.map(op => (
-                            <div key={op.id} className="workbench-op-row-wrap">
-                              <button
-                                className={`workbench-op-btn${op.id === selectedId ? ' workbench-op-btn--active' : ''}`}
-                                onClick={() => selectOperation(op.id)}
-                              >
-                                {op.name}
-                              </button>
-                              <button
-                                type="button"
-                                className={`workbench-star-btn${isFavorite(op.id) ? ' workbench-star-btn--active' : ''}`}
-                                onClick={e => { e.stopPropagation(); toggleFavorite(op.id) }}
-                                title={isFavorite(op.id) ? `Unstar ${op.name}` : `Star ${op.name}`}
-                              >
-                                <Star size={12} fill={isFavorite(op.id) ? 'currentColor' : 'none'} />
-                              </button>
+                          {!isCollapsed && (
+                            <div className="workbench-category-ops">
+                              {ops.map(op => (
+                                <div key={op.id} className="workbench-op-row-wrap">
+                                  <button
+                                    ref={el => { operationRefs.current[op.id] = el }}
+                                    className={`workbench-op-btn${op.id === selectedId ? ' workbench-op-btn--active' : ''}`}
+                                    onClick={() => selectOperation(op.id)}
+                                  >
+                                    {op.name}
+                                  </button>
+                                  <button
+                                    type="button"
+                                    className={`workbench-star-btn${isFavorite(op.id) ? ' workbench-star-btn--active' : ''}`}
+                                    onClick={e => { e.stopPropagation(); toggleFavorite(op.id) }}
+                                    title={isFavorite(op.id) ? `Unstar ${op.name}` : `Star ${op.name}`}
+                                  >
+                                    <Star size={12} fill={isFavorite(op.id) ? 'currentColor' : 'none'} />
+                                  </button>
+                                </div>
+                              ))}
                             </div>
-                          ))}
+                          )}
                         </div>
                       )
                     })}
