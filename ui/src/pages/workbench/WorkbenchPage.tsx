@@ -1,11 +1,18 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { FlaskConical, RefreshCw, Search, ChevronDown, ChevronRight, X } from 'lucide-react'
+import { FlaskConical, RefreshCw, Search, ChevronDown, ChevronRight, X, Settings2, RotateCcw, Star } from 'lucide-react'
 import { api } from '../../api'
 import type { WorkbenchOperation } from '../../api'
 import { usePersistentState } from '../../hooks/usePersistentState'
+import { useWorkbenchLayout } from '../../hooks/useWorkbenchLayout'
+import { useWorkbenchFavorites } from '../../hooks/useWorkbenchFavorites'
+import { ActionButton } from '../../components/ActionButton'
+import { ConfirmActionModal } from '../../components/ConfirmActionModal'
 import { OperationPanel } from './OperationPanel'
 import { RecipePanel, type RecipeStep } from './RecipePanel'
+import { WorkbenchSidebarCustomize } from './WorkbenchSidebarCustomize'
 import './WorkbenchPage.css'
+
+const FAVORITES_CATEGORY = 'Favorites'
 
 function encodeRecipe(steps: RecipeStep[]): string {
   return JSON.stringify(steps.map(s => [s.operationId, s.params]))
@@ -50,7 +57,24 @@ export default function WorkbenchPage({
   const [recipePast, setRecipePast] = useState<RecipeStep[][]>([])
   const [recipeFuture, setRecipeFuture] = useState<RecipeStep[][]>([])
   const [pendingInitialInput, setPendingInitialInput] = useState<string | null>(null)
+  const [isCustomizing, setIsCustomizing] = useState(false)
+  const [pendingReset, setPendingReset] = useState(false)
   const searchInputRef = useRef<HTMLInputElement>(null)
+
+  const {
+    allByCategory,
+    visibleByCategory,
+    isCategoryHidden,
+    isOperationHidden,
+    hideCategory,
+    showCategory,
+    hideOperation,
+    showOperation,
+    reorderCategory,
+    reorderOperation,
+    resetLayout,
+  } = useWorkbenchLayout(categories, operations)
+  const { isFavorite, toggleFavorite } = useWorkbenchFavorites()
 
   useEffect(() => {
     let cancelled = false
@@ -100,19 +124,17 @@ export default function WorkbenchPage({
 
   const byCategory = useMemo(() => {
     const q = search.trim().toLowerCase()
-    const filtered = q
-      ? operations.filter(op => op.name.toLowerCase().includes(q) || op.description.toLowerCase().includes(q))
-      : operations
-    const groups = new Map<string, WorkbenchOperation[]>()
-    for (const op of filtered) {
-      const list = groups.get(op.category) ?? []
-      list.push(op)
-      groups.set(op.category, list)
-    }
-    return categories
-      .map((category): [string, WorkbenchOperation[]] => [category, groups.get(category) ?? []])
-      .filter(([, ops]) => ops.length > 0)
-  }, [operations, categories, search])
+    const filteredVisible = q
+      ? visibleByCategory.map((entry): [string, WorkbenchOperation[]] => [
+          entry[0],
+          entry[1].filter(op => op.name.toLowerCase().includes(q) || op.description.toLowerCase().includes(q)),
+        ])
+      : visibleByCategory
+    const base = filteredVisible.filter(([, ops]) => ops.length > 0)
+    if (q) return base
+    const favoriteOps = visibleByCategory.flatMap(([, ops]) => ops).filter(op => isFavorite(op.id))
+    return favoriteOps.length > 0 ? [[FAVORITES_CATEGORY, favoriteOps] as [string, WorkbenchOperation[]], ...base] : base
+  }, [visibleByCategory, search, isFavorite])
 
   const selected = operations.find(op => op.id === selectedId) ?? null
 
@@ -154,7 +176,7 @@ export default function WorkbenchPage({
       const isTyping = !!target && (
         target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.tagName === 'SELECT' || target.isContentEditable
       )
-      if (!isTyping && e.key === '/') {
+      if (!isTyping && e.key === '/' && !isCustomizing) {
         e.preventDefault()
         searchInputRef.current?.focus()
         return
@@ -167,7 +189,7 @@ export default function WorkbenchPage({
     }
     window.addEventListener('keydown', onKeyDown)
     return () => window.removeEventListener('keydown', onKeyDown)
-  }, [recipe, recipePast, recipeFuture])
+  }, [recipe, recipePast, recipeFuture, isCustomizing])
 
   function addToRecipe(operation: WorkbenchOperation, params: Record<string, string>, inputValue: string) {
     const step: RecipeStep = {
@@ -196,48 +218,118 @@ export default function WorkbenchPage({
         <>
           <nav className="workbench-sidebar">
             <div className="workbench-sidebar-title">
-              <FlaskConical size={14} /> Workbench
+              <span className="workbench-sidebar-title-text">
+                <FlaskConical size={14} /> Workbench
+              </span>
+              <div className="workbench-sidebar-title-actions">
+                {isCustomizing && (
+                  <button
+                    type="button"
+                    className="workbench-reset-link-btn"
+                    onClick={() => setPendingReset(true)}
+                    title="Reset layout"
+                  >
+                    <RotateCcw size={12} />
+                  </button>
+                )}
+                <ActionButton
+                  variant={isCustomizing ? 'success' : 'default'}
+                  className="workbench-customize-btn"
+                  onClick={() => setIsCustomizing(prev => !prev)}
+                >
+                  <Settings2 size={13} /> {isCustomizing ? 'Done' : 'Customize'}
+                </ActionButton>
+              </div>
             </div>
-            <div className="workbench-search">
+            <div className={`workbench-search${isCustomizing ? ' workbench-search--disabled' : ''}`}>
               <Search size={13} className="workbench-search-icon" />
               <input
                 ref={searchInputRef}
                 className="workbench-search-input"
-                placeholder="Find an operation… (/)"
+                placeholder={isCustomizing ? 'Search disabled while customizing' : 'Find an operation… (/)'}
                 value={search}
                 onChange={e => setSearch(e.target.value)}
+                disabled={isCustomizing}
               />
-              {search && (
+              {search && !isCustomizing && (
                 <button className="workbench-search-clear" onClick={() => setSearch('')} title="Clear search">
                   <X size={12} />
                 </button>
               )}
             </div>
 
-            {byCategory.map(([category, ops]) => {
-              const isCollapsed = search.trim() ? false : !expanded.includes(category)
-              return (
-                <div key={category} className="workbench-category">
-                  <button className="workbench-category-header" onClick={() => toggleCategory(category)}>
-                    {isCollapsed ? <ChevronRight size={12} /> : <ChevronDown size={12} />}
-                    <span className="workbench-category-label">{category.replace(/_/g, ' ')}</span>
-                  </button>
-                  {!isCollapsed && ops.map(op => (
-                    <button
-                      key={op.id}
-                      className={`workbench-op-btn${op.id === selectedId ? ' workbench-op-btn--active' : ''}`}
-                      onClick={() => selectOperation(op.id)}
-                    >
-                      {op.name}
-                    </button>
-                  ))}
-                </div>
-              )
-            })}
-            {byCategory.length === 0 && (
-              <div className="workbench-empty">No operations match "{search}".</div>
+            {isCustomizing ? (
+              <WorkbenchSidebarCustomize
+                allByCategory={allByCategory}
+                isCategoryHidden={isCategoryHidden}
+                isOperationHidden={isOperationHidden}
+                hideCategory={hideCategory}
+                showCategory={showCategory}
+                hideOperation={hideOperation}
+                showOperation={showOperation}
+                isFavorite={isFavorite}
+                toggleFavorite={toggleFavorite}
+                reorderCategory={reorderCategory}
+                reorderOperation={reorderOperation}
+              />
+            ) : (
+              <>
+                {byCategory.map(([category, ops]) => {
+                  const isCollapsed = search.trim() ? false : !expanded.includes(category)
+                  return (
+                    <div key={category} className="workbench-category">
+                      <button className="workbench-category-header" onClick={() => toggleCategory(category)}>
+                        {isCollapsed ? <ChevronRight size={12} /> : <ChevronDown size={12} />}
+                        <span className="workbench-category-label">{category.replace(/_/g, ' ')}</span>
+                      </button>
+                      {!isCollapsed && ops.map(op => (
+                        <div key={op.id} className="workbench-op-row-wrap">
+                          <button
+                            className={`workbench-op-btn${op.id === selectedId ? ' workbench-op-btn--active' : ''}`}
+                            onClick={() => selectOperation(op.id)}
+                          >
+                            {op.name}
+                          </button>
+                          <button
+                            type="button"
+                            className={`workbench-star-btn${isFavorite(op.id) ? ' workbench-star-btn--active' : ''}`}
+                            onClick={e => { e.stopPropagation(); toggleFavorite(op.id) }}
+                            title={isFavorite(op.id) ? `Unstar ${op.name}` : `Star ${op.name}`}
+                          >
+                            <Star size={12} fill={isFavorite(op.id) ? 'currentColor' : 'none'} />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )
+                })}
+                {byCategory.length === 0 && (
+                  <div className="workbench-empty">
+                    {search
+                      ? <>No operations match "{search}".</>
+                      : (
+                        <>
+                          All categories are hidden.{' '}
+                          <button type="button" className="workbench-empty-reset-link" onClick={resetLayout}>
+                            Reset layout
+                          </button>
+                        </>
+                      )}
+                  </div>
+                )}
+              </>
             )}
           </nav>
+
+          <ConfirmActionModal
+            isOpen={pendingReset}
+            title="Reset Workbench layout?"
+            description="This will un-hide all categories and tools and restore the default order. Starred favorites are not affected."
+            confirmLabel="Reset"
+            confirmVariant="default"
+            onConfirm={() => { resetLayout(); setPendingReset(false) }}
+            onClose={() => setPendingReset(false)}
+          />
 
           <div className="workbench-main">
             <section className={`workbench-panel${selected ? ' section' : ''}`}>
