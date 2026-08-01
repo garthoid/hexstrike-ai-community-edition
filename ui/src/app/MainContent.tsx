@@ -165,7 +165,7 @@ export function MainContent({
   reorderPage,
 }: MainContentProps) {
   return (
-    <main className={`main${page === 'run' || page === 'workbench' || page === 'tools' ? ' main--flush' : ''}`}>
+    <main className={`main${page === 'run' || page === 'workbench' || page === 'tools' || page === 'sessions' ? ' main--flush' : ''}`}>
       <Suspense fallback={<PageLoader />}>
         {page === 'settings' && (
           <SettingsPage

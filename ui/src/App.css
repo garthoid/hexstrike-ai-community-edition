@@ -75,7 +75,7 @@
   gap: 0;
   overflow: hidden;
   position: fixed;
-  top: 52px;
+  top: 40px;
   left: var(--sidebar-w, 0);
   right: 0;
   bottom: 0;
@@ -84,6 +84,175 @@
 
 .layout--demo .main--flush {
   top: 85px;
+}
+
+/* ── Browser page shell (flush two-column layout: nav rail + main column) ──── */
+
+.browser-page {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+.browser-page-top {
+  flex-shrink: 0;
+  padding: 14px 20px;
+  background: var(--bg-card2);
+  border-bottom: 1px solid var(--border);
+}
+
+.browser-page-row {
+  flex: 1 1 0;
+  display: flex;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.browser-nav {
+  flex: 0 0 240px;
+  display: flex;
+  flex-direction: column;
+  border-right: 1px solid var(--border);
+  padding: 10px 0;
+  overflow-y: auto;
+}
+
+.browser-nav-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 14px 10px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-h);
+}
+
+.browser-nav-title:not(:first-child) {
+  padding-top: 14px;
+}
+
+.browser-nav-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  width: 100%;
+  text-align: left;
+  background: none;
+  border: none;
+  border-left: 2px solid transparent;
+  color: var(--text-h);
+  padding: 7px 14px;
+  font-size: 12.5px;
+  cursor: pointer;
+}
+
+.browser-nav-item:hover {
+  background: var(--bg-card2);
+}
+
+.browser-nav-item--active {
+  color: var(--green);
+  border-left-color: var(--green);
+  background: var(--green-dim);
+}
+
+.browser-nav-item--column {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+}
+
+.browser-nav-label {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.browser-nav-desc {
+  font-size: 10.5px;
+  color: var(--text-dim);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+.browser-nav-count {
+  flex-shrink: 0;
+  font-size: 10.5px;
+  color: var(--text-dim);
+  background: var(--bg-card2);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 1px 7px;
+}
+
+.browser-nav-item--active .browser-nav-count {
+  color: var(--green);
+  border-color: rgba(0, 230, 118, 0.35);
+}
+
+.browser-main {
+  flex: 1 1 0;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.browser-main .section-header,
+.browser-main .registry-controls {
+  flex-shrink: 0;
+}
+
+.browser-scroll {
+  flex: 1 1 0;
+  overflow-y: auto;
+}
+
+.browser-aside {
+  flex: 0 0 320px;
+  border-left: 1px solid var(--border);
+  padding: 12px 10px;
+  overflow-y: auto;
+  transition: flex-grow 0.2s cubic-bezier(0.16, 1, 0.3, 1), flex-basis 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.browser-page-row--aside-grow .browser-aside {
+  flex: 1 1 0;
+}
+
+@media (max-width: 1280px) {
+  .browser-nav {
+    flex-basis: 200px;
+  }
+}
+
+@media (max-width: 980px) {
+  .browser-page-row {
+    flex-direction: column;
+    overflow-y: auto;
+  }
+
+  .browser-nav,
+  .browser-main {
+    border: none;
+    border-bottom: 1px solid var(--border);
+    flex: 0 0 auto;
+  }
+
+  .browser-nav {
+    max-height: 28vh;
+  }
+
+  .browser-scroll {
+    overflow-y: visible;
+  }
 }
 
 /* ── Top Bar ─────────────────────────────────────────────────────────────── */

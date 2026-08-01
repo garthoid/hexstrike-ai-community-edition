@@ -79,7 +79,7 @@ export default function ToolsPage({ health, tools, toolsStatus }: ToolsPageProps
   }
 
   return (
-    <div className="tools-page">
+    <div className="tools-page browser-page">
       {selectedTool && (
         <ToolModal
           tool={selectedTool}
@@ -88,7 +88,7 @@ export default function ToolsPage({ health, tools, toolsStatus }: ToolsPageProps
         />
       )}
 
-      <div className="tools-page-top">
+      <div className="browser-page-top">
         <KpiStrip
           items={[
             { icon: <Wrench size={16} />, label: 'Total Server Tools', value: tools.length, accent: 'var(--blue)' },
@@ -109,7 +109,7 @@ export default function ToolsPage({ health, tools, toolsStatus }: ToolsPageProps
         />
       </div>
 
-      <div className="tools-browser">
+      <div className="browser-page-row">
         <ToolsCategoryNav
           categories={cats}
           activeCat={activeCat}

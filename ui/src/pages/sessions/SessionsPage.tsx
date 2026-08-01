@@ -1,8 +1,8 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useSessionsStream } from './useSessionsStream'
 import {
-  RefreshCw, XCircle, Activity, CheckCircle, Pencil, Trash2, Play, Clock,
-  Layers, Target, Info,
+  RefreshCw, XCircle, Activity, CheckCircle, Pencil,
+  Layers, Target,
 } from 'lucide-react'
 import {
   api,
@@ -12,16 +12,15 @@ import {
   type SessionTemplate,
   type Tool,
 } from '../../api'
-import { CollapsibleSection } from '../../components/CollapsibleSection'
-import { StatCard } from '../../components/StatCard'
+import { KpiStrip } from '../../components/KpiStrip'
 import { ConfirmActionModal } from '../../components/ConfirmActionModal'
 import { InformationModal } from '../../components/InformationModal'
 import { useToast } from '../../components/ToastProvider'
 import { useEscapeClose } from '../../hooks/useEscapeClose'
-import { fmtTs } from '../../shared/utils'
 import { START_MODES, type StartMode } from './constants'
-import { StartSessionModal, StartSessionSection } from './SessionsSections'
-import { SessionCard } from './SessionCard'
+import { StartSessionModal } from './SessionsSections'
+import { SessionsSetupNav } from './SessionsSetupNav'
+import { SessionsListCol } from './SessionsListCol'
 import './SessionsPage.css'
 import './SessionNotes.css'
 import './SessionFindings.css'
@@ -35,11 +34,7 @@ let sessionsBootstrapped = false
 let sessionsCacheData: SessionsResponse | null = null
 let sessionsCacheTools: Tool[] = []
 let sessionsCacheTemplates: SessionTemplate[] = []
-let sessionsCacheSections: {
-  showActive: boolean
-  showCompleted: boolean
-  showTemplates: boolean
-} | null = null
+let sessionsCacheView: 'active' | 'completed' | null = null
 
 export default function SessionsPage({ demoData, onOpenSession }: SessionsPageProps) {
   const { pushToast } = useToast()
@@ -47,8 +42,6 @@ export default function SessionsPage({ demoData, onOpenSession }: SessionsPagePr
   const [creatingSession, setCreatingSession] = useState(false)
   const [tools, setTools] = useState<Tool[]>(sessionsCacheTools)
   const [templates, setTemplates] = useState<SessionTemplate[]>(sessionsCacheTemplates)
-  const [createMsg, setCreateMsg] = useState<string | null>(null)
-  const [templateActionError, setTemplateActionError] = useState<string | null>(null)
   const [templateActionBusyId, setTemplateActionBusyId] = useState<string | null>(null)
   const [pendingDeleteTemplate, setPendingDeleteTemplate] = useState<SessionTemplate | null>(null)
   const [startMode, setStartMode] = useState<StartMode | null>(null)
@@ -73,11 +66,7 @@ export default function SessionsPage({ demoData, onOpenSession }: SessionsPagePr
   const [savingTemplate, setSavingTemplate] = useState(false)
   const [loading, setLoading] = useState(!demoData && !sessionsBootstrapped)
   const [error, setError] = useState<string | null>(null)
-  const [showActiveSessions, setShowActiveSessions] = useState(sessionsCacheSections?.showActive ?? true)
-  const [showCompletedSessions, setShowCompletedSessions] = useState(sessionsCacheSections?.showCompleted ?? false)
-  const [showCustomTemplates, setShowCustomTemplates] = useState(sessionsCacheSections?.showTemplates ?? true)
-  const sectionDefaultsSetRef = useRef(false)
-  const templateSectionTouchedRef = useRef(false)
+  const [sessionsView, setSessionsView] = useState<'active' | 'completed'>(sessionsCacheView ?? 'active')
 
   const { streamStatus } = useSessionsStream({
     enabled: !demoData,
@@ -94,12 +83,8 @@ export default function SessionsPage({ demoData, onOpenSession }: SessionsPagePr
   useEscapeClose(Boolean(editingTemplateId), closeTemplateEditor)
 
   useEffect(() => {
-    sessionsCacheSections = {
-      showActive: showActiveSessions,
-      showCompleted: showCompletedSessions,
-      showTemplates: showCustomTemplates,
-    }
-  }, [showActiveSessions, showCompletedSessions, showCustomTemplates])
+    sessionsCacheView = sessionsView
+  }, [sessionsView])
 
   useEffect(() => {
     if (demoData) return
@@ -118,20 +103,26 @@ export default function SessionsPage({ demoData, onOpenSession }: SessionsPagePr
       .finally(() => setLoading(false))
   }, [demoData])
 
-  useEffect(() => {
-    if (sectionDefaultsSetRef.current || loading || !data) return
+  const active = useMemo(() => {
     const rawActive = data?.active ?? []
-    const activeCount = rawActive.filter(s => (s.status ?? 'active') !== 'completed').length
-    setShowActiveSessions(activeCount > 0)
-    setShowCustomTemplates(templates.length > 0)
-    sectionDefaultsSetRef.current = true
-  }, [loading, data, templates.length])
+    return rawActive
+      .filter(s => (s.status ?? 'active') !== 'completed')
+      .sort((a, b) => (b.created_at ?? 0) - (a.created_at ?? 0))
+  }, [data])
+
+  const completed = useMemo(() => {
+    const rawActive = data?.active ?? []
+    return [
+      ...(data?.completed ?? []),
+      ...rawActive.filter(s => (s.status ?? 'active') === 'completed'),
+    ]
+      .filter((s, idx, arr) => arr.findIndex(x => x.session_id === s.session_id) === idx)
+      .sort((a, b) => (b.created_at ?? 0) - (a.created_at ?? 0))
+  }, [data])
 
   useEffect(() => {
-    if (loading) return
-    if (templateSectionTouchedRef.current) return
-    if (templates.length > 0) setShowCustomTemplates(true)
-  }, [loading, templates.length])
+    if (sessionsView === 'completed' && completed.length === 0) setSessionsView('active')
+  }, [sessionsView, completed.length])
 
   async function refreshTemplates() {
     if (demoData) return
@@ -184,7 +175,6 @@ export default function SessionsPage({ demoData, onOpenSession }: SessionsPagePr
     setEditTemplateSteps(template.workflow_steps ?? [])
     setEditToolSearch('')
     setEditTemplateError(null)
-    setTemplateActionError(null)
   }
 
   function closeTemplateEditor() {
@@ -204,16 +194,13 @@ export default function SessionsPage({ demoData, onOpenSession }: SessionsPagePr
   async function deleteTemplate(templateId: string) {
     if (demoData) return
     setTemplateActionBusyId(templateId)
-    setTemplateActionError(null)
     try {
       await api.deleteSessionTemplate(templateId)
       setTemplates(prev => prev.filter(t => t.template_id !== templateId))
       if (selectedTemplateId === templateId) setSelectedTemplateId('')
-      setCreateMsg('Template deleted.')
       pushToast('success', 'Template deleted')
     } catch (e) {
       const msg = String(e)
-      setTemplateActionError(msg)
       pushToast('error', `Delete failed: ${msg}`)
     } finally {
       setTemplateActionBusyId(null)
@@ -245,14 +232,12 @@ export default function SessionsPage({ demoData, onOpenSession }: SessionsPagePr
 
     setSavingTemplate(true)
     setEditTemplateError(null)
-    setTemplateActionError(null)
     try {
       await api.updateSessionTemplate(editingTemplateId, {
         name,
         workflow_steps: editTemplateSteps,
       })
       await refreshTemplates()
-      setCreateMsg('Template updated.')
       pushToast('success', 'Template updated')
       closeTemplateEditor()
     } catch (e) {
@@ -271,7 +256,6 @@ export default function SessionsPage({ demoData, onOpenSession }: SessionsPagePr
       return
     }
 
-    setCreateMsg(null)
     setModalError(null)
     setCreatingSession(true)
     try {
@@ -390,7 +374,6 @@ export default function SessionsPage({ demoData, onOpenSession }: SessionsPagePr
     } catch (e) {
       const msg = String(e)
       setModalError(msg)
-      setCreateMsg(msg)
       pushToast('error', `Session start failed: ${msg}`)
     } finally {
       setCreatingSession(false)
@@ -428,7 +411,6 @@ export default function SessionsPage({ demoData, onOpenSession }: SessionsPagePr
     } catch (e) {
       const msg = String(e)
       setModalError(msg)
-      setCreateMsg(msg)
       pushToast('error', `Session start failed: ${msg}`)
     } finally {
       setConfirmingPreview(false)
@@ -445,16 +427,6 @@ export default function SessionsPage({ demoData, onOpenSession }: SessionsPagePr
     <div className="error-banner"><XCircle size={16} /> {error}</div>
   )
 
-  const rawActive = data?.active ?? []
-  const active = rawActive
-    .filter(s => (s.status ?? 'active') !== 'completed')
-    .sort((a, b) => (b.created_at ?? 0) - (a.created_at ?? 0))
-  const completed = [
-    ...(data?.completed ?? []),
-    ...rawActive.filter(s => (s.status ?? 'active') === 'completed'),
-  ]
-    .filter((s, idx, arr) => arr.findIndex(x => x.session_id === s.session_id) === idx)
-    .sort((a, b) => (b.created_at ?? 0) - (a.created_at ?? 0))
   const allFindings = [...active, ...completed].reduce((sum, s) => sum + s.total_findings, 0)
   const uniqueTargets = new Set([...active, ...completed].map(s => s.target)).size
   const editingTemplate = editingTemplateId ? templates.find(t => t.template_id === editingTemplateId) ?? null : null
@@ -478,38 +450,7 @@ export default function SessionsPage({ demoData, onOpenSession }: SessionsPagePr
   const fmtNumber = (n?: number) => (typeof n === 'number' ? n.toFixed(2) : 'n/a')
 
   return (
-    <div className="page-content">
-      <div className="kpi-row">
-        <StatCard
-          icon={<Layers size={20} />}
-          label="Active Sessions"
-          value={active.length}
-          sub="in progress"
-          accent={active.length > 0 ? 'var(--green)' : 'var(--text-dim)'}
-        />
-        <StatCard icon={<CheckCircle size={20} />} label="Completed" value={completed.length} sub="archived" accent="var(--blue)" />
-        <StatCard
-          icon={<Activity size={20} />}
-          label="Total Findings"
-          value={allFindings}
-          sub="across all sessions"
-          accent="var(--amber)"
-        />
-        <StatCard
-          icon={<Target size={20} />}
-          label="Unique Targets"
-          value={uniqueTargets}
-          sub="scanned"
-          accent="var(--purple)"
-        />
-      </div>
-
-      <StartSessionSection
-        startModes={START_MODES}
-        onOpenStartMode={openStartModal}
-        createMsg={createMsg}
-      />
-
+    <div className="sessions-page browser-page">
       {startMode && !pendingPreview && (
         <StartSessionModal
           startMode={startMode}
@@ -618,119 +559,37 @@ export default function SessionsPage({ demoData, onOpenSession }: SessionsPagePr
 
       </InformationModal>
 
-      <CollapsibleSection
-        title={<>Active Sessions</>}
-        badge={<span className="badge">{active.length}</span>}
-        open={showActiveSessions}
-        onToggle={setShowActiveSessions}
-        headerRight={(
-          <div className="sessions-header-actions">
-            <span className={`sessions-stream-status sessions-stream-status--${streamStatus}`}>
-              {streamStatus === 'streaming' ? 'Live' : streamStatus === 'polling' ? 'Polling' : 'Offline'}
-            </span>
-          </div>
-        )}
-      >
-        {active.length === 0 ? (
-          <div className="tasks-empty">
-            <Layers size={28} color="var(--text-dim)" />
-            <p>No active sessions. Start a session from target to run tools manually.</p>
-          </div>
-        ) : (
-          <div className="sessions-grid">
-            {active.map(session => <SessionCard key={session.session_id} session={session} onOpen={onOpenSession} />)}
-          </div>
-        )}
-        <div className="section-meta session-list-footer-tip">
-          <Info size={12} />
-          Call MCP tool <span className="mono">handover_session("&lt;session_id&gt;", "optional note")</span> to continue the session with AI.
-        </div>
-      </CollapsibleSection>
+      <div className="browser-page-top">
+        <KpiStrip
+          items={[
+            { icon: <Layers size={16} />, label: 'Active Sessions', value: active.length, accent: active.length > 0 ? 'var(--green)' : 'var(--text-dim)' },
+            { icon: <CheckCircle size={16} />, label: 'Completed', value: completed.length, accent: 'var(--blue)' },
+            { icon: <Activity size={16} />, label: 'Total Findings', value: allFindings, accent: 'var(--amber)' },
+            { icon: <Target size={16} />, label: 'Unique Targets', value: uniqueTargets, accent: 'var(--purple)' },
+          ]}
+        />
+      </div>
 
-      <CollapsibleSection
-        title={<>Completed Sessions</>}
-        badge={<span className="badge">{completed.length}</span>}
-        open={showCompletedSessions}
-        onToggle={setShowCompletedSessions}
-      >
-        {completed.length === 0 ? (
-          <div className="tasks-empty">
-            <Layers size={28} color="var(--text-dim)" />
-            <p>No completed sessions yet.</p>
-          </div>
-        ) : (
-          <div className="sessions-grid">
-            {completed.map(session => <SessionCard key={session.session_id} session={session} onOpen={onOpenSession} />)}
-          </div>
-        )}
-      </CollapsibleSection>
+      <div className="browser-page-row">
+        <SessionsSetupNav
+          startModes={START_MODES}
+          templates={templates}
+          onOpenStartMode={openStartModal}
+          onUseTemplate={useTemplate}
+          onEditTemplate={openTemplateEditor}
+          onDeleteTemplate={setPendingDeleteTemplate}
+          templateActionBusyId={templateActionBusyId}
+        />
 
-      <CollapsibleSection
-        title={<>Custom Templates</>}
-        badge={<span className="badge">{templates.length}</span>}
-        open={showCustomTemplates}
-        onToggle={v => {
-          templateSectionTouchedRef.current = true
-          setShowCustomTemplates(v)
-        }}
-      >
-        {templateActionError && <div className="run-error">{templateActionError}</div>}
-
-        {templates.length === 0 ? (
-          <div className="tasks-empty">
-            <Layers size={28} color="var(--text-dim)" />
-            <p>No custom templates yet. Open a session and click Create Template.</p>
-          </div>
-        ) : (
-          <div className="sessions-grid">
-            {templates.map(template => (
-              <div key={template.template_id} className="session-card session-card--compact template-session-card">
-                <div className="session-card-header">
-                  <div className="session-target">
-                    <Layers size={13} color="var(--blue)" />
-                    <span className="mono">{template.name}</span>
-                  </div>
-                  <span className="session-tool-chip mono">Custom Template</span>
-                </div>
-
-                <div className="session-card-meta">
-                  <span><Activity size={11} /> {template.workflow_steps.length} tools</span>
-                  <span><Clock size={11} /> {fmtTs(template.updated_at)}</span>
-                </div>
-
-                <div className="session-tools">
-                  {template.workflow_steps.slice(0, 7).map((step, idx) => (
-                    <span key={`${template.template_id}:${idx}:${step.tool}`} className="session-tool-chip">
-                      {step.tool}
-                    </span>
-                  ))}
-                  {template.workflow_steps.length > 7 && (
-                    <span className="session-tool-chip">+{template.workflow_steps.length - 7}</span>
-                  )}
-                </div>
-
-                <div className="session-card-footer">
-                  <div className="template-card-actions">
-                    <button className="session-action-btn" onClick={() => useTemplate(template.template_id)}>
-                      <Play size={12} /> Use
-                    </button>
-                    <button className="session-action-btn" onClick={() => openTemplateEditor(template)}>
-                      <Pencil size={12} /> Edit
-                    </button>
-                    <button
-                      className="session-delete-btn"
-                      onClick={() => setPendingDeleteTemplate(template)}
-                      disabled={templateActionBusyId === template.template_id}
-                    >
-                      <Trash2 size={12} /> {templateActionBusyId === template.template_id ? 'Deleting…' : 'Delete'}
-                    </button>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-      </CollapsibleSection>
+        <SessionsListCol
+          active={active}
+          completed={completed}
+          view={sessionsView}
+          setView={setSessionsView}
+          streamStatus={streamStatus}
+          onOpenSession={onOpenSession}
+        />
+      </div>
 
       {editingTemplate && (
         <div className="modal-backdrop" onClick={e => { if (e.target === e.currentTarget) closeTemplateEditor() }}>

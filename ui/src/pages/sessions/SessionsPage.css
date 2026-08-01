@@ -1,3 +1,38 @@
+/* ── Sessions Overview Layout ────────────────────────────────────────────────── */
+
+.sessions-setup-template-row {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding-right: 8px;
+}
+
+.sessions-setup-template-btn {
+  flex: 1;
+  min-width: 0;
+}
+
+.sessions-setup-template-actions {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  flex-shrink: 0;
+}
+
+.sessions-setup-template-actions button {
+  border: none;
+  background: none;
+  color: var(--text-dim);
+  padding: 4px;
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+.sessions-setup-template-actions button:hover {
+  color: var(--text-h);
+  background: var(--bg-card2);
+}
+
 /* ── Sessions Page ───────────────────────────────────────────────────────────── */
 
 .sessions-grid {
@@ -5,27 +40,6 @@
   grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
   gap: 12px;
   padding: 4px 0;
-}
-
-.start-mode-grid {
-  gap: 1px;
-  background: var(--border);
-}
-
-.start-mode-card {
-  cursor: default;
-}
-
-.start-mode-icon {
-  color: var(--green);
-  display: inline-flex;
-  align-items: center;
-}
-
-.start-mode-detail {
-  color: var(--text-dim);
-  margin: 0;
-  font-size: 11px;
 }
 
 .session-start-form {
@@ -356,20 +370,6 @@
 
 .session-help-box p + p {
   margin-top: 6px;
-}
-
-.sessions-collapsed-toggle {
-  cursor: pointer;
-  transition: opacity 0.15s ease;
-}
-
-.sessions-collapsed-toggle:hover {
-  opacity: 0.9;
-}
-
-.sessions-collapsed-toggle:focus-visible {
-  outline: 1px solid var(--blue);
-  outline-offset: 2px;
 }
 
 .sessions-stream-status {
@@ -1023,17 +1023,6 @@
   flex-wrap: wrap;
 }
 
-.template-session-card {
-  transition: border-color 0.15s;
-}
-
-.template-card-actions {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  flex-wrap: wrap;
-}
-
 .modal--wide {
   width: min(860px, calc(100vw - 40px));
 }
@@ -1080,14 +1069,6 @@
 @media (max-width: 860px) {
   .template-editor-grid {
     grid-template-columns: 1fr;
-  }
-
-  .template-card-actions {
-    width: 100%;
-  }
-
-  .template-card-actions button {
-    flex: 1;
   }
 
   .session-start-actions {

@@ -31,7 +31,7 @@ export function ToolsRegistrySection({
   refreshingAvailability = false,
 }: ToolsRegistrySectionProps) {
   return (
-    <div className="tools-main-col">
+    <div className="browser-main">
       <div className="section-header">
         <h3>
           {activeCat === 'all' ? 'Tool Registry' : activeCat.replace(/_/g, ' ')}{' '}
@@ -80,7 +80,7 @@ export function ToolsRegistrySection({
           </button>
         </div>
       </div>
-      <div className="tools-grid-scroll">
+      <div className="browser-scroll">
         <div className="registry-grid registry-grid--wide">
           {filtered.map(tool => (
             <div

@@ -207,7 +207,7 @@ export default function WorkbenchPage({
   }
 
   return (
-    <div className={`workbench-page${recipe.length > 0 ? ' workbench-page--recipe-active' : ''}`}>
+    <div className={`workbench-page${recipe.length > 0 ? ' browser-page-row--aside-grow' : ''}`}>
       {loading && (
         <div className="workbench-page-loading">
           <RefreshCw size={20} className="spin" color="var(--green)" />
@@ -218,8 +218,8 @@ export default function WorkbenchPage({
 
       {!loading && !error && (
         <>
-          <nav className="workbench-sidebar">
-            <div className="workbench-sidebar-title">
+          <nav className="workbench-sidebar browser-nav">
+            <div className="workbench-sidebar-title browser-nav-title">
               <span className="workbench-sidebar-title-text">
                 <FlaskConical size={14} /> Workbench
               </span>
@@ -354,7 +354,7 @@ export default function WorkbenchPage({
             </section>
           </div>
 
-          <aside className="workbench-recipe-col">
+          <aside className="workbench-recipe-col browser-aside">
             <RecipePanel
               recipe={recipe}
               setRecipe={setRecipeTracked}
