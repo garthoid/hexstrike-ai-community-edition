@@ -31,12 +31,7 @@ git clone https://github.com/CommonHuman-Lab/nyxstrike.git
 cd nyxstrike
 
 ./nyxstrike.sh -a               # Setup + start server
-./nyxstrike.sh -a -ai           # + local AI model (~8.4 GB RAM)
-./nyxstrike.sh -a -ai-small     # + smaller AI model (~2.5 GB RAM)
-
-# Docker
-docker compose up --build -d    # Build + start
-docker compose down             # Stop
+./nyxstrike.sh -a -t            # + install external tools
 
 ```
 
