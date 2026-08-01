@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { ConfirmActionModal } from '../../components/ConfirmActionModal'
 import { useToast } from '../../components/ToastProvider'
+import { BrowserPage } from '../../components/layout/BrowserPage'
 import {
   Plus, Trash2, Edit2, Search, X, KeyRound, Package, RefreshCw,
   Download, CheckCircle2, Circle, Copy, Check, FlaskConical,
@@ -11,6 +12,7 @@ import type {
   Credential, CredentialType, CreateCredentialPayload,
   LootItem, LootType, CreateLootPayload,
 } from '../../api'
+import { LootTabNav } from './LootTabNav'
 import './LootPage.css'
 
 // ── Constants ──────────────────────────────────────────────────────────────────
@@ -1038,8 +1040,9 @@ export function LootPage({ onOpenInWorkbench }: LootPageProps = {}) {
   const [tab, setTab] = useState<Tab>('credentials')
 
   return (
-    <div className="page-content">
-      <div className="loot-page-card">
+    <BrowserPage
+      className="loot-page"
+      top={(
         <div className="loot-page-header">
           <h1 className="loot-page-title">
             <KeyRound size={16} /> Loot Store
@@ -1048,26 +1051,17 @@ export function LootPage({ onOpenInWorkbench }: LootPageProps = {}) {
             Manage captured credentials and loot from your engagements.
           </p>
         </div>
-
-        <div className="loot-tabs">
-          <button
-            className={`loot-tab-btn${tab === 'credentials' ? ' loot-tab-btn--active' : ''}`}
-            onClick={() => setTab('credentials')}
-          >
-            <KeyRound size={13} /> Credentials
-          </button>
-          <button
-            className={`loot-tab-btn${tab === 'loot' ? ' loot-tab-btn--active' : ''}`}
-            onClick={() => setTab('loot')}
-          >
-            <Package size={13} /> Loot
-          </button>
+      )}
+      nav={<LootTabNav tab={tab} setTab={setTab} />}
+      main={(
+        <div className="browser-main">
+          <div className="browser-scroll">
+            {tab === 'credentials' && <CredentialsTab />}
+            {tab === 'loot' && <LootTab onOpenInWorkbench={onOpenInWorkbench} />}
+          </div>
         </div>
-
-        {tab === 'credentials' && <CredentialsTab />}
-        {tab === 'loot' && <LootTab onOpenInWorkbench={onOpenInWorkbench} />}
-      </div>
-    </div>
+      )}
+    />
   )
 }
 

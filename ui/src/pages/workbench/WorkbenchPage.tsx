@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { FlaskConical, RefreshCw, Search, ChevronDown, ChevronRight, X, Settings2, RotateCcw, Star } from 'lucide-react'
+import { FlaskConical, RefreshCw, Search, ChevronDown, ChevronRight, X, Settings2, RotateCcw, Star, Database, Layers } from 'lucide-react'
 import { api } from '../../api'
 import type { WorkbenchOperation } from '../../api'
 import { usePersistentState } from '../../hooks/usePersistentState'
@@ -7,6 +7,8 @@ import { useWorkbenchLayout } from '../../hooks/useWorkbenchLayout'
 import { useWorkbenchFavorites } from '../../hooks/useWorkbenchFavorites'
 import { ActionButton } from '../../components/ActionButton'
 import { ConfirmActionModal } from '../../components/ConfirmActionModal'
+import { BrowserPage } from '../../components/layout/BrowserPage'
+import { KpiStrip } from '../../components/KpiStrip'
 import { OperationPanel } from './OperationPanel'
 import { RecipePanel, type RecipeStep } from './RecipePanel'
 import { WorkbenchSidebarCustomize } from './WorkbenchSidebarCustomize'
@@ -74,7 +76,7 @@ export default function WorkbenchPage({
     reorderOperation,
     resetLayout,
   } = useWorkbenchLayout(categories, operations)
-  const { isFavorite, toggleFavorite } = useWorkbenchFavorites()
+  const { favorites, isFavorite, toggleFavorite } = useWorkbenchFavorites()
 
   useEffect(() => {
     let cancelled = false
@@ -207,7 +209,7 @@ export default function WorkbenchPage({
   }
 
   return (
-    <div className={`workbench-page${recipe.length > 0 ? ' browser-page-row--aside-grow' : ''}`}>
+    <>
       {loading && (
         <div className="workbench-page-loading">
           <RefreshCw size={20} className="spin" color="var(--green)" />
@@ -218,111 +220,6 @@ export default function WorkbenchPage({
 
       {!loading && !error && (
         <>
-          <nav className="workbench-sidebar browser-nav">
-            <div className="workbench-sidebar-title browser-nav-title">
-              <span className="workbench-sidebar-title-text">
-                <FlaskConical size={14} /> Workbench
-              </span>
-              <div className="workbench-sidebar-title-actions">
-                {isCustomizing && (
-                  <button
-                    type="button"
-                    className="workbench-reset-link-btn"
-                    onClick={() => setPendingReset(true)}
-                    title="Reset layout"
-                  >
-                    <RotateCcw size={12} />
-                  </button>
-                )}
-                <ActionButton
-                  variant={isCustomizing ? 'success' : 'default'}
-                  className="workbench-customize-btn"
-                  onClick={() => setIsCustomizing(prev => !prev)}
-                >
-                  <Settings2 size={13} /> {isCustomizing ? 'Done' : 'Customize'}
-                </ActionButton>
-              </div>
-            </div>
-            <div className={`workbench-search${isCustomizing ? ' workbench-search--disabled' : ''}`}>
-              <Search size={13} className="workbench-search-icon" />
-              <input
-                ref={searchInputRef}
-                className="workbench-search-input"
-                placeholder={isCustomizing ? 'Search disabled while customizing' : 'Find an operation… (/)'}
-                value={search}
-                onChange={e => setSearch(e.target.value)}
-                disabled={isCustomizing}
-              />
-              {search && !isCustomizing && (
-                <button className="workbench-search-clear" onClick={() => setSearch('')} title="Clear search">
-                  <X size={12} />
-                </button>
-              )}
-            </div>
-
-            {isCustomizing ? (
-              <WorkbenchSidebarCustomize
-                allByCategory={allByCategory}
-                isCategoryHidden={isCategoryHidden}
-                isOperationHidden={isOperationHidden}
-                hideCategory={hideCategory}
-                showCategory={showCategory}
-                hideOperation={hideOperation}
-                showOperation={showOperation}
-                isFavorite={isFavorite}
-                toggleFavorite={toggleFavorite}
-                reorderCategory={reorderCategory}
-                reorderOperation={reorderOperation}
-              />
-            ) : (
-              <>
-                {byCategory.map(([category, ops]) => {
-                  const isCollapsed = search.trim() ? false : !expanded.includes(category)
-                  return (
-                    <div key={category} className="workbench-category">
-                      <button className="workbench-category-header" onClick={() => toggleCategory(category)}>
-                        {isCollapsed ? <ChevronRight size={12} /> : <ChevronDown size={12} />}
-                        <span className="workbench-category-label">{category.replace(/_/g, ' ')}</span>
-                      </button>
-                      {!isCollapsed && ops.map(op => (
-                        <div key={op.id} className="workbench-op-row-wrap">
-                          <button
-                            className={`workbench-op-btn${op.id === selectedId ? ' workbench-op-btn--active' : ''}`}
-                            onClick={() => selectOperation(op.id)}
-                          >
-                            {op.name}
-                          </button>
-                          <button
-                            type="button"
-                            className={`workbench-star-btn${isFavorite(op.id) ? ' workbench-star-btn--active' : ''}`}
-                            onClick={e => { e.stopPropagation(); toggleFavorite(op.id) }}
-                            title={isFavorite(op.id) ? `Unstar ${op.name}` : `Star ${op.name}`}
-                          >
-                            <Star size={12} fill={isFavorite(op.id) ? 'currentColor' : 'none'} />
-                          </button>
-                        </div>
-                      ))}
-                    </div>
-                  )
-                })}
-                {byCategory.length === 0 && (
-                  <div className="workbench-empty">
-                    {search
-                      ? <>No operations match "{search}".</>
-                      : (
-                        <>
-                          All categories are hidden.{' '}
-                          <button type="button" className="workbench-empty-reset-link" onClick={resetLayout}>
-                            Reset layout
-                          </button>
-                        </>
-                      )}
-                  </div>
-                )}
-              </>
-            )}
-          </nav>
-
           <ConfirmActionModal
             isOpen={pendingReset}
             title="Reset Workbench layout?"
@@ -333,38 +230,166 @@ export default function WorkbenchPage({
             onClose={() => setPendingReset(false)}
           />
 
-          <div className="workbench-main">
-            <section className={`workbench-panel${selected ? ' section' : ''}`}>
-              {selected
-                ? (
-                  <OperationPanel
-                    key={selected.id}
-                    operation={selected}
-                    onAddToRecipe={addToRecipe}
-                    initialInput={pendingInitialInput ?? undefined}
-                  />
-                )
-                : (
-                  <div className="workbench-panel-empty">
-                    <FlaskConical size={28} color="var(--text-dim)" />
-                    <span className="workbench-panel-empty-title">Select an operation</span>
-                    <span className="workbench-panel-empty-hint">Pick something from the sidebar to get started.</span>
+          <BrowserPage
+            className="workbench-page"
+            asideExpanded={recipe.length > 0}
+            top={(
+              <KpiStrip
+                items={[
+                  { icon: <FlaskConical size={16} />, label: 'Operations', value: operations.length, accent: 'var(--blue)' },
+                  { icon: <Database size={16} />, label: 'Categories', value: categories.length, accent: 'var(--purple)' },
+                  { icon: <Star size={16} />, label: 'Favorites', value: favorites.length, accent: 'var(--amber)' },
+                  {
+                    icon: <Layers size={16} />,
+                    label: 'Recipe Steps',
+                    value: recipe.length,
+                    accent: recipe.length > 0 ? 'var(--green)' : 'var(--text-dim)',
+                  },
+                ]}
+              />
+            )}
+            nav={(
+              <nav className="workbench-sidebar browser-nav">
+                <div className="workbench-sidebar-title browser-nav-title">
+                  <span className="workbench-sidebar-title-text">
+                    <FlaskConical size={14} /> Workbench
+                  </span>
+                  <div className="workbench-sidebar-title-actions">
+                    {isCustomizing && (
+                      <button
+                        type="button"
+                        className="workbench-reset-link-btn"
+                        onClick={() => setPendingReset(true)}
+                        title="Reset layout"
+                      >
+                        <RotateCcw size={12} />
+                      </button>
+                    )}
+                    <ActionButton
+                      variant={isCustomizing ? 'success' : 'default'}
+                      className="workbench-customize-btn"
+                      onClick={() => setIsCustomizing(prev => !prev)}
+                    >
+                      <Settings2 size={13} /> {isCustomizing ? 'Done' : 'Customize'}
+                    </ActionButton>
                   </div>
-                )}
-            </section>
-          </div>
+                </div>
+                <div className={`workbench-search${isCustomizing ? ' workbench-search--disabled' : ''}`}>
+                  <Search size={13} className="workbench-search-icon" />
+                  <input
+                    ref={searchInputRef}
+                    className="workbench-search-input"
+                    placeholder={isCustomizing ? 'Search disabled while customizing' : 'Find an operation… (/)'}
+                    value={search}
+                    onChange={e => setSearch(e.target.value)}
+                    disabled={isCustomizing}
+                  />
+                  {search && !isCustomizing && (
+                    <button className="workbench-search-clear" onClick={() => setSearch('')} title="Clear search">
+                      <X size={12} />
+                    </button>
+                  )}
+                </div>
 
-          <aside className="workbench-recipe-col browser-aside">
-            <RecipePanel
-              recipe={recipe}
-              setRecipe={setRecipeTracked}
-              operations={operations}
-              input={recipeInput}
-              setInput={setRecipeInput}
-            />
-          </aside>
+                {isCustomizing ? (
+                  <WorkbenchSidebarCustomize
+                    allByCategory={allByCategory}
+                    isCategoryHidden={isCategoryHidden}
+                    isOperationHidden={isOperationHidden}
+                    hideCategory={hideCategory}
+                    showCategory={showCategory}
+                    hideOperation={hideOperation}
+                    showOperation={showOperation}
+                    isFavorite={isFavorite}
+                    toggleFavorite={toggleFavorite}
+                    reorderCategory={reorderCategory}
+                    reorderOperation={reorderOperation}
+                  />
+                ) : (
+                  <>
+                    {byCategory.map(([category, ops]) => {
+                      const isCollapsed = search.trim() ? false : !expanded.includes(category)
+                      return (
+                        <div key={category} className="workbench-category">
+                          <button className="workbench-category-header" onClick={() => toggleCategory(category)}>
+                            {isCollapsed ? <ChevronRight size={12} /> : <ChevronDown size={12} />}
+                            <span className="workbench-category-label">{category.replace(/_/g, ' ')}</span>
+                          </button>
+                          {!isCollapsed && ops.map(op => (
+                            <div key={op.id} className="workbench-op-row-wrap">
+                              <button
+                                className={`workbench-op-btn${op.id === selectedId ? ' workbench-op-btn--active' : ''}`}
+                                onClick={() => selectOperation(op.id)}
+                              >
+                                {op.name}
+                              </button>
+                              <button
+                                type="button"
+                                className={`workbench-star-btn${isFavorite(op.id) ? ' workbench-star-btn--active' : ''}`}
+                                onClick={e => { e.stopPropagation(); toggleFavorite(op.id) }}
+                                title={isFavorite(op.id) ? `Unstar ${op.name}` : `Star ${op.name}`}
+                              >
+                                <Star size={12} fill={isFavorite(op.id) ? 'currentColor' : 'none'} />
+                              </button>
+                            </div>
+                          ))}
+                        </div>
+                      )
+                    })}
+                    {byCategory.length === 0 && (
+                      <div className="workbench-empty">
+                        {search
+                          ? <>No operations match "{search}".</>
+                          : (
+                            <>
+                              All categories are hidden.{' '}
+                              <button type="button" className="workbench-empty-reset-link" onClick={resetLayout}>
+                                Reset layout
+                              </button>
+                            </>
+                          )}
+                      </div>
+                    )}
+                  </>
+                )}
+              </nav>
+            )}
+            main={(
+              <div className="workbench-main">
+                <section className={`workbench-panel${selected ? ' section' : ''}`}>
+                  {selected
+                    ? (
+                      <OperationPanel
+                        key={selected.id}
+                        operation={selected}
+                        onAddToRecipe={addToRecipe}
+                        initialInput={pendingInitialInput ?? undefined}
+                      />
+                    )
+                    : (
+                      <div className="workbench-panel-empty">
+                        <FlaskConical size={28} color="var(--text-dim)" />
+                        <span className="workbench-panel-empty-title">Select an operation</span>
+                        <span className="workbench-panel-empty-hint">Pick something from the sidebar to get started.</span>
+                      </div>
+                    )}
+                </section>
+              </div>
+            )}
+            aside={(
+              <aside className="workbench-recipe-col browser-aside">
+                <RecipePanel
+                  recipe={recipe}
+                  setRecipe={setRecipeTracked}
+                  operations={operations}
+                  input={recipeInput}
+                  setInput={setRecipeInput}
+                />
+              </aside>
+            )}
+          />
         </>
       )}
-    </div>
+    </>
   )
 }

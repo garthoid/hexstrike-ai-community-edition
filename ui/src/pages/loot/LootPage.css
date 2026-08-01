@@ -4,7 +4,7 @@ a.session-action-btn {
 
 /* ── Button styles (self-contained, mirrors SessionsPage/SessionNotes) ──────── */
 
-.loot-page-card .session-action-btn,
+.loot-page .session-action-btn,
 .loot-modal .session-action-btn {
   display: inline-flex;
   align-items: center;
@@ -19,29 +19,29 @@ a.session-action-btn {
   text-decoration: none;
 }
 
-.loot-page-card .session-action-btn:hover,
+.loot-page .session-action-btn:hover,
 .loot-modal .session-action-btn:hover {
   background: color-mix(in srgb, var(--text) 6%, transparent);
 }
 
-.loot-page-card .session-action-btn:disabled,
+.loot-page .session-action-btn:disabled,
 .loot-modal .session-action-btn:disabled {
   opacity: 0.55;
   cursor: not-allowed;
 }
 
-.loot-page-card .session-action-btn--primary,
+.loot-page .session-action-btn--primary,
 .loot-modal .session-action-btn--primary {
   color: var(--green);
   border-color: var(--green);
 }
 
-.loot-page-card .session-action-btn--primary:hover,
+.loot-page .session-action-btn--primary:hover,
 .loot-modal .session-action-btn--primary:hover {
   background: color-mix(in srgb, var(--green) 10%, transparent);
 }
 
-.loot-page-card .finding-icon-btn {
+.loot-page .finding-icon-btn {
   background: transparent;
   border: 1px solid transparent;
   border-radius: 4px;
@@ -54,31 +54,17 @@ a.session-action-btn {
   transition: opacity 0.15s, border-color 0.15s;
 }
 
-.loot-page-card .finding-icon-btn:hover {
+.loot-page .finding-icon-btn:hover {
   opacity: 1;
   border-color: var(--border);
 }
 
-.loot-page-card .finding-icon-btn--danger:hover {
+.loot-page .finding-icon-btn--danger:hover {
   color: var(--red);
   border-color: color-mix(in srgb, var(--red) 40%, transparent);
 }
 
 /* ── Loot Page ─────────────────────────────────────────────────────────────── */
-
-.loot-page-card {
-  background: var(--bg-card2);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: 1.25rem 1.5rem 1.5rem;
-  display: flex;
-  flex-direction: column;
-  gap: 0;
-}
-
-.loot-page-header {
-  margin-bottom: 1.25rem;
-}
 
 .loot-page-title {
   display: flex;
@@ -94,45 +80,13 @@ a.session-action-btn {
   margin: 0;
 }
 
-/* ── Tabs ───────────────────────────────────────────────────────────────────── */
-
-.loot-tabs {
-  display: flex;
-  gap: 0.25rem;
-  border-bottom: 1px solid var(--border);
-  margin-bottom: 1rem;
-}
-
-.loot-tab-btn {
-  display: flex;
-  align-items: center;
-  gap: 0.35rem;
-  padding: 0.45rem 0.85rem;
-  background: none;
-  border: none;
-  border-bottom: 2px solid transparent;
-  color: var(--text-dim);
-  font-size: 0.8rem;
-  cursor: pointer;
-  transition: color 0.15s, border-color 0.15s;
-  margin-bottom: -1px;
-}
-
-.loot-tab-btn:hover {
-  color: var(--text);
-}
-
-.loot-tab-btn--active {
-  color: var(--accent);
-  border-bottom-color: var(--accent);
-}
-
 /* ── Tab Content ────────────────────────────────────────────────────────────── */
 
 .loot-tab-content {
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
+  padding: 1.25rem 1.5rem 1.5rem;
 }
 
 /* ── Tab Header ─────────────────────────────────────────────────────────────── */

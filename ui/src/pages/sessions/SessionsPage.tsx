@@ -16,6 +16,7 @@ import { KpiStrip } from '../../components/KpiStrip'
 import { ConfirmActionModal } from '../../components/ConfirmActionModal'
 import { InformationModal } from '../../components/InformationModal'
 import { useToast } from '../../components/ToastProvider'
+import { BrowserPage } from '../../components/layout/BrowserPage'
 import { useEscapeClose } from '../../hooks/useEscapeClose'
 import { START_MODES, type StartMode } from './constants'
 import { StartSessionModal } from './SessionsSections'
@@ -450,7 +451,7 @@ export default function SessionsPage({ demoData, onOpenSession }: SessionsPagePr
   const fmtNumber = (n?: number) => (typeof n === 'number' ? n.toFixed(2) : 'n/a')
 
   return (
-    <div className="sessions-page browser-page">
+    <>
       {startMode && !pendingPreview && (
         <StartSessionModal
           startMode={startMode}
@@ -559,37 +560,40 @@ export default function SessionsPage({ demoData, onOpenSession }: SessionsPagePr
 
       </InformationModal>
 
-      <div className="browser-page-top">
-        <KpiStrip
-          items={[
-            { icon: <Layers size={16} />, label: 'Active Sessions', value: active.length, accent: active.length > 0 ? 'var(--green)' : 'var(--text-dim)' },
-            { icon: <CheckCircle size={16} />, label: 'Completed', value: completed.length, accent: 'var(--blue)' },
-            { icon: <Activity size={16} />, label: 'Total Findings', value: allFindings, accent: 'var(--amber)' },
-            { icon: <Target size={16} />, label: 'Unique Targets', value: uniqueTargets, accent: 'var(--purple)' },
-          ]}
-        />
-      </div>
-
-      <div className="browser-page-row">
-        <SessionsSetupNav
-          startModes={START_MODES}
-          templates={templates}
-          onOpenStartMode={openStartModal}
-          onUseTemplate={useTemplate}
-          onEditTemplate={openTemplateEditor}
-          onDeleteTemplate={setPendingDeleteTemplate}
-          templateActionBusyId={templateActionBusyId}
-        />
-
-        <SessionsListCol
-          active={active}
-          completed={completed}
-          view={sessionsView}
-          setView={setSessionsView}
-          streamStatus={streamStatus}
-          onOpenSession={onOpenSession}
-        />
-      </div>
+      <BrowserPage
+        className="sessions-page"
+        top={(
+          <KpiStrip
+            items={[
+              { icon: <Layers size={16} />, label: 'Active Sessions', value: active.length, accent: active.length > 0 ? 'var(--green)' : 'var(--text-dim)' },
+              { icon: <CheckCircle size={16} />, label: 'Completed', value: completed.length, accent: 'var(--blue)' },
+              { icon: <Activity size={16} />, label: 'Total Findings', value: allFindings, accent: 'var(--amber)' },
+              { icon: <Target size={16} />, label: 'Unique Targets', value: uniqueTargets, accent: 'var(--purple)' },
+            ]}
+          />
+        )}
+        nav={(
+          <SessionsSetupNav
+            startModes={START_MODES}
+            templates={templates}
+            onOpenStartMode={openStartModal}
+            onUseTemplate={useTemplate}
+            onEditTemplate={openTemplateEditor}
+            onDeleteTemplate={setPendingDeleteTemplate}
+            templateActionBusyId={templateActionBusyId}
+          />
+        )}
+        main={(
+          <SessionsListCol
+            active={active}
+            completed={completed}
+            view={sessionsView}
+            setView={setSessionsView}
+            streamStatus={streamStatus}
+            onOpenSession={onOpenSession}
+          />
+        )}
+      />
 
       {editingTemplate && (
         <div className="modal-backdrop" onClick={e => { if (e.target === e.currentTarget) closeTemplateEditor() }}>
@@ -693,6 +697,6 @@ export default function SessionsPage({ demoData, onOpenSession }: SessionsPagePr
           if (!templateActionBusyId) setPendingDeleteTemplate(null)
         }}
       />
-    </div>
+    </>
   )
 }

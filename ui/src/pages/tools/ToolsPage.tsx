@@ -4,6 +4,7 @@ import { api, type Tool, type WebDashboardResponse } from '../../api'
 import { KpiStrip } from '../../components/KpiStrip'
 import { ToolModal } from '../../components/ToolModal'
 import { useToast } from '../../components/ToastProvider'
+import { BrowserPage } from '../../components/layout/BrowserPage'
 import { filterToolsByOptions, getToolCategories } from '../../shared/toolUtils'
 import { ToolsCategoryNav } from './ToolsCategoryNav'
 import { ToolsRegistrySection } from './ToolsRegistrySection'
@@ -79,7 +80,7 @@ export default function ToolsPage({ health, tools, toolsStatus }: ToolsPageProps
   }
 
   return (
-    <div className="tools-page browser-page">
+    <>
       {selectedTool && (
         <ToolModal
           tool={selectedTool}
@@ -88,51 +89,54 @@ export default function ToolsPage({ health, tools, toolsStatus }: ToolsPageProps
         />
       )}
 
-      <div className="browser-page-top">
-        <KpiStrip
-          items={[
-            { icon: <Wrench size={16} />, label: 'Total Server Tools', value: tools.length, accent: 'var(--blue)' },
-            {
-              icon: <Shield size={16} />,
-              label: `Kali Tools Installed · ${((localTotals.available / Math.max(localTotals.total, 1)) * 100).toFixed(0)}% coverage`,
-              value: `${localTotals.available} / ${localTotals.total}`,
-              accent: 'var(--green)',
-            },
-            {
-              icon: <XCircle size={16} />,
-              label: 'Missing / not installed',
-              value: missingCount,
-              accent: missingCount > 0 ? 'var(--amber)' : 'var(--text-dim)',
-            },
-            { icon: <Database size={16} />, label: 'Tool Categories', value: cats.length - 1, accent: 'var(--purple)' },
-          ]}
-        />
-      </div>
-
-      <div className="browser-page-row">
-        <ToolsCategoryNav
-          categories={cats}
-          activeCat={activeCat}
-          setActiveCat={setActiveCat}
-          counts={categoryCounts}
-          totalCount={searchFiltered.length}
-        />
-
-        <ToolsRegistrySection
-          tools={tools}
-          filtered={filtered}
-          activeCat={activeCat}
-          search={search}
-          setSearch={setSearch}
-          missingOnly={missingOnly}
-          setMissingOnly={setMissingOnly}
-          missingCount={missingCount}
-          toolsStatus={effectiveToolsStatus}
-          onSelectTool={setSelectedTool}
-          onRefreshAvailability={refreshAvailabilityNow}
-          refreshingAvailability={refreshingAvailability}
-        />
-      </div>
-    </div>
+      <BrowserPage
+        className="tools-page"
+        top={(
+          <KpiStrip
+            items={[
+              { icon: <Wrench size={16} />, label: 'Total Server Tools', value: tools.length, accent: 'var(--blue)' },
+              {
+                icon: <Shield size={16} />,
+                label: `Kali Tools Installed · ${((localTotals.available / Math.max(localTotals.total, 1)) * 100).toFixed(0)}% coverage`,
+                value: `${localTotals.available} / ${localTotals.total}`,
+                accent: 'var(--green)',
+              },
+              {
+                icon: <XCircle size={16} />,
+                label: 'Missing / not installed',
+                value: missingCount,
+                accent: missingCount > 0 ? 'var(--amber)' : 'var(--text-dim)',
+              },
+              { icon: <Database size={16} />, label: 'Tool Categories', value: cats.length - 1, accent: 'var(--purple)' },
+            ]}
+          />
+        )}
+        nav={(
+          <ToolsCategoryNav
+            categories={cats}
+            activeCat={activeCat}
+            setActiveCat={setActiveCat}
+            counts={categoryCounts}
+            totalCount={searchFiltered.length}
+          />
+        )}
+        main={(
+          <ToolsRegistrySection
+            tools={tools}
+            filtered={filtered}
+            activeCat={activeCat}
+            search={search}
+            setSearch={setSearch}
+            missingOnly={missingOnly}
+            setMissingOnly={setMissingOnly}
+            missingCount={missingCount}
+            toolsStatus={effectiveToolsStatus}
+            onSelectTool={setSelectedTool}
+            onRefreshAvailability={refreshAvailabilityNow}
+            refreshingAvailability={refreshingAvailability}
+          />
+        )}
+      />
+    </>
   )
 }
