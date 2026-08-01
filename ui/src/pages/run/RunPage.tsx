@@ -12,6 +12,7 @@ import { RunHistoryPanel } from './RunHistoryPanel'
 import { RunQuickBar } from './RunQuickBar'
 import { deriveTargetFromParams, RUN_FAVORITES_KEY, RUN_RECENT_TARGETS_KEY, RUN_TOPOLOGY_SESSION_KEY } from './storage'
 import { useToast } from '../../components/ToastProvider'
+import { AppFooter } from '../../app/AppFooter'
 import '../../components/tool-run/shared.css'
 import './RunPage.css'
 
@@ -271,24 +272,27 @@ export function RunPage({
         onSelectTool={selectTool}
       />
 
-      <RunPanel
-        selected={selected}
-        toolsStatus={toolsStatus}
-        fieldValues={fieldValues}
-        setFieldValues={setFieldValues}
-        showOptional={showOptional}
-        setShowOptional={setShowOptional}
-        running={running}
-        runError={runError}
-        liveOutput={liveOutput}
-        isFavorite={selected ? favorites.includes(selected.name) : false}
-        onToggleFavorite={toggleFavoriteSelected}
-        onRunTool={runTool}
-        viewEntry={viewEntry}
-        autoTopology={autoTopology}
-        setAutoTopology={setAutoTopology}
-        onExportTopology={entry => void exportTopology(entry, true)}
-      />
+      <div className="run-main-col">
+        <RunPanel
+          selected={selected}
+          toolsStatus={toolsStatus}
+          fieldValues={fieldValues}
+          setFieldValues={setFieldValues}
+          showOptional={showOptional}
+          setShowOptional={setShowOptional}
+          running={running}
+          runError={runError}
+          liveOutput={liveOutput}
+          isFavorite={selected ? favorites.includes(selected.name) : false}
+          onToggleFavorite={toggleFavoriteSelected}
+          onRunTool={runTool}
+          viewEntry={viewEntry}
+          autoTopology={autoTopology}
+          setAutoTopology={setAutoTopology}
+          onExportTopology={entry => void exportTopology(entry, true)}
+        />
+        <AppFooter />
+      </div>
 
       <RunQuickBar
         recentTargets={recentTargets}

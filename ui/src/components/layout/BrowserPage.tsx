@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react'
+import { AppFooter } from '../../app/AppFooter'
 
 interface BrowserPageProps {
   className?: string
@@ -15,7 +16,10 @@ export function BrowserPage({ className, top, nav, main, aside, asideExpanded }:
       {top && <div className="browser-page-top">{top}</div>}
       <div className={`browser-page-row${aside && asideExpanded ? ' browser-page-row--aside-grow' : ''}`}>
         {nav}
-        {main}
+        <div className="browser-main-col">
+          {main}
+          <AppFooter />
+        </div>
         {aside}
       </div>
     </div>

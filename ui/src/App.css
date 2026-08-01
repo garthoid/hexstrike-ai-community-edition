@@ -56,7 +56,7 @@
 
 .main {
   flex: 1;
-  padding: 10px 24px 40px;
+  padding: 10px 24px 12px;
   max-width: 1400px;
   width: 100%;
   margin: 0 auto;
@@ -80,6 +80,17 @@
   right: 0;
   bottom: 0;
   transition: left 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.page-slot {
+  flex: 1 1 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.main--flush .page-slot {
+  overflow: hidden;
 }
 
 .layout--demo .main--flush {
@@ -201,11 +212,21 @@
   border-color: rgba(0, 230, 118, 0.35);
 }
 
+.browser-main-col {
+  flex: 1 1 0;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+}
+
 .browser-main {
   flex: 1 1 0;
   display: flex;
   flex-direction: column;
   min-width: 0;
+  min-height: 0;
   overflow: hidden;
 }
 
@@ -217,6 +238,10 @@
 .browser-scroll {
   flex: 1 1 0;
   overflow-y: auto;
+}
+
+.browser-scroll > .section {
+  margin: 0;
 }
 
 .browser-aside {
@@ -244,10 +269,14 @@
   }
 
   .browser-nav,
-  .browser-main {
+  .browser-main-col {
     border: none;
     border-bottom: 1px solid var(--border);
     flex: 0 0 auto;
+  }
+
+  .browser-main {
+    overflow: visible;
   }
 
   .browser-nav {
@@ -705,26 +734,25 @@
   }
 }
 
-.dashboard-signature-wrap {
+/* ── Global footer ───────────────────────────────────────────────────────── */
+.app-footer {
+  flex-shrink: 0;
+  height: 22px;
   display: flex;
+  align-items: center;
   justify-content: center;
-  margin-top: -2px;
-  margin-bottom: 6px;
 }
 
-.dashboard-signature > a{
-  display: inline-flex;
-  align-items: center;
-  padding: 6px 12px;
-  border-radius: 999px;
-  border: 1px solid color-mix(in srgb, var(--accent) 42%, var(--border));
-  background:
-    linear-gradient(180deg, color-mix(in srgb, var(--accent) 16%, transparent), color-mix(in srgb, var(--accent-alt) 11%, transparent));
-  color: color-mix(in srgb, var(--text-h) 90%, var(--accent));
-  font-size: 11px;
-  letter-spacing: 0.08em;
-  box-shadow: 0 8px 22px color-mix(in srgb, var(--accent) 15%, transparent);
+.app-footer-link {
+  font-size: 10px;
+  letter-spacing: 0.05em;
+  color: var(--text-dim);
   text-decoration: none;
+  transition: color var(--t-base) ease;
+}
+
+.app-footer-link:hover {
+  color: var(--text);
 }
 
 /* ── Section ─────────────────────────────────────────────────────────────── */
@@ -733,6 +761,7 @@
   border: 1px solid var(--border);
   border-radius: var(--radius);
   overflow: hidden;
+  margin: 5px 0;
 }
 
 .section-header {
@@ -1322,7 +1351,7 @@
   }
 
   .main {
-    padding: 10px 10px 26px;
+    padding: 10px 10px 12px;
     gap: 12px;
   }
 

@@ -10,6 +10,7 @@ import type { RunHistoryEntry } from '../shared/types'
 import type { ThemeId } from './themes'
 import type { Page } from './routing'
 import type { PageConfig } from '../hooks/usePageVisibility'
+import { AppFooter } from './AppFooter'
 
 // Eagerly loaded — always visible on any page
 import { DashboardPage } from '../pages/dashboard/DashboardPage'
@@ -164,8 +165,12 @@ export function MainContent({
   orderedPageConfigs,
   reorderPage,
 }: MainContentProps) {
+  // Flush pages render their own footer inside their main content column
+  // (BrowserPage / RunPage) so it lines up with a single column, not the full row.
+  const isFlush = page === 'run' || page === 'workbench' || page === 'tools' || page === 'sessions' || page === 'plugins' || page === 'loot' || page === 'reports' || page === 'tasks' || page === 'help' || page === 'settings'
   return (
-    <main className={`main${page === 'run' || page === 'workbench' || page === 'tools' || page === 'sessions' || page === 'plugins' || page === 'loot' || page === 'reports' || page === 'tasks' || page === 'help' || page === 'settings' ? ' main--flush' : ''}`}>
+    <main className={`main${isFlush ? ' main--flush' : ''}`}>
+      <div className="page-slot">
       <Suspense fallback={<PageLoader />}>
         {page === 'settings' && (
           <SettingsPage
@@ -266,6 +271,8 @@ export function MainContent({
           </>
         )}
       </Suspense>
+      </div>
+      {!isFlush && <AppFooter />}
     </main>
   )
 }

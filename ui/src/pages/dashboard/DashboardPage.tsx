@@ -106,17 +106,6 @@ export function DashboardPage({ health, tools, runHistory, loading, error, toolC
           </div>
         )}
       </InformationModal>
-
-      <div className="dashboard-signature-wrap">
-        <span className="dashboard-signature mono">
-            <a
-            href="https://github.com/CommonHuman-Lab"
-            target="_blank"
-            rel="noreferrer">
-              Made by CommonHuman
-            </a>
-          </span>
-      </div>
     </>
   )
 }
