@@ -1,5 +1,12 @@
 /* ── Tasks Page ─────────────────────────────────────────────────────────────── */
 
+.tasks-page .section {
+  background: none;
+  border: none;
+  border-radius: 0;
+  overflow: visible;
+}
+
 .tasks-pool-row {
   display: flex;
   flex-wrap: wrap;

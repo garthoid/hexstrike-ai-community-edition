@@ -4,7 +4,7 @@ import {
   PauseCircle, PlayCircle, StopCircle, ListTodo,
 } from 'lucide-react'
 import type { ProcessDashboardResponse } from '../../api'
-import { StatCard } from '../../components/StatCard'
+import { KpiStrip } from '../../components/KpiStrip'
 import type { StreamStatus } from './useProcessDashboard'
 import { useEscapeClose } from '../../hooks/useEscapeClose'
 
@@ -44,36 +44,14 @@ export function WorkerPoolSection({
   const timestampLabel = data?.timestamp?.slice(11, 19) ?? 'n/a'
 
   return (
-    <div className="kpi-row">
-      <StatCard
-        icon={<Activity size={20} />}
-        label="Worker Pool"
-        value={statusLabel}
-        sub={`updated ${timestampLabel}`}
-        accent={statusAccent}
-      />
-      <StatCard
-        icon={<Cpu size={20} />}
-        label="CPU"
-        value={load ? `${load.cpu_percent.toFixed(1)}%` : 'n/a'}
-        sub="system load"
-        accent="var(--green)"
-      />
-      <StatCard
-        icon={<MemoryStick size={20} />}
-        label="Memory"
-        value={load ? `${load.memory_percent.toFixed(1)}%` : 'n/a'}
-        sub="system memory"
-        accent="var(--blue)"
-      />
-      <StatCard
-        icon={<Wifi size={20} />}
-        label="Connections"
-        value={load ? load.active_connections : 'n/a'}
-        sub="active sockets"
-        accent="var(--amber)"
-      />
-    </div>
+    <KpiStrip
+      items={[
+        { icon: <Activity size={16} />, label: `Worker Pool · updated ${timestampLabel}`, value: statusLabel, accent: statusAccent },
+        { icon: <Cpu size={16} />, label: 'CPU · system load', value: load ? `${load.cpu_percent.toFixed(1)}%` : 'n/a', accent: 'var(--green)' },
+        { icon: <MemoryStick size={16} />, label: 'Memory · system memory', value: load ? `${load.memory_percent.toFixed(1)}%` : 'n/a', accent: 'var(--blue)' },
+        { icon: <Wifi size={16} />, label: 'Connections · active sockets', value: load ? load.active_connections : 'n/a', accent: 'var(--amber)' },
+      ]}
+    />
   )
 }
 

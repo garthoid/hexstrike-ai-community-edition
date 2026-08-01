@@ -4,6 +4,7 @@ import {
 import type { ProcessDashboardResponse } from '../../api'
 import { useProcessDashboard } from './useProcessDashboard'
 import { ProcessesSection, WorkerPoolSection } from './TasksSections'
+import { BrowserPage } from '../../components/layout/BrowserPage'
 import './TasksPage.css'
 
 interface TasksPageProps {
@@ -37,20 +38,24 @@ export default function TasksPage({ demoData }: TasksPageProps) {
   const processes = (data?.processes ?? []).slice(-100)
 
   return (
-    <div className="page-content">
-      {poolStats && (
-        <WorkerPoolSection data={data} streamStatus={streamStatus} />
+    <BrowserPage
+      className="tasks-page"
+      top={poolStats ? <WorkerPoolSection data={data} streamStatus={streamStatus} /> : undefined}
+      main={(
+        <div className="browser-main">
+          <div className="browser-scroll">
+            <ProcessesSection
+              processes={processes}
+              streamStatus={streamStatus}
+              onRefresh={fetchData}
+              onPause={pauseProcess}
+              onResume={resumeProcess}
+              onTerminate={terminateProcess}
+              onCancelAiTask={cancelAiTask}
+            />
+          </div>
+        </div>
       )}
-
-      <ProcessesSection
-        processes={processes}
-        streamStatus={streamStatus}
-        onRefresh={fetchData}
-        onPause={pauseProcess}
-        onResume={resumeProcess}
-        onTerminate={terminateProcess}
-        onCancelAiTask={cancelAiTask}
-      />
-    </div>
+    />
   )
 }

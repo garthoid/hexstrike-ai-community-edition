@@ -3,7 +3,7 @@ import type { ReactNode } from 'react'
 interface BrowserPageProps {
   className?: string
   top?: ReactNode
-  nav: ReactNode
+  nav?: ReactNode
   main: ReactNode
   aside?: ReactNode
   asideExpanded?: boolean

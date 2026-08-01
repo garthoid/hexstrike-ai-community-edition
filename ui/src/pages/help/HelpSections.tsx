@@ -70,7 +70,7 @@ export function IdeConfigSection({
 
 export function FlagsSection() {
   return (
-    <CollapsibleSection title="MCP Client Flags">
+    <CollapsibleSection title="MCP Client Flags" defaultOpen>
       <div className="flags-table">
         {MCP_FLAGS.map(([flag, description, defaultValue]) => (
           <div key={flag} className="flag-row">
@@ -86,7 +86,7 @@ export function FlagsSection() {
 
 export function AuthenticationSection() {
   return (
-    <CollapsibleSection title="Authentication">
+    <CollapsibleSection title="Authentication" defaultOpen>
       <p className="help-body">
         If you set <code>NYXSTRIKE_API_TOKEN</code> on the server, every request must carry a Bearer token.
         Pass it to the MCP client with <code>--auth-token</code>, or set it in the IDE config under <code>args</code>.
@@ -112,7 +112,7 @@ const UI_FEATURES: Array<{ shortcut: string; title: string; description: string 
 
 export function CommandPaletteSection() {
   return (
-    <CollapsibleSection title="Command Palette">
+    <CollapsibleSection title="Command Palette" defaultOpen>
       <div className="help-feature-row">
         <Keyboard size={14} color="var(--green)" />
         <p className="help-body" style={{ padding: 0, margin: 0 }}>
@@ -140,7 +140,7 @@ export function CommandPaletteSection() {
 
 export function UIFeaturesSection() {
   return (
-    <CollapsibleSection title="UI Features">
+    <CollapsibleSection title="UI Features" defaultOpen>
       <p className="help-body">
         A few quality-of-life features worth knowing about:
       </p>
@@ -170,7 +170,7 @@ export function UIFeaturesSection() {
 
 export function DemoModeSection() {
   return (
-    <CollapsibleSection title="Demo Mode" className="help-about-section">
+    <CollapsibleSection title="Demo Mode" className="help-about-section" defaultOpen>
       <div className="help-about">
         <p className="help-about-desc">
           Activate demo mode to explore the dashboard. All data is synthetic but designed to feel realistic. Ideal for learning, demos, or just satisfying your curiosity!
