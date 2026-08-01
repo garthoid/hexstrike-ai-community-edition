@@ -1,5 +1,3 @@
-import { LayoutGrid } from 'lucide-react'
-
 interface ToolsCategoryNavProps {
   categories: string[]
   activeCat: string
@@ -10,10 +8,7 @@ interface ToolsCategoryNavProps {
 
 export function ToolsCategoryNav({ categories, activeCat, setActiveCat, counts, totalCount }: ToolsCategoryNavProps) {
   return (
-    <nav className="browser-nav">
-      <div className="browser-nav-title">
-        <LayoutGrid size={14} /> Categories
-      </div>
+    <nav className="browser-nav browser-nav-narrow">
       <button
         className={`browser-nav-item${activeCat === 'all' ? ' browser-nav-item--active' : ''}`}
         onClick={() => setActiveCat('all')}

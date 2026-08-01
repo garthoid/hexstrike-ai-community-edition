@@ -119,6 +119,10 @@
   overflow-y: auto;
 }
 
+.browser-nav-narrow {
+  padding: 0 0;
+}
+
 .browser-nav-title {
   display: flex;
   align-items: center;
