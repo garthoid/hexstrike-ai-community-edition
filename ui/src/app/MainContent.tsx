@@ -167,7 +167,7 @@ export function MainContent({
 }: MainContentProps) {
   // Flush pages render their own footer inside their main content column
   // (BrowserPage / RunPage) so it lines up with a single column, not the full row.
-  const isFlush = page === 'run' || page === 'workbench' || page === 'tools' || page === 'sessions' || page === 'plugins' || page === 'loot' || page === 'reports' || page === 'tasks' || page === 'help' || page === 'settings'
+  const isFlush = page === 'run' || page === 'workbench' || page === 'tools' || page === 'sessions' || page === 'plugins' || page === 'loot' || page === 'reports' || page === 'tasks' || page === 'help' || page === 'settings' || page === 'verify' || page === 'logs'
   return (
     <main className={`main${isFlush ? ' main--flush' : ''}`}>
       <div className="page-slot">

@@ -1,4 +1,6 @@
 import React, { useState } from 'react'
+import { Terminal } from 'lucide-react'
+import { BrowserPage } from '../../components/layout/BrowserPage'
 import { LogsToolbar, LogsViewer } from './LogsSections'
 import { getVisibleLogLines } from './utils'
 import './LogsPage.css'
@@ -25,10 +27,13 @@ export default function LogsPage({
   const visible = getVisibleLogLines(logLines, showHttpAccess)
 
   return (
-    <div className="page-content">
-      <section className="section">
-        <div className="section-header">
-          <h3>Server Log</h3>
+    <BrowserPage
+      className="logs-page"
+      top={(
+        <div className="logs-page-header">
+          <h1 className="logs-page-title">
+            <Terminal size={16} /> Server Log
+          </h1>
           <LogsToolbar
             logAutoScroll={logAutoScroll}
             setLogAutoScroll={setLogAutoScroll}
@@ -40,8 +45,12 @@ export default function LogsPage({
             totalCount={logLines.length}
           />
         </div>
-        <LogsViewer visible={visible} logLimit={logLimit} logEndRef={logEndRef} />
-      </section>
-    </div>
+      )}
+      main={(
+        <div className="browser-main">
+          <LogsViewer visible={visible} logLimit={logLimit} logEndRef={logEndRef} />
+        </div>
+      )}
+    />
   )
 }

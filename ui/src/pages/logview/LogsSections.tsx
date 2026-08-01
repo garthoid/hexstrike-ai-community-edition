@@ -68,7 +68,7 @@ interface LogsViewerProps {
 
 export function LogsViewer({ visible, logLimit, logEndRef }: LogsViewerProps) {
   return (
-    <div className="log-viewer log-viewer--full">
+    <div className="log-viewer">
       {visible.length === 0
         ? <span className="log-empty">Waiting for log data…</span>
         : visible.slice(-logLimit).map((line, i) => (

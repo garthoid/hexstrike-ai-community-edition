@@ -1,12 +1,5 @@
 /* ── Verify Page ─────────────────────────────────────────────────────────────── */
 
-.verify-page-header {
-  background: var(--bg-card2);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: 1.25rem 1.5rem;
-}
-
 .verify-page-title {
   display: flex;
   align-items: center;
@@ -19,11 +12,11 @@
 
 .verify-page-subtitle {
   margin: 0;
-  max-width: 720px;
   line-height: 1.5;
 }
 
 .verify-tools-grid {
+  padding: 16px 20px;
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
   align-items: stretch;
