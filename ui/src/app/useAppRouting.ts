@@ -10,6 +10,7 @@ export function useAppRouting(isPageEnabled: (page: Page) => boolean) {
     initialRoute.workbenchOperationId
   )
   const [activeWorkbenchRecipe, setActiveWorkbenchRecipeState] = useState<string | null>(initialRoute.workbenchRecipe)
+  const [activeWorkbenchInput, setActiveWorkbenchInputState] = useState<string | null>(initialRoute.workbenchInput)
   const [sidebarMobileOpen, setSidebarMobileOpen] = useState(false)
 
   function setPage(p: Page) {
@@ -20,6 +21,7 @@ export function useAppRouting(isPageEnabled: (page: Page) => boolean) {
     setActiveToolNameState(null)
     setActiveWorkbenchOperationIdState(null)
     setActiveWorkbenchRecipeState(null)
+    setActiveWorkbenchInputState(null)
     setSidebarMobileOpen(false)
   }
 
@@ -30,6 +32,18 @@ export function useAppRouting(isPageEnabled: (page: Page) => boolean) {
     setActiveToolNameState(null)
     setActiveWorkbenchOperationIdState(null)
     setActiveWorkbenchRecipeState(null)
+    setActiveWorkbenchInputState(null)
+    setSidebarMobileOpen(false)
+  }
+
+  function openWorkbench(input: string, operationId: string | null = null) {
+    window.location.hash = buildWorkbenchHash(operationId, null, input)
+    setPageState('workbench')
+    setActiveSessionId(null)
+    setActiveToolNameState(null)
+    setActiveWorkbenchOperationIdState(operationId)
+    setActiveWorkbenchRecipeState(null)
+    setActiveWorkbenchInputState(input)
     setSidebarMobileOpen(false)
   }
 
@@ -59,6 +73,7 @@ export function useAppRouting(isPageEnabled: (page: Page) => boolean) {
       setActiveToolNameState(route.toolName)
       setActiveWorkbenchOperationIdState(route.workbenchOperationId)
       setActiveWorkbenchRecipeState(route.workbenchRecipe)
+      setActiveWorkbenchInputState(route.workbenchInput)
       setSidebarMobileOpen(false)
     }
     window.addEventListener('hashchange', onHashChange)
@@ -78,6 +93,7 @@ export function useAppRouting(isPageEnabled: (page: Page) => boolean) {
     activeToolName,
     activeWorkbenchOperationId,
     activeWorkbenchRecipe,
+    activeWorkbenchInput,
     sidebarMobileOpen,
     setSidebarMobileOpen,
     setPage,
@@ -85,5 +101,6 @@ export function useAppRouting(isPageEnabled: (page: Page) => boolean) {
     setActiveToolName,
     setActiveWorkbenchOperationId,
     setActiveWorkbenchRecipe,
+    openWorkbench,
   }
 }

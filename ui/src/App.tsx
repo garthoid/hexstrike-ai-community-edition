@@ -35,6 +35,7 @@ export default function App() {
     activeToolName,
     activeWorkbenchOperationId,
     activeWorkbenchRecipe,
+    activeWorkbenchInput,
     sidebarMobileOpen,
     setSidebarMobileOpen,
     setPage,
@@ -42,6 +43,7 @@ export default function App() {
     setActiveToolName,
     setActiveWorkbenchOperationId,
     setActiveWorkbenchRecipe,
+    openWorkbench,
   } = useAppRouting(isPageEnabled)
 
   const [sidebarCollapsed, setSidebarCollapsed] = usePersistentState('nyxstrike_sidebar_collapsed', false)
@@ -171,6 +173,8 @@ export default function App() {
             onWorkbenchOperationSelected={setActiveWorkbenchOperationId}
             urlWorkbenchRecipe={activeWorkbenchRecipe}
             onWorkbenchRecipeChanged={setActiveWorkbenchRecipe}
+            urlWorkbenchInput={activeWorkbenchInput}
+            onOpenInWorkbench={openWorkbench}
             openSessionDetail={openSessionDetail}
             activeSessionId={activeSessionId}
             setPage={setPage}

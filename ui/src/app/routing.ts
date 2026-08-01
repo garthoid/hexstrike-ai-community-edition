@@ -31,12 +31,17 @@ const VALID_PAGES = new Set<Page>([
   'workbench',
 ]);
 
-export function buildWorkbenchHash(operationId: string | null, recipeJson: string | null): string {
+export function buildWorkbenchHash(
+  operationId: string | null,
+  recipeJson: string | null,
+  inputText?: string | null
+): string {
   const path = operationId ? `/workbench/${encodeURIComponent(operationId)}` : '/workbench';
-  if (!recipeJson) return path;
   const params = new URLSearchParams();
-  params.set('recipe', recipeJson);
-  return `${path}?${params.toString()}`;
+  if (recipeJson) params.set('recipe', recipeJson);
+  if (inputText) params.set('input', inputText);
+  const query = params.toString();
+  return query ? `${path}?${query}` : path;
 }
 
 export function routeFromHash(): {
@@ -45,6 +50,7 @@ export function routeFromHash(): {
   toolName: string | null;
   workbenchOperationId: string | null;
   workbenchRecipe: string | null;
+  workbenchInput: string | null;
 } {
   const hash = window.location.hash.replace(/^#\/?/, '');
   if (hash.startsWith('sessions/')) {
@@ -55,6 +61,7 @@ export function routeFromHash(): {
       toolName: null,
       workbenchOperationId: null,
       workbenchRecipe: null,
+      workbenchInput: null,
     };
   }
   if (hash.startsWith('run/')) {
@@ -65,18 +72,20 @@ export function routeFromHash(): {
       toolName: toolName || null,
       workbenchOperationId: null,
       workbenchRecipe: null,
+      workbenchInput: null,
     };
   }
   if (hash === 'workbench' || hash.startsWith('workbench/') || hash.startsWith('workbench?')) {
     const [pathPart, queryPart] = hash.slice('workbench'.length).split('?');
     const operationId = pathPart.startsWith('/') ? decodeURIComponent(pathPart.slice(1)) : '';
-    const recipe = new URLSearchParams(queryPart ?? '').get('recipe');
+    const query = new URLSearchParams(queryPart ?? '');
     return {
       page: 'workbench',
       sessionId: null,
       toolName: null,
       workbenchOperationId: operationId || null,
-      workbenchRecipe: recipe,
+      workbenchRecipe: query.get('recipe'),
+      workbenchInput: query.get('input'),
     };
   }
 
@@ -86,5 +95,6 @@ export function routeFromHash(): {
     toolName: null,
     workbenchOperationId: null,
     workbenchRecipe: null,
+    workbenchInput: null,
   };
 }

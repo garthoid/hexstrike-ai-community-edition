@@ -380,6 +380,16 @@
   flex-shrink: 0;
 }
 
+.workbench-recipe-toolbar {
+  display: flex;
+  gap: 2px;
+  flex-shrink: 0;
+}
+
+.workbench-hidden-file-input {
+  display: none;
+}
+
 /* ── Recipe ───────────────────────────────────────────────────────────────── */
 
 .workbench-recipe-step-drag {

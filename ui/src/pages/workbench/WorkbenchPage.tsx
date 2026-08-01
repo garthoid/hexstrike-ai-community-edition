@@ -27,6 +27,7 @@ interface WorkbenchPageProps {
   onOperationSelected?: (operationId: string | null) => void
   urlRecipe?: string | null
   onRecipeChanged?: (encodedRecipe: string | null) => void
+  urlInput?: string | null
 }
 
 export default function WorkbenchPage({
@@ -34,6 +35,7 @@ export default function WorkbenchPage({
   onOperationSelected,
   urlRecipe,
   onRecipeChanged,
+  urlInput,
 }: WorkbenchPageProps) {
   const [operations, setOperations] = useState<WorkbenchOperation[]>([])
   const [categories, setCategories] = useState<string[]>([])
@@ -47,6 +49,7 @@ export default function WorkbenchPage({
   const [hydrated, setHydrated] = useState(!urlRecipe)
   const [recipePast, setRecipePast] = useState<RecipeStep[][]>([])
   const [recipeFuture, setRecipeFuture] = useState<RecipeStep[][]>([])
+  const [pendingInitialInput, setPendingInitialInput] = useState<string | null>(null)
   const searchInputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
@@ -83,9 +86,12 @@ export default function WorkbenchPage({
       } catch {
         setRecipe([])
       }
+      if (urlInput) setRecipeInput(prev => (prev.trim() ? prev : urlInput))
+    } else if (urlInput) {
+      setPendingInitialInput(urlInput)
     }
     setHydrated(true)
-  }, [operations, hydrated, urlRecipe])
+  }, [operations, hydrated, urlRecipe, urlInput])
 
   useEffect(() => {
     if (!hydrated) return
@@ -112,6 +118,7 @@ export default function WorkbenchPage({
 
   function selectOperation(operationId: string) {
     setSelectedId(operationId)
+    setPendingInitialInput(null)
     onOperationSelected?.(operationId)
   }
 
@@ -235,7 +242,14 @@ export default function WorkbenchPage({
           <div className="workbench-main">
             <section className={`workbench-panel${selected ? ' section' : ''}`}>
               {selected
-                ? <OperationPanel key={selected.id} operation={selected} onAddToRecipe={addToRecipe} />
+                ? (
+                  <OperationPanel
+                    key={selected.id}
+                    operation={selected}
+                    onAddToRecipe={addToRecipe}
+                    initialInput={pendingInitialInput ?? undefined}
+                  />
+                )
                 : (
                   <div className="workbench-panel-empty">
                     <FlaskConical size={28} color="var(--text-dim)" />

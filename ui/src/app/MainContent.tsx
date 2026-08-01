@@ -94,6 +94,8 @@ interface MainContentProps {
   onWorkbenchOperationSelected?: (operationId: string | null) => void
   urlWorkbenchRecipe?: string | null
   onWorkbenchRecipeChanged?: (encodedRecipe: string | null) => void
+  urlWorkbenchInput?: string | null
+  onOpenInWorkbench?: (input: string, operationId?: string | null) => void
   openSessionDetail: (sessionId: string) => void
   activeSessionId: string | null
   setPage: (page: Page) => void
@@ -135,6 +137,8 @@ export function MainContent({
   onWorkbenchOperationSelected,
   urlWorkbenchRecipe,
   onWorkbenchRecipeChanged,
+  urlWorkbenchInput,
+  onOpenInWorkbench,
   openSessionDetail,
   activeSessionId,
   setPage,
@@ -214,13 +218,14 @@ export function MainContent({
             llmAvailable={health?.llm_status?.available ?? false}
           />
         )}
-        {page === 'loot' && <LootPage />}
+        {page === 'loot' && <LootPage onOpenInWorkbench={onOpenInWorkbench} />}
         {page === 'workbench' && (
           <WorkbenchPage
             urlOperationId={urlWorkbenchOperationId}
             onOperationSelected={onWorkbenchOperationSelected}
             urlRecipe={urlWorkbenchRecipe}
             onRecipeChanged={onWorkbenchRecipeChanged}
+            urlInput={urlWorkbenchInput}
           />
         )}
         {page === 'logs' && (

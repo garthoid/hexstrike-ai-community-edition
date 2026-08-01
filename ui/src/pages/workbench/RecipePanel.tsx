@@ -1,14 +1,19 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import type { Dispatch, SetStateAction } from 'react'
 import {
   ArrowUp, ArrowDown, X, Play, RefreshCw, Copy, Check, Workflow, Pencil,
-  Save, FolderOpen, Trash2, GripVertical, SkipForward, Sparkles, Download,
+  Save, FolderOpen, FolderPlus, Trash2, GripVertical, SkipForward, Sparkles, Download,
+  Link2, Upload, Eraser, Send,
 } from 'lucide-react'
 import { api } from '../../api'
 import type { WorkbenchOperation, WorkbenchRecipeStepResult, WorkbenchSavedRecipe } from '../../api'
 import { useDragReorder } from '../../hooks/useDragReorder'
 import { usePersistentState } from '../../hooks/usePersistentState'
 import { downloadWorkbenchOutput } from './fileIO'
+import { downloadRecipeAsFile, parseRecipeFile } from './recipeIO'
+import { ConfirmActionModal } from '../../components/ConfirmActionModal'
+import { SendToLootModal } from '../../components/SendToLootModal'
+import { useToast } from '../../components/ToastProvider'
 
 export interface RecipeStep {
   stepId: string
@@ -47,6 +52,13 @@ export function RecipePanel({ recipe, setRecipe, operations, input, setInput }: 
   const [saveAsName, setSaveAsName] = useState('')
   const [renamingRecipeId, setRenamingRecipeId] = useState<string | null>(null)
   const [renameDraft, setRenameDraft] = useState('')
+  const [loadedRecipeId, setLoadedRecipeId] = useState<string | null>(null)
+  const [savingInPlace, setSavingInPlace] = useState(false)
+  const [pendingDelete, setPendingDelete] = useState<WorkbenchSavedRecipe | null>(null)
+  const [deletingRecipe, setDeletingRecipe] = useState(false)
+  const [sendToLootOpen, setSendToLootOpen] = useState(false)
+  const importFileRef = useRef<HTMLInputElement>(null)
+  const { pushToast } = useToast()
 
   function loadSavedRecipes() {
     setSavedLoading(true)
@@ -97,6 +109,56 @@ export function RecipePanel({ recipe, setRecipe, operations, input, setInput }: 
     setRecipe(prev => prev.filter((_, i) => i !== index))
     setEditingId(prev => (recipe[index]?.stepId === prev ? null : prev))
     setStepOverrides({})
+  }
+
+  function duplicate(index: number) {
+    setRecipe(prev => {
+      const step = prev[index]
+      if (!step) return prev
+      const copy: RecipeStep = { ...step, stepId: crypto.randomUUID(), params: { ...step.params } }
+      const next = [...prev]
+      next.splice(index + 1, 0, copy)
+      return next
+    })
+    setStepOverrides({})
+  }
+
+  function clearRecipe() {
+    setRecipe([])
+    setLoadedRecipeId(null)
+    pushToast('info', 'Recipe cleared — undo with Ctrl+Z.')
+  }
+
+  function copyRecipeLink() {
+    navigator.clipboard?.writeText(window.location.href)
+      .then(() => pushToast('success', 'Recipe link copied.'))
+      .catch(() => pushToast('error', 'Failed to copy link.'))
+  }
+
+  function exportRecipe() {
+    downloadRecipeAsFile(recipe)
+  }
+
+  function triggerImport() {
+    importFileRef.current?.click()
+  }
+
+  function handleImportFile(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    e.target.value = ''
+    if (!file) return
+    const reader = new FileReader()
+    reader.onload = () => {
+      try {
+        const { steps, skipped } = parseRecipeFile(String(reader.result ?? ''), operations)
+        setRecipe(steps)
+        setLoadedRecipeId(null)
+        pushToast('success', skipped > 0 ? `Recipe imported — ${skipped} step(s) skipped (unknown operation).` : 'Recipe imported.')
+      } catch (err) {
+        pushToast('error', `Failed to import recipe: ${String(err)}`)
+      }
+    }
+    reader.readAsText(file)
   }
 
   function startEdit(step: RecipeStep) {
@@ -197,7 +259,24 @@ export function RecipePanel({ recipe, setRecipe, operations, input, setInput }: 
     )
     if (res.success) {
       setSavingAs(false)
+      setLoadedRecipeId(res.recipe?.recipe_id ?? null)
       loadSavedRecipes()
+      pushToast('success', `Saved as "${name}".`)
+    } else {
+      setSavedError(res.error ?? 'Failed to save recipe.')
+    }
+  }
+
+  async function saveInPlace() {
+    if (!loadedRecipeId) return
+    setSavingInPlace(true)
+    const res = await api.updateWorkbenchRecipe(loadedRecipeId, {
+      steps: recipe.map(s => ({ operation_id: s.operationId, params: s.params })),
+    })
+    setSavingInPlace(false)
+    if (res.success) {
+      loadSavedRecipes()
+      pushToast('success', 'Recipe saved.')
     } else {
       setSavedError(res.error ?? 'Failed to save recipe.')
     }
@@ -218,6 +297,7 @@ export function RecipePanel({ recipe, setRecipe, operations, input, setInput }: 
       .filter((s): s is RecipeStep => s !== null)
     setRecipe(loaded)
     setEditingId(null)
+    setLoadedRecipeId(saved.recipe_id)
   }
 
   function startRenameRecipe(saved: WorkbenchSavedRecipe) {
@@ -241,9 +321,14 @@ export function RecipePanel({ recipe, setRecipe, operations, input, setInput }: 
     }
   }
 
-  async function deleteSavedRecipe(recipeId: string) {
-    const res = await api.deleteWorkbenchRecipe(recipeId)
+  async function confirmDelete() {
+    if (!pendingDelete) return
+    setDeletingRecipe(true)
+    const res = await api.deleteWorkbenchRecipe(pendingDelete.recipe_id)
+    setDeletingRecipe(false)
     if (res.success) {
+      if (loadedRecipeId === pendingDelete.recipe_id) setLoadedRecipeId(null)
+      setPendingDelete(null)
       loadSavedRecipes()
     } else {
       setSavedError(res.error ?? 'Failed to delete recipe.')
@@ -255,6 +340,27 @@ export function RecipePanel({ recipe, setRecipe, operations, input, setInput }: 
       {recipe.length > 0 && (
         <div className="section-header">
           <h3><Workflow size={14} style={{ marginRight: 6, verticalAlign: -2 }} />Recipe</h3>
+          <span className="workbench-recipe-toolbar">
+            <button className="icon-btn" onClick={copyRecipeLink} title="Copy link to this recipe">
+              <Link2 size={12} />
+            </button>
+            <button className="icon-btn" onClick={exportRecipe} title="Export recipe as a JSON file">
+              <Download size={12} />
+            </button>
+            <button className="icon-btn" onClick={triggerImport} title="Import recipe from a JSON file">
+              <Upload size={12} />
+            </button>
+            <input
+              ref={importFileRef}
+              type="file"
+              accept="application/json"
+              className="workbench-hidden-file-input"
+              onChange={handleImportFile}
+            />
+            <button className="icon-btn" onClick={clearRecipe} title="Clear recipe (undo with Ctrl+Z)">
+              <Eraser size={12} />
+            </button>
+          </span>
         </div>
       )}
       <div className="workbench-op-content">
@@ -262,9 +368,16 @@ export function RecipePanel({ recipe, setRecipe, operations, input, setInput }: 
           <div className="workbench-saved-recipes-header">
             <span className="workbench-field-label"><FolderOpen size={12} style={{ marginRight: 4, verticalAlign: -2 }} />Saved Recipes</span>
             {recipe.length > 0 && !savingAs && (
-              <button className="icon-btn" onClick={startSaveAs} title="Save current recipe">
-                <Save size={12} />
-              </button>
+              <span className="workbench-saved-recipe-actions">
+                {loadedRecipeId && (
+                  <button className="icon-btn" onClick={() => void saveInPlace()} disabled={savingInPlace} title="Save changes to the loaded recipe">
+                    <Save size={12} />
+                  </button>
+                )}
+                <button className="icon-btn" onClick={startSaveAs} title="Save as a new recipe">
+                  <FolderPlus size={12} />
+                </button>
+              </span>
             )}
           </div>
 
@@ -320,7 +433,7 @@ export function RecipePanel({ recipe, setRecipe, operations, input, setInput }: 
                     <button className="icon-btn" onClick={() => startRenameRecipe(saved)} title="Rename">
                       <Pencil size={12} />
                     </button>
-                    <button className="icon-btn" onClick={() => void deleteSavedRecipe(saved.recipe_id)} title="Delete">
+                    <button className="icon-btn" onClick={() => setPendingDelete(saved)} title="Delete">
                       <Trash2 size={12} />
                     </button>
                   </span>
@@ -391,6 +504,9 @@ export function RecipePanel({ recipe, setRecipe, operations, input, setInput }: 
                       </button>
                       <button className="icon-btn" onClick={() => void runToStep(i)} disabled={loading} title="Run recipe up to this step">
                         <SkipForward size={12} />
+                      </button>
+                      <button className="icon-btn" onClick={() => duplicate(i)} title="Duplicate step">
+                        <Copy size={12} />
                       </button>
                       <button className="icon-btn" onClick={() => remove(i)} title="Remove">
                         <X size={12} />
@@ -555,6 +671,9 @@ export function RecipePanel({ recipe, setRecipe, operations, input, setInput }: 
                     >
                       <Download size={12} />
                     </button>
+                    <button className="icon-btn" onClick={() => setSendToLootOpen(true)} title="Send output to Loot">
+                      <Send size={12} />
+                    </button>
                   </span>
                 </div>
                 {outputMime?.startsWith('image/') ? (
@@ -567,6 +686,25 @@ export function RecipePanel({ recipe, setRecipe, operations, input, setInput }: 
           </>
         )}
       </div>
+
+      <ConfirmActionModal
+        isOpen={!!pendingDelete}
+        title="Delete saved recipe?"
+        description={`This will permanently delete "${pendingDelete?.name}". This can't be undone.`}
+        confirmLabel="Delete"
+        isConfirming={deletingRecipe}
+        onConfirm={confirmDelete}
+        onClose={() => setPendingDelete(null)}
+      />
+
+      {output !== null && (
+        <SendToLootModal
+          isOpen={sendToLootOpen}
+          onClose={() => setSendToLootOpen(false)}
+          defaultTitle="Recipe output"
+          content={output}
+        />
+      )}
     </section>
   )
 }

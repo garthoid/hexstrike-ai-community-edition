@@ -1,18 +1,23 @@
 import { useState } from 'react'
-import { Copy, Check, Play, RefreshCw, ListPlus, Download } from 'lucide-react'
+import { Copy, Check, Play, RefreshCw, ListPlus, Download, Send } from 'lucide-react'
 import { api } from '../../api'
 import type { WorkbenchOperation } from '../../api'
 import { downloadWorkbenchOutput } from './fileIO'
+import { SendToLootModal } from '../../components/SendToLootModal'
 
 interface OperationPanelProps {
   operation: WorkbenchOperation
   onAddToRecipe: (operation: WorkbenchOperation, params: Record<string, string>, inputValue: string) => void
+  initialInput?: string
 }
 
-export function OperationPanel({ operation, onAddToRecipe }: OperationPanelProps) {
+export function OperationPanel({ operation, onAddToRecipe, initialInput }: OperationPanelProps) {
   const [values, setValues] = useState<Record<string, string>>(() =>
-    Object.fromEntries(operation.params.map(p => [p.name, String(p.default ?? '')]))
+    Object.fromEntries(
+      operation.params.map(p => [p.name, p.name === 'input' && initialInput ? initialInput : String(p.default ?? '')])
+    )
   )
+  const [sendToLootOpen, setSendToLootOpen] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [output, setOutput] = useState<string | null>(null)
@@ -141,6 +146,9 @@ export function OperationPanel({ operation, onAddToRecipe }: OperationPanelProps
                 >
                   <Download size={12} />
                 </button>
+                <button className="icon-btn" onClick={() => setSendToLootOpen(true)} title="Send output to Loot">
+                  <Send size={12} />
+                </button>
               </span>
             </div>
             {outputMime?.startsWith('image/') ? (
@@ -150,6 +158,15 @@ export function OperationPanel({ operation, onAddToRecipe }: OperationPanelProps
             )}
             {note && <div className="workbench-note">{note}</div>}
           </div>
+        )}
+
+        {output !== null && (
+          <SendToLootModal
+            isOpen={sendToLootOpen}
+            onClose={() => setSendToLootOpen(false)}
+            defaultTitle={`${operation.name} output`}
+            content={output}
+          />
         )}
       </div>
     </div>

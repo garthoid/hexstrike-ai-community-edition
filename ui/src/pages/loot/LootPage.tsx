@@ -4,7 +4,7 @@ import { ConfirmActionModal } from '../../components/ConfirmActionModal'
 import { useToast } from '../../components/ToastProvider'
 import {
   Plus, Trash2, Edit2, Search, X, KeyRound, Package, RefreshCw,
-  Download, CheckCircle2, Circle, Copy, Check,
+  Download, CheckCircle2, Circle, Copy, Check, FlaskConical,
 } from 'lucide-react'
 import { api } from '../../api'
 import type {
@@ -745,7 +745,11 @@ function CredentialsTab() {
 
 // ── Loot Tab ───────────────────────────────────────────────────────────────────
 
-function LootTab() {
+interface LootTabProps {
+  onOpenInWorkbench?: (input: string, operationId?: string | null) => void
+}
+
+function LootTab({ onOpenInWorkbench }: LootTabProps) {
   const { pushToast } = useToast()
   const [items, setItems] = useState<LootItem[]>([])
   const [loading, setLoading] = useState(true)
@@ -990,6 +994,15 @@ function LootTab() {
                 <div className="loot-card-secret-wrap">
                   <pre className="loot-card-secret mono">{item.content}</pre>
                   <CopyButton text={item.content} />
+                  {onOpenInWorkbench && (
+                    <button
+                      className="finding-icon-btn"
+                      title="Open in Workbench"
+                      onClick={() => onOpenInWorkbench(item.content!)}
+                    >
+                      <FlaskConical size={12} />
+                    </button>
+                  )}
                 </div>
               ) : null}
               <div className="loot-card-meta">
@@ -1017,7 +1030,11 @@ function LootTab() {
 
 type Tab = 'credentials' | 'loot'
 
-export function LootPage() {
+interface LootPageProps {
+  onOpenInWorkbench?: (input: string, operationId?: string | null) => void
+}
+
+export function LootPage({ onOpenInWorkbench }: LootPageProps = {}) {
   const [tab, setTab] = useState<Tab>('credentials')
 
   return (
@@ -1048,7 +1065,7 @@ export function LootPage() {
         </div>
 
         {tab === 'credentials' && <CredentialsTab />}
-        {tab === 'loot' && <LootTab />}
+        {tab === 'loot' && <LootTab onOpenInWorkbench={onOpenInWorkbench} />}
       </div>
     </div>
   )
