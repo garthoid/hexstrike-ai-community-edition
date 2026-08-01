@@ -472,6 +472,66 @@
 
 .stat-sub { font-size: 11px; color: var(--text-dim); }
 
+/* ── KPI Strip (flat, boxless — sits on a panel bg with dividers) ──────────── */
+.kpi-strip {
+  display: flex;
+  align-items: stretch;
+  gap: 22px;
+  padding: 6px 0;
+  flex-wrap: wrap;
+}
+
+.kpi-strip-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  flex: 1 1 0;
+  min-width: 160px;
+}
+
+.kpi-strip-top {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  line-height: 1.2;
+}
+
+.kpi-strip-icon {
+  flex-shrink: 0;
+  display: inline-flex;
+}
+
+.kpi-strip-value {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-h);
+  font-family: var(--mono);
+}
+
+.kpi-strip-label {
+  font-size: 10.5px;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.kpi-strip-divider {
+  width: 1px;
+  align-self: stretch;
+  background: var(--border);
+  flex-shrink: 0;
+}
+
+@media (max-width: 780px) {
+  .kpi-strip-divider {
+    display: none;
+  }
+}
+
 .dashboard-signature-wrap {
   display: flex;
   justify-content: center;

@@ -4,9 +4,7 @@ import type { Tool } from '../../api'
 interface ToolsRegistrySectionProps {
   tools: Tool[]
   filtered: Tool[]
-  categories: string[]
   activeCat: string
-  setActiveCat: (value: string) => void
   search: string
   setSearch: (value: string) => void
   missingOnly: boolean
@@ -21,9 +19,7 @@ interface ToolsRegistrySectionProps {
 export function ToolsRegistrySection({
   tools,
   filtered,
-  categories,
   activeCat,
-  setActiveCat,
   search,
   setSearch,
   missingOnly,
@@ -35,9 +31,12 @@ export function ToolsRegistrySection({
   refreshingAvailability = false,
 }: ToolsRegistrySectionProps) {
   return (
-    <section className="section">
+    <div className="tools-main-col">
       <div className="section-header">
-        <h3>Tool Registry <span className="badge">{filtered.length} / {tools.length}</span></h3>
+        <h3>
+          {activeCat === 'all' ? 'Tool Registry' : activeCat.replace(/_/g, ' ')}{' '}
+          <span className="badge">{filtered.length} / {tools.length}</span>
+        </h3>
         {onRefreshAvailability && (
           <button
             className="registry-missing-toggle"
@@ -80,57 +79,48 @@ export function ToolsRegistrySection({
             {missingCount > 0 && <span className="badge">{missingCount}</span>}
           </button>
         </div>
-        <div className="cat-tabs">
-          {categories.map(category => (
-            <button
-              key={category}
-              className={`cat-tab ${activeCat === category ? 'active' : ''}`}
-              onClick={() => setActiveCat(activeCat === category ? 'all' : category)}
-            >
-              {category.replace(/_/g, ' ')}
-            </button>
-          ))}
-        </div>
       </div>
-      <div className="registry-grid registry-grid--wide">
-        {filtered.map(tool => (
-          <div
-            key={tool.name}
-            className="registry-card registry-card--clickable"
-            onClick={() => onSelectTool(tool)}
-            title={`Click for details on ${tool.name}`}
-          >
-            <div className="registry-card-top">
-              <span className="registry-name mono" title={tool.name}>{tool.name}</span>
-              <div className="registry-meta">
-                {tool.parent_tool && (
-                  <span className="registry-cat" title={`Based on ${tool.parent_tool}`}>
-                    {tool.parent_tool}
-                  </span>
-                )}
-                {toolsStatus[tool.name] === true && (
-                  <span className="registry-installed" title="Installed">
-                    <CheckCircle size={11} color="var(--green)" />
-                  </span>
-                )}
-                {toolsStatus[tool.name] === false && (
-                  <span className="registry-installed" title="Not installed">
-                    <XCircle size={11} color="var(--red)" />
-                  </span>
-                )}
+      <div className="tools-grid-scroll">
+        <div className="registry-grid registry-grid--wide">
+          {filtered.map(tool => (
+            <div
+              key={tool.name}
+              className="registry-card registry-card--clickable"
+              onClick={() => onSelectTool(tool)}
+              title={`Click for details on ${tool.name}`}
+            >
+              <div className="registry-card-top">
+                <span className="registry-name mono" title={tool.name}>{tool.name}</span>
+                <div className="registry-meta">
+                  {tool.parent_tool && (
+                    <span className="registry-cat" title={`Based on ${tool.parent_tool}`}>
+                      {tool.parent_tool}
+                    </span>
+                  )}
+                  {toolsStatus[tool.name] === true && (
+                    <span className="registry-installed" title="Installed">
+                      <CheckCircle size={11} color="var(--green)" />
+                    </span>
+                  )}
+                  {toolsStatus[tool.name] === false && (
+                    <span className="registry-installed" title="Not installed">
+                      <XCircle size={11} color="var(--red)" />
+                    </span>
+                  )}
+                </div>
+              </div>
+              <p className="registry-desc">{tool.desc}</p>
+              <div className="registry-footer">
+                <span className="registry-cat">{tool.category.replace(/_/g, ' ')}</span>
+                <span className="registry-eff" title="Effectiveness">
+                  {'█'.repeat(Math.round(tool.effectiveness * 5))}{'░'.repeat(5 - Math.round(tool.effectiveness * 5))}
+                </span>
               </div>
             </div>
-            <p className="registry-desc">{tool.desc}</p>
-            <div className="registry-footer">
-              <span className="registry-cat">{tool.category.replace(/_/g, ' ')}</span>
-              <span className="registry-eff" title="Effectiveness">
-                {'█'.repeat(Math.round(tool.effectiveness * 5))}{'░'.repeat(5 - Math.round(tool.effectiveness * 5))}
-              </span>
-            </div>
-          </div>
-        ))}
+          ))}
+        </div>
         {filtered.length === 0 && <p className="empty-state">No tools match your filter.</p>}
       </div>
-    </section>
+    </div>
   )
 }

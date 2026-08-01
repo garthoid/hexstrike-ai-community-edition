@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react'
 import { Wrench, Database, Shield, XCircle } from 'lucide-react'
 import { api, type Tool, type WebDashboardResponse } from '../../api'
-import { StatCard } from '../../components/StatCard'
+import { KpiStrip } from '../../components/KpiStrip'
 import { ToolModal } from '../../components/ToolModal'
 import { useToast } from '../../components/ToastProvider'
 import { filterToolsByOptions, getToolCategories } from '../../shared/toolUtils'
+import { ToolsCategoryNav } from './ToolsCategoryNav'
 import { ToolsRegistrySection } from './ToolsRegistrySection'
 import './ToolsPage.css'
 
@@ -39,13 +40,20 @@ export default function ToolsPage({ health, tools, toolsStatus }: ToolsPageProps
   }, [toolsStatus, health.total_tools_available, health.total_tools_count, refreshingAvailability])
 
   const cats = getToolCategories(tools)
-  const filtered = filterToolsByOptions(tools, {
+  const searchFiltered = filterToolsByOptions(tools, {
     toolsStatus: effectiveToolsStatus,
-    activeCategory: activeCat,
+    activeCategory: 'all',
     search,
     missingOnly,
     includeParentToolSearch: true,
   })
+  const filtered = activeCat === 'all'
+    ? searchFiltered
+    : searchFiltered.filter(tool => tool.category === activeCat)
+  const categoryCounts: Record<string, number> = {}
+  for (const tool of searchFiltered) {
+    categoryCounts[tool.category] = (categoryCounts[tool.category] ?? 0) + 1
+  }
 
   const missingCount = localTotals.total - localTotals.available
 
@@ -71,7 +79,7 @@ export default function ToolsPage({ health, tools, toolsStatus }: ToolsPageProps
   }
 
   return (
-    <div className="page-content tools-page">
+    <div className="tools-page">
       {selectedTool && (
         <ToolModal
           tool={selectedTool}
@@ -80,47 +88,51 @@ export default function ToolsPage({ health, tools, toolsStatus }: ToolsPageProps
         />
       )}
 
-      <div className="kpi-row">
-        <StatCard icon={<Wrench size={20} />} label="Total Server Tools" value={tools.length} sub="in registry" accent="var(--blue)" />
-        <StatCard
-          icon={<Shield size={20} />}
-          label="Kali Tools Installed"
-          value={`${localTotals.available} / ${localTotals.total}`}
-          sub={`${((localTotals.available / Math.max(localTotals.total, 1)) * 100).toFixed(0)}% coverage`}
-          accent="var(--green)"        
-        />
-        <StatCard
-          icon={<XCircle size={20} />}
-          label="Missing"
-          value={missingCount}
-          sub="not installed"
-          accent={missingCount > 0 ? 'var(--amber)' : 'var(--text-dim)'}
-        />
-        <StatCard
-          icon={<Database size={20} />}
-          label="Categories"
-          value={cats.length - 1}
-          sub="tool categories"
-          accent="var(--purple)"
+      <div className="tools-page-top">
+        <KpiStrip
+          items={[
+            { icon: <Wrench size={16} />, label: 'Total Server Tools', value: tools.length, accent: 'var(--blue)' },
+            {
+              icon: <Shield size={16} />,
+              label: `Kali Tools Installed · ${((localTotals.available / Math.max(localTotals.total, 1)) * 100).toFixed(0)}% coverage`,
+              value: `${localTotals.available} / ${localTotals.total}`,
+              accent: 'var(--green)',
+            },
+            {
+              icon: <XCircle size={16} />,
+              label: 'Missing / not installed',
+              value: missingCount,
+              accent: missingCount > 0 ? 'var(--amber)' : 'var(--text-dim)',
+            },
+            { icon: <Database size={16} />, label: 'Tool Categories', value: cats.length - 1, accent: 'var(--purple)' },
+          ]}
         />
       </div>
 
-      <ToolsRegistrySection
-        tools={tools}
-        filtered={filtered}
-        categories={cats}
-        activeCat={activeCat}
-        setActiveCat={setActiveCat}
-        search={search}
-        setSearch={setSearch}
-        missingOnly={missingOnly}
-        setMissingOnly={setMissingOnly}
-        missingCount={missingCount}
-        toolsStatus={effectiveToolsStatus}
-        onSelectTool={setSelectedTool}
-        onRefreshAvailability={refreshAvailabilityNow}
-        refreshingAvailability={refreshingAvailability}
-      />
+      <div className="tools-browser">
+        <ToolsCategoryNav
+          categories={cats}
+          activeCat={activeCat}
+          setActiveCat={setActiveCat}
+          counts={categoryCounts}
+          totalCount={searchFiltered.length}
+        />
+
+        <ToolsRegistrySection
+          tools={tools}
+          filtered={filtered}
+          activeCat={activeCat}
+          search={search}
+          setSearch={setSearch}
+          missingOnly={missingOnly}
+          setMissingOnly={setMissingOnly}
+          missingCount={missingCount}
+          toolsStatus={effectiveToolsStatus}
+          onSelectTool={setSelectedTool}
+          onRefreshAvailability={refreshAvailabilityNow}
+          refreshingAvailability={refreshingAvailability}
+        />
+      </div>
     </div>
   )
 }
