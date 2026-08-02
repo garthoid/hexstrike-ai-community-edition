@@ -3,11 +3,10 @@
 <img src="assets/nyxstrike-logo.png" alt="NyxStrike" width="220"/>
 
 # NyxStrike
-*Previously: Hexstrike AI Community Edition*
 
-### AI-powered offensive security orchestration engine
+## AI-powered offensive security orchestration engine
 
-#### ⚡ From target → recon → exploit chain in minutes
+* ⚡ From target → recon → exploit chain in minutes *
 
 [![Python](https://img.shields.io/badge/Python-3.13%2B-blue.svg)](https://www.python.org/)
 [![License](https://img.shields.io/badge/License-AGPLv3-green.svg)](LICENSE)
