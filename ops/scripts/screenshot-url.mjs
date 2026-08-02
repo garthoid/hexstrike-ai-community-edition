@@ -7,15 +7,15 @@
 // sheets, dropdowns) rather than just the page's initial load state.
 //
 // Usage:
-//   node scripts/screenshot-url.mjs <hash-route-or-url> [output.png] [--theme=<id>] [--no-demo] [--click=<selector>] [--press=<key>] [--wait-for=<selector>]
+//   node ops/scripts/screenshot-url.mjs <hash-route-or-url> [output.png] [--theme=<id>] [--no-demo] [--click=<selector>] [--press=<key>] [--wait-for=<selector>]
 //
 // Examples:
-//   node scripts/screenshot-url.mjs '#/tools'
-//   node scripts/screenshot-url.mjs '#/tools' tools.png --theme=synthwave
-//   node scripts/screenshot-url.mjs http://localhost:5173/#/loot loot.png
-//   node scripts/screenshot-url.mjs '#/settings' --no-demo
+//   node ops/scripts/screenshot-url.mjs '#/tools'
+//   node ops/scripts/screenshot-url.mjs '#/tools' tools.png --theme=synthwave
+//   node ops/scripts/screenshot-url.mjs http://localhost:5173/#/loot loot.png
+//   node ops/scripts/screenshot-url.mjs '#/settings' --no-demo
 //   # Click the first tool card and capture the detail Sheet that slides in:
-//   node scripts/screenshot-url.mjs '#/tools' sheet.png --click=".registry-card--clickable" --wait-for=".sheet"
+//   node ops/scripts/screenshot-url.mjs '#/tools' sheet.png --click=".registry-card--clickable" --wait-for=".sheet"
 //   # Then close it and confirm Escape works (chain a second invocation with --press=Escape).
 //
 // Env vars (all optional):
@@ -57,7 +57,7 @@ const waitForSelector = waitForArg ? waitForArg.slice("--wait-for=".length) : nu
 
 const target = positional[0];
 if (!target) {
-  console.error("Usage: node scripts/screenshot-url.mjs <hash-route-or-url> [output.png] [--theme=<id>] [--no-demo]");
+  console.error("Usage: node ops/scripts/screenshot-url.mjs <hash-route-or-url> [output.png] [--theme=<id>] [--no-demo]");
   process.exit(1);
 }
 

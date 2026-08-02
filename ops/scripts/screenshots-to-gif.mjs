@@ -5,7 +5,7 @@
 // crossfade GIF, for README/marketing content.
 //
 // Usage:
-//   node scripts/screenshots-to-gif.mjs
+//   node ops/scripts/screenshots-to-gif.mjs
 //
 // Env vars (all optional):
 //   IN_DIR          default ./screenshots (next to this script)

@@ -12,9 +12,9 @@
 #                                -> screenshot-themes-slices.mjs -> content/themes-slices.jpg
 #
 # Usage:
-#   ./scripts/make-demo-content.sh            # run both flows
-#   ./scripts/make-demo-content.sh demo       # just the page-by-page demo gif
-#   ./scripts/make-demo-content.sh themes     # just the themes gif + slices jpg
+#   ./ops/scripts/make-demo-content.sh            # run both flows
+#   ./ops/scripts/make-demo-content.sh demo       # just the page-by-page demo gif
+#   ./ops/scripts/make-demo-content.sh themes     # just the themes gif + slices jpg
 #
 # Requires the UI dev server running (cd frontend/ui && npm run dev), playwright
 # (npx playwright install chromium) and ffmpeg/ffprobe on PATH. Env var

@@ -23,7 +23,7 @@ install_log.txt
 .opencode/.gitignore
 
 # Screenshot/demo-content tooling output
-/scripts/screenshots/
-/scripts/themes/
-/scripts/content/
+/ops/scripts/screenshots/
+/ops/scripts/themes/
+/ops/scripts/content/
 .claude/skills/

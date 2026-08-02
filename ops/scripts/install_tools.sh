@@ -9,7 +9,7 @@
 # =============================================================================
 #
 #  USAGE:
-#    ./scripts/install_tools.sh [OPTIONS]
+#    ./ops/scripts/install_tools.sh [OPTIONS]
 #
 #  OPTIONS:
 #    --only <category>   Install only a specific category
@@ -20,10 +20,10 @@
 #    --help, -h          Show this help message and exit
 #
 #  EXAMPLES:
-#    ./scripts/install_tools.sh                   # Install everything
-#    ./scripts/install_tools.sh --only network    # Install only network tools
-#    ./scripts/install_tools.sh --dry-run         # Preview all installs
-#    ./scripts/install_tools.sh --only web --dry-run
+#    ./ops/scripts/install_tools.sh                   # Install everything
+#    ./ops/scripts/install_tools.sh --only network    # Install only network tools
+#    ./ops/scripts/install_tools.sh --dry-run         # Preview all installs
+#    ./ops/scripts/install_tools.sh --only web --dry-run
 #
 #  NOTES:
 #    - Python deps (pyproject.toml) are handled separately: uv sync --extra tools --extra big
@@ -96,7 +96,7 @@ section() { echo ""; echo -e "${BOLD}${YELLOW}━━━ $* ━━━━━━━
 # ─── Help ─────────────────────────────────────────────────────────────────────
 print_help() {
   echo -e "${BOLD}USAGE${RESET}"
-  echo "  ./scripts/install_tools.sh [OPTIONS]"
+  echo "  ./ops/scripts/install_tools.sh [OPTIONS]"
   echo ""
   echo -e "${BOLD}OPTIONS${RESET}"
   echo "  --only <category>   Install only a specific category of tools"
@@ -116,10 +116,10 @@ print_help() {
   echo "  browser   Browser agent dependencies (Chromium + ChromeDriver)"
   echo ""
   echo -e "${BOLD}EXAMPLES${RESET}"
-  echo "  ./scripts/install_tools.sh                    Install all tools"
-  echo "  ./scripts/install_tools.sh --only web         Install only web tools"
-  echo "  ./scripts/install_tools.sh --dry-run          Preview all installs"
-  echo "  ./scripts/install_tools.sh --only cloud --dry-run"
+  echo "  ./ops/scripts/install_tools.sh                    Install all tools"
+  echo "  ./ops/scripts/install_tools.sh --only web         Install only web tools"
+  echo "  ./ops/scripts/install_tools.sh --dry-run          Preview all installs"
+  echo "  ./ops/scripts/install_tools.sh --only cloud --dry-run"
   echo ""
   echo -e "${BOLD}NOTES${RESET}"
   echo "  • Python deps: handle separately with  uv sync --extra tools --extra big"

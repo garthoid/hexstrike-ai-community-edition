@@ -6,7 +6,7 @@
 // theme's screenshot into an equal-width vertical band with a name label.
 //
 // Usage:
-//   node scripts/screenshot-themes-slices.mjs
+//   node ops/scripts/screenshot-themes-slices.mjs
 //
 // Env vars (all optional):
 //   IN_DIR    default ./themes (next to this script)

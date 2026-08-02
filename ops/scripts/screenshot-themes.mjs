@@ -9,7 +9,7 @@
 //   2. Install dependencies once:
 //        npm install && npx playwright install chromium
 //   3. Run:
-//        node scripts/screenshot-themes.mjs
+//        node ops/scripts/screenshot-themes.mjs
 //
 // Env vars (all optional):
 //   BASE_URL  default http://localhost:5173

@@ -202,8 +202,8 @@ run_setup() {
   sync_python_deps
 
   if [[ "${INSTALL_TOOLS}" == true ]]; then
-    echo "[2/3] Installing external tools via scripts/install_tools.sh..."
-    bash "${ROOT_DIR}/scripts/install_tools.sh"
+    echo "[2/3] Installing external tools via ops/scripts/install_tools.sh..."
+    bash "${ROOT_DIR}/ops/scripts/install_tools.sh"
   else
     echo "[2/3] Skipping external tools (use -t to enable)."
   fi
@@ -295,8 +295,8 @@ while [[ $# -gt 0 ]]; do
       echo "Setup:"
       echo "  -a, --all               Start here — update repo + start server"
       echo "  -s, --update-self       git pull this repo (skips if local changes present)"
-      echo "  -t, --install-tools     Install security tools via scripts/install_tools.sh"
-      echo "                          (run scripts/install_tools.sh --help for category/dry-run options)"
+      echo "  -t, --install-tools     Install security tools via ops/scripts/install_tools.sh"
+      echo "                          (run ops/scripts/install_tools.sh --help for category/dry-run options)"
       echo "  -b, --install-big-packages  Install heavy optional Python extras (implies -t)"
       echo "  -u, --update-git-tools  Pull latest for already-cloned git_tools repos (implies -t)"
       echo "  -y, --update-python-packages  Upgrade the uv lockfile and re-sync Python deps"
