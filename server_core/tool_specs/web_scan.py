@@ -1,3 +1,5 @@
+import shlex
+
 from server_core.tool_spec import ParamSpec, ToolSpec, ToolValidationError
 
 
@@ -17,50 +19,67 @@ def _findings_as_success_postprocess(raw, params: dict) -> dict:
 
 
 def _breachsql_command(p: dict) -> str:
-    command = f"breachsql -u {p['url']}"
+    argv = ["breachsql", "-u", p["url"]]
     if p["data"]:
-        command += f" -d {p['data']!r}"
+        argv.append("-d")
+        argv.append(p["data"])
     for header in (p["headers"] or {}).items():
-        command += f" -H {header[0]}:{header[1]!r}"
+        argv.append("-H")
+        argv.append(f"{header[0]}:{header[1]}")
     if p["cookies"]:
-        command += f" -c {p['cookies']!r}"
+        argv.append("-c")
+        argv.append(p["cookies"])
     if p["proxy"]:
-        command += f" --proxy {p['proxy']}"
+        argv.append("--proxy")
+        argv.append(p["proxy"])
     if p["threads"] and int(p["threads"]) != 5:
-        command += f" -t {int(p['threads'])}"
+        argv.append("-t")
+        argv.append(str(int(p["threads"])))
     if p["timeout"] and int(p["timeout"]) != 15:
-        command += f" --timeout {int(p['timeout'])}"
+        argv.append("--timeout")
+        argv.append(str(int(p["timeout"])))
     if p["level"] and int(p["level"]) != 1:
-        command += f" --level {int(p['level'])}"
+        argv.append("--level")
+        argv.append(str(int(p["level"])))
     if p["dbms"] and p["dbms"] != "auto":
-        command += f" --dbms {p['dbms']}"
+        argv.append("--dbms")
+        argv.append(p["dbms"])
     if p["technique"] and p["technique"] != "EBTUO":
-        command += f" --technique {p['technique']}"
+        argv.append("--technique")
+        argv.append(p["technique"])
     if p["time_threshold"] and int(p["time_threshold"]) != 4:
-        command += f" --time-threshold {int(p['time_threshold'])}"
+        argv.append("--time-threshold")
+        argv.append(str(int(p["time_threshold"])))
     if p["risk"] and int(p["risk"]) != 1:
-        command += f" --risk {int(p['risk'])}"
+        argv.append("--risk")
+        argv.append(str(int(p["risk"])))
     if p["path_params"]:
-        command += f" --path-params {','.join(p['path_params'])}"
+        argv.append("--path-params")
+        argv.append(",".join(p["path_params"]))
     if p["cookie_params"]:
-        command += f" --cookie-params {','.join(p['cookie_params'])}"
+        argv.append("--cookie-params")
+        argv.append(",".join(p["cookie_params"]))
     if p["header_params"]:
-        command += f" --header-params {','.join(p['header_params'])}"
+        argv.append("--header-params")
+        argv.append(",".join(p["header_params"]))
     if _bool(p["exploit"]):
-        command += " --exploit"
+        argv.append("--exploit")
     if p["dump"]:
-        command += f" --dump {p['dump']}"
+        argv.append("--dump")
+        argv.append(p["dump"])
     if _bool(p["dump_all"]):
-        command += " --dump-all"
+        argv.append("--dump-all")
     if _bool(p["crawl"]):
-        command += " --crawl"
+        argv.append("--crawl")
     if p["max_pages"] and int(p["max_pages"]) != 100:
-        command += f" --max-pages {int(p['max_pages'])}"
+        argv.append("--max-pages")
+        argv.append(str(int(p["max_pages"])))
     if p["max_depth"] and int(p["max_depth"]) != 3:
-        command += f" --max-depth {int(p['max_depth'])}"
+        argv.append("--max-depth")
+        argv.append(str(int(p["max_depth"])))
     if p["additional_args"]:
-        command += f" {p['additional_args']}"
-    return command
+        argv.extend(shlex.split(p["additional_args"]))
+    return shlex.join(argv)
 
 
 def _dalfox_command(p: dict) -> str:
@@ -68,232 +87,280 @@ def _dalfox_command(p: dict) -> str:
     if not url and not pipe_mode:
         raise ToolValidationError("URL parameter is required")
 
-    command = "dalfox pipe" if pipe_mode else f"dalfox url {url}"
+    argv = ["dalfox", "pipe"] if pipe_mode else ["dalfox", "url", url]
     if p["blind"]:
-        command += " --blind"
+        argv.append("--blind")
     if p["mining_dom"]:
-        command += " --dom"
+        argv.append("--dom")
     if p["mining_dict"]:
-        command += " --mining-dict"
+        argv.append("--mining-dict")
     if p["custom_payload"]:
-        command += f" --custom-payload '{p['custom_payload']}'"
+        argv.append("--custom-payload")
+        argv.append(p["custom_payload"])
     if p["additional_args"]:
-        command += f" {p['additional_args']}"
-    return command
+        argv.extend(shlex.split(p["additional_args"]))
+    return shlex.join(argv)
 
 
 def _interactsh_command(p: dict) -> str:
-    command = f"interactsh-client -json -n {p['n']} -pi {p['poll_interval']}"
+    argv = ["interactsh-client", "-json", "-n", str(p["n"]), "-pi", str(p["poll_interval"])]
     if p["server"]:
-        command += f" -server {p['server']}"
+        argv.append("-server")
+        argv.append(p["server"])
     if p["token"]:
-        command += f" -token {p['token']}"
+        argv.append("-token")
+        argv.append(p["token"])
     if p["additional_args"]:
-        command += f" {p['additional_args']}"
-    return command
+        argv.extend(shlex.split(p["additional_args"]))
+    return shlex.join(argv)
 
 
 def _jaeles_command(p: dict) -> str:
-    command = f"jaeles scan -u {p['url']} -c {p['threads']} --timeout {p['timeout']}"
+    argv = ["jaeles", "scan", "-u", p["url"], "-c", str(p["threads"]), "--timeout", str(p["timeout"])]
     if p["signatures"]:
-        command += f" -s {p['signatures']}"
+        argv.append("-s")
+        argv.append(p["signatures"])
     if p["config"]:
-        command += f" --config {p['config']}"
+        argv.append("--config")
+        argv.append(p["config"])
     if p["additional_args"]:
-        command += f" {p['additional_args']}"
-    return command
+        argv.extend(shlex.split(p["additional_args"]))
+    return shlex.join(argv)
 
 
 def _joomscan_command(p: dict) -> str:
-    command = f"joomscan --url {p['url']}"
+    argv = ["joomscan", "--url", p["url"]]
     if p["additional_args"]:
-        command += f" {p['additional_args']}"
-    return command
+        argv.extend(shlex.split(p["additional_args"]))
+    return shlex.join(argv)
 
 
 def _nikto_command(p: dict) -> str:
-    command = f"nikto -h {p['target']}"
+    argv = ["nikto", "-h", p["target"]]
     if p["additional_args"]:
-        command += f" {p['additional_args']}"
-    return command
+        argv.extend(shlex.split(p["additional_args"]))
+    return shlex.join(argv)
 
 
 def _phaseaccess_command(p: dict) -> str:
-    command = f"phaseaccess -u {p['target']} --json -q"
+    argv = ["phaseaccess", "-u", p["target"], "--json", "-q"]
 
     method = p["method"]
     if method and method != "GET":
-        command += f" -X {method}"
+        argv.append("-X")
+        argv.append(method)
     if p["body"]:
-        command += f" -d {p['body']!r}"
+        argv.append("-d")
+        argv.append(p["body"])
 
     for key, val in (p["session_a_headers"] or {}).items():
-        command += f" -H {key}:{val!r}"
+        argv.append("-H")
+        argv.append(f"{key}:{val}")
     if p["session_a_cookies"]:
-        command += f" -c {p['session_a_cookies']!r}"
+        argv.append("-c")
+        argv.append(p["session_a_cookies"])
     label_a = p["session_a_label"]
     if label_a and label_a != "session_a":
-        command += f" --label-a {label_a}"
+        argv.append("--label-a")
+        argv.append(label_a)
 
     for key, val in (p["session_b_headers"] or {}).items():
-        command += f" --header-b {key}:{val!r}"
+        argv.append("--header-b")
+        argv.append(f"{key}:{val}")
     if p["session_b_cookies"]:
-        command += f" --cookie-b {p['session_b_cookies']!r}"
+        argv.append("--cookie-b")
+        argv.append(p["session_b_cookies"])
     if p["session_b_label"]:
-        command += f" --label-b {p['session_b_label']}"
+        argv.append("--label-b")
+        argv.append(p["session_b_label"])
 
     if p["login_url"]:
-        command += f" --login-url {p['login_url']}"
+        argv.append("--login-url")
+        argv.append(p["login_url"])
     if p["login_user"]:
-        command += f" --login-user {p['login_user']!r}"
+        argv.append("--login-user")
+        argv.append(p["login_user"])
     if p["login_pass"]:
-        command += f" --login-pass {p['login_pass']!r}"
+        argv.append("--login-pass")
+        argv.append(p["login_pass"])
     if p["login_user_field"]:
-        command += f" --login-user-field {p['login_user_field']}"
+        argv.append("--login-user-field")
+        argv.append(p["login_user_field"])
     if p["login_pass_field"]:
-        command += f" --login-pass-field {p['login_pass_field']}"
+        argv.append("--login-pass-field")
+        argv.append(p["login_pass_field"])
 
     if p["login_url_b"]:
-        command += f" --login-url-b {p['login_url_b']}"
+        argv.append("--login-url-b")
+        argv.append(p["login_url_b"])
     if p["login_user_b"]:
-        command += f" --login-user-b {p['login_user_b']!r}"
+        argv.append("--login-user-b")
+        argv.append(p["login_user_b"])
     if p["login_pass_b"]:
-        command += f" --login-pass-b {p['login_pass_b']!r}"
+        argv.append("--login-pass-b")
+        argv.append(p["login_pass_b"])
 
     if _bool(p["crawl"]):
-        command += " --crawl"
+        argv.append("--crawl")
     if p["crawl_depth"] and int(p["crawl_depth"]) != 3:
-        command += f" --crawl-depth {int(p['crawl_depth'])}"
+        argv.append("--crawl-depth")
+        argv.append(str(int(p["crawl_depth"])))
     if p["crawl_pages"] and int(p["crawl_pages"]) != 100:
-        command += f" --crawl-pages {int(p['crawl_pages'])}"
+        argv.append("--crawl-pages")
+        argv.append(str(int(p["crawl_pages"])))
     if _bool(p["browser_crawl"]):
-        command += " --browser-crawl"
+        argv.append("--browser-crawl")
     if _bool(p["auto_login"]):
-        command += " --auto-login"
+        argv.append("--auto-login")
 
     if p["openapi"]:
-        command += f" --openapi {p['openapi']}"
+        argv.append("--openapi")
+        argv.append(p["openapi"])
     if p["base_url"]:
-        command += f" --base-url {p['base_url']}"
+        argv.append("--base-url")
+        argv.append(p["base_url"])
     if p["targets"]:
-        command += f" --targets {p['targets']}"
+        argv.append("--targets")
+        argv.append(p["targets"])
 
     if p["chain_create"]:
-        command += f" --chain-create {p['chain_create']}"
+        argv.append("--chain-create")
+        argv.append(p["chain_create"])
     if p["chain_body"]:
-        command += f" --chain-body {p['chain_body']!r}"
+        argv.append("--chain-body")
+        argv.append(p["chain_body"])
     if p["chain_read"]:
-        command += f" --chain-read {p['chain_read']}"
+        argv.append("--chain-read")
+        argv.append(p["chain_read"])
 
     if p["proxy"]:
-        command += f" --proxy {p['proxy']}"
+        argv.append("--proxy")
+        argv.append(p["proxy"])
     if not _bool(p["verify_ssl"]):
-        command += " --insecure"
+        argv.append("--insecure")
     if p["delay"] and float(p["delay"]) > 0:
-        command += f" --delay {float(p['delay'])}"
+        argv.append("--delay")
+        argv.append(str(float(p["delay"])))
     if p["threads"] and int(p["threads"]) != 5:
-        command += f" -t {int(p['threads'])}"
+        argv.append("-t")
+        argv.append(str(int(p["threads"])))
     if p["timeout"] and int(p["timeout"]) != 15:
-        command += f" --timeout {int(p['timeout'])}"
+        argv.append("--timeout")
+        argv.append(str(int(p["timeout"])))
     if p["user_agent"]:
-        command += f" --user-agent {p['user_agent']!r}"
+        argv.append("--user-agent")
+        argv.append(p["user_agent"])
 
     if p["max_candidates"] and int(p["max_candidates"]) != 10:
-        command += f" --max-candidates {int(p['max_candidates'])}"
+        argv.append("--max-candidates")
+        argv.append(str(int(p["max_candidates"])))
     if p["min_confidence"]:
-        command += f" --min-confidence {p['min_confidence']}"
+        argv.append("--min-confidence")
+        argv.append(p["min_confidence"])
     if not _bool(p["method_bypass"]):
-        command += " --no-method-bypass"
+        argv.append("--no-method-bypass")
     if not _bool(p["param_pollution"]):
-        command += " --no-param-pollution"
+        argv.append("--no-param-pollution")
     if not _bool(p["mass_assignment"]):
-        command += " --no-mass-assignment"
+        argv.append("--no-mass-assignment")
     if not _bool(p["soft_delete"]):
-        command += " --no-soft-delete"
+        argv.append("--no-soft-delete")
     if not _bool(p["blind_idor"]):
-        command += " --no-blind-idor"
+        argv.append("--no-blind-idor")
 
     for extra_url in (p["extra_urls"] or []):
-        command += f" --extra-url {extra_url}"
+        argv.append("--extra-url")
+        argv.append(extra_url)
 
     if p["additional_args"]:
-        command += f" {p['additional_args']}"
-    return command
+        argv.extend(shlex.split(p["additional_args"]))
+    return shlex.join(argv)
 
 
 def _sqlmap_command(p: dict) -> str:
-    command = f"sqlmap -u {p['url']} --batch"
+    argv = ["sqlmap", "-u", p["url"], "--batch"]
     if p["data"]:
-        command += f' --data="{p["data"]}"'
+        argv.append(f"--data={p['data']}")
     if p["additional_args"]:
-        command += f" {p['additional_args']}"
-    return command
+        argv.extend(shlex.split(p["additional_args"]))
+    return shlex.join(argv)
 
 
 def _stingxss_command(p: dict) -> str:
-    command = f"stingxss -u {p['url']}"
+    argv = ["stingxss", "-u", p["url"]]
     if p["data"]:
-        command += f" -d {p['data']!r}"
+        argv.append("-d")
+        argv.append(p["data"])
     for key, val in (p["headers"] or {}).items():
-        command += f" -H {key}:{val!r}"
+        argv.append("-H")
+        argv.append(f"{key}:{val}")
     if p["cookies"]:
-        command += f" -c {p['cookies']!r}"
+        argv.append("-c")
+        argv.append(p["cookies"])
     if p["proxy"]:
-        command += f" --proxy {p['proxy']}"
+        argv.append("--proxy")
+        argv.append(p["proxy"])
     if p["threads"] and int(p["threads"]) != 5:
-        command += f" -t {int(p['threads'])}"
+        argv.append("-t")
+        argv.append(str(int(p["threads"])))
     if p["timeout"] and int(p["timeout"]) != 15:
-        command += f" --timeout {int(p['timeout'])}"
+        argv.append("--timeout")
+        argv.append(str(int(p["timeout"])))
     if p["level"] and int(p["level"]) != 1:
-        command += f" --level {int(p['level'])}"
+        argv.append("--level")
+        argv.append(str(int(p["level"])))
     if _bool(p["crawl"]):
-        command += " --crawl"
+        argv.append("--crawl")
     if p["max_pages"] and int(p["max_pages"]) != 50:
-        command += f" --max-pages {int(p['max_pages'])}"
+        argv.append("--max-pages")
+        argv.append(str(int(p["max_pages"])))
     if p["max_depth"] and int(p["max_depth"]) != 3:
-        command += f" --max-depth {int(p['max_depth'])}"
+        argv.append("--max-depth")
+        argv.append(str(int(p["max_depth"])))
     if p["blind_callback"]:
-        command += f" --blind {p['blind_callback']}"
+        argv.append("--blind")
+        argv.append(p["blind_callback"])
     if _bool(p["browser"]):
-        command += " --browser"
+        argv.append("--browser")
         if not _bool(p["browser_headless"]):
-            command += " --no-browser-headless"
+            argv.append("--no-browser-headless")
     if _bool(p["test_stored"]):
-        command += " --test-stored"
+        argv.append("--test-stored")
     if _bool(p["poc"]):
-        command += " --poc"
+        argv.append("--poc")
     for header in (p["inject_headers"] or []):
-        command += f" --inject-headers {header}"
+        argv.append("--inject-headers")
+        argv.append(header)
     # custom_payloads is a list — only supported via file; accepted but a no-op, matches Flask
     if not _bool(p["probe_filter"]):
-        command += " --no-probe-filter"
+        argv.append("--no-probe-filter")
     if _bool(p["graphql"]):
-        command += " --graphql"
+        argv.append("--graphql")
     if _bool(p["websocket"]):
-        command += " --websocket"
+        argv.append("--websocket")
     if p["additional_args"]:
-        command += f" {p['additional_args']}"
-    return command
+        argv.extend(shlex.split(p["additional_args"]))
+    return shlex.join(argv)
 
 
 def _whatweb_command(p: dict) -> str:
-    return f"whatweb -v -a 3 {p['url']}"
+    return shlex.join(["whatweb", "-v", "-a", "3", p["url"]])
 
 
 def _wpscan_command(p: dict) -> str:
-    command = f"wpscan --url {p['url']}"
+    argv = ["wpscan", "--url", p["url"]]
     if p["additional_args"]:
-        command += f" {p['additional_args']}"
-    return command
+        argv.extend(shlex.split(p["additional_args"]))
+    return shlex.join(argv)
 
 
 def _xsser_command(p: dict) -> str:
-    command = f"xsser --url '{p['url']}'"
+    argv = ["xsser", "--url", p["url"]]
     if p["params"]:
-        command += f" --param='{p['params']}'"
+        argv.append(f"--param={p['params']}")
     if p["additional_args"]:
-        command += f" {p['additional_args']}"
-    return command
+        argv.extend(shlex.split(p["additional_args"]))
+    return shlex.join(argv)
 
 
 def _zap_command(p: dict) -> str:
@@ -302,21 +369,26 @@ def _zap_command(p: dict) -> str:
         raise ToolValidationError("Target parameter is required for scans")
 
     if p["daemon"]:
-        command = f"zaproxy -daemon -host {p['host']} -port {p['port']}"
+        argv = ["zaproxy", "-daemon", "-host", p["host"], "-port", str(p["port"])]
         if p["api_key"]:
-            command += f" -config api.key={p['api_key']}"
+            argv.append("-config")
+            argv.append(f"api.key={p['api_key']}")
     else:
-        command = f"zaproxy -cmd -quickurl {target}"
+        argv = ["zaproxy", "-cmd", "-quickurl", target]
         if p["format"]:
-            command += f" -quickout {p['format']}"
+            argv.append("-quickout")
+            argv.append(p["format"])
         if p["output_file"]:
-            command += f' -quickprogress -dir "{p["output_file"]}"'
+            argv.append("-quickprogress")
+            argv.append("-dir")
+            argv.append(p["output_file"])
         if p["api_key"]:
-            command += f" -config api.key={p['api_key']}"
+            argv.append("-config")
+            argv.append(f"api.key={p['api_key']}")
 
     if p["additional_args"]:
-        command += f" {p['additional_args']}"
-    return command
+        argv.extend(shlex.split(p["additional_args"]))
+    return shlex.join(argv)
 
 
 SPECS = [

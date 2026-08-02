@@ -11,12 +11,14 @@ def _api_fuzzer_command(p: dict):
         for endpoint in p["endpoints"]:
             for method in p["methods"]:
                 test_url = f"{p['base_url'].rstrip('/')}/{str(endpoint).lstrip('/')}"
-                commands.append(f"curl -s -X {method} -w '%{{http_code}}|%{{size_download}}' '{test_url}'")
+                argv = ["curl", "-s", "-X", method, "-w", "%{http_code}|%{size_download}", test_url]
+                commands.append(shlex.join(argv))
         return commands
-    return (
-        f"ffuf -u {p['base_url']}/FUZZ -w {p['wordlist']} "
-        f"-mc 200,201,202,204,301,302,307,401,403,405 -t 50"
-    )
+    argv = [
+        "ffuf", "-u", f"{p['base_url']}/FUZZ", "-w", p["wordlist"],
+        "-mc", "200,201,202,204,301,302,307,401,403,405", "-t", "50",
+    ]
+    return shlex.join(argv)
 
 
 def _api_fuzzer_postprocess(raw, p: dict) -> dict:

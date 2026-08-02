@@ -1,17 +1,22 @@
+import shlex
+
 from server_core.tool_spec import ParamSpec, ToolSpec
 
 
 def _trivy_command(p: dict) -> str:
-    command = f"trivy {p['scan_type']} {p['target']}"
+    argv = ["trivy", p["scan_type"], p["target"]]
     if p["output_format"]:
-        command += f" --format {p['output_format']}"
+        argv.append("--format")
+        argv.append(p["output_format"])
     if p["severity"]:
-        command += f" --severity {p['severity']}"
+        argv.append("--severity")
+        argv.append(p["severity"])
     if p["output_file"]:
-        command += f" --output {p['output_file']}"
+        argv.append("--output")
+        argv.append(p["output_file"])
     if p["additional_args"]:
-        command += f" {p['additional_args']}"
-    return command
+        argv.extend(shlex.split(p["additional_args"]))
+    return shlex.join(argv)
 
 
 def _trivy_postprocess(raw: dict, params: dict) -> dict:
@@ -21,16 +26,19 @@ def _trivy_postprocess(raw: dict, params: dict) -> dict:
 
 
 def _docker_bench_command(p: dict) -> str:
-    command = "docker-bench-security"
+    argv = ["docker-bench-security"]
     if p["checks"]:
-        command += f" -c {p['checks']}"
+        argv.append("-c")
+        argv.append(p["checks"])
     if p["exclude"]:
-        command += f" -e {p['exclude']}"
+        argv.append("-e")
+        argv.append(p["exclude"])
     if p["output_file"]:
-        command += f" -l {p['output_file']}"
+        argv.append("-l")
+        argv.append(p["output_file"])
     if p["additional_args"]:
-        command += f" {p['additional_args']}"
-    return command
+        argv.extend(shlex.split(p["additional_args"]))
+    return shlex.join(argv)
 
 
 def _docker_bench_postprocess(raw: dict, params: dict) -> dict:
@@ -39,14 +47,16 @@ def _docker_bench_postprocess(raw: dict, params: dict) -> dict:
 
 
 def _clair_command(p: dict) -> str:
-    command = f"clairctl analyze {p['image']}"
+    argv = ["clairctl", "analyze", p["image"]]
     if p["config"]:
-        command += f" --config {p['config']}"
+        argv.append("--config")
+        argv.append(p["config"])
     if p["output_format"]:
-        command += f" --format {p['output_format']}"
+        argv.append("--format")
+        argv.append(p["output_format"])
     if p["additional_args"]:
-        command += f" {p['additional_args']}"
-    return command
+        argv.extend(shlex.split(p["additional_args"]))
+    return shlex.join(argv)
 
 
 SPECS = [

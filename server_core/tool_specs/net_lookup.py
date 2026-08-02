@@ -1,10 +1,12 @@
+import shlex
+
 from server_core.tool_spec import ParamSpec, ToolSpec
 
 _RECORD_TYPES = ["A", "MX", "NS", "TXT"]
 
 
 def _whois_command(p: dict) -> str:
-    return f"whois {p['target']}"
+    return shlex.join(["whois", p["target"]])
 
 
 def _whois_postprocess(raw: dict, params: dict) -> dict:
@@ -16,12 +18,12 @@ def _http_headers_command(p: dict) -> str:
     scheme = "https" if p["https"] else "http"
     clean = p["target"].replace("https://", "").replace("http://", "")
     url = f"{scheme}://{clean}"
-    cmd = f"curl -sI -k --max-time {int(p['timeout'])}"
+    argv = ["curl", "-sI", "-k", "--max-time", str(int(p["timeout"]))]
     if p["follow_redirects"]:
-        cmd += " --location"
-    cmd += f" {url}"
+        argv.append("--location")
+    argv.append(url)
     p["_url"] = url
-    return cmd
+    return shlex.join(argv)
 
 
 def _parse_headers(raw: str) -> tuple:
@@ -67,7 +69,7 @@ def _dig_commands(p: dict) -> list:
     requested = p["record_types"]
     types = [r.upper() for r in requested if r.upper() in _RECORD_TYPES] or list(_RECORD_TYPES)
     p["_record_types_used"] = types
-    return [f"dig +short {rtype} {p['target']}" for rtype in types]
+    return [shlex.join(["dig", "+short", rtype, p["target"]]) for rtype in types]
 
 
 def _dig_postprocess(raw_list: list, params: dict) -> dict:

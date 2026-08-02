@@ -1,4 +1,5 @@
 import os
+import shlex
 
 from server_core.tool_spec import ParamSpec, ToolSpec, ToolValidationError
 
@@ -63,10 +64,10 @@ for func_addr, func in cfg.functions.items():
     with open(_ANGR_SCRIPT, "w") as f:
         f.write(content)
 
-    command = f"python3 {_ANGR_SCRIPT}"
+    argv = ["python3", _ANGR_SCRIPT]
     if p["additional_args"]:
-        command += f" {p['additional_args']}"
-    return command
+        argv.extend(shlex.split(p["additional_args"]))
+    return shlex.join(argv)
 
 
 def _angr_cleanup_postprocess(raw, params: dict):
@@ -82,17 +83,17 @@ def _autopsy_command(p: dict) -> str:
 
 
 def _binwalk_command(p: dict) -> str:
-    command = "binwalk"
+    argv = ["binwalk"]
     if p["extract"]:
-        command += " -e"
+        argv.append("-e")
     if p["additional_args"]:
-        command += f" {p['additional_args']}"
-    command += f" {p['file_path']}"
-    return command
+        argv.extend(shlex.split(p["additional_args"]))
+    argv.append(p["file_path"])
+    return shlex.join(argv)
 
 
 def _checksec_command(p: dict) -> str:
-    return f"checksec --file={p['binary']}"
+    return shlex.join(["checksec", f"--file={p['binary']}"])
 
 
 def _ghidra_command(p: dict) -> str:
@@ -100,43 +101,49 @@ def _ghidra_command(p: dict) -> str:
     project_dir = f"/tmp/ghidra_projects/{project_name}"
     os.makedirs(project_dir, exist_ok=True)
 
-    command = f"analyzeHeadless {project_dir} {project_name} -import {p['binary']} -deleteProject"
+    argv = ["analyzeHeadless", project_dir, project_name, "-import", p["binary"], "-deleteProject"]
     if p["script_file"]:
-        command += f" -postScript {p['script_file']}"
+        argv.append("-postScript")
+        argv.append(p["script_file"])
     if p["output_format"] == "xml":
-        command += f" -postScript ExportXml.java {project_dir}/analysis.xml"
+        argv.append("-postScript")
+        argv.append("ExportXml.java")
+        argv.append(f"{project_dir}/analysis.xml")
     if p["additional_args"]:
-        command += f" {p['additional_args']}"
-    return command
+        argv.extend(shlex.split(p["additional_args"]))
+    return shlex.join(argv)
 
 
 def _one_gadget_command(p: dict) -> str:
-    command = f"one_gadget {p['libc_path']} --level {p['level']}"
+    argv = ["one_gadget", p["libc_path"], "--level", str(p["level"])]
     if p["additional_args"]:
-        command += f" {p['additional_args']}"
-    return command
+        argv.extend(shlex.split(p["additional_args"]))
+    return shlex.join(argv)
 
 
 def _ropper_command(p: dict) -> str:
-    command = f"ropper --file {p['binary']}"
+    argv = ["ropper", "--file", p["binary"]]
     gadget_type = p["gadget_type"]
     if gadget_type == "rop":
-        command += " --rop"
+        argv.append("--rop")
     elif gadget_type == "jop":
-        command += " --jop"
+        argv.append("--jop")
     elif gadget_type == "sys":
-        command += " --sys"
+        argv.append("--sys")
     elif gadget_type == "all":
-        command += " --all"
+        argv.append("--all")
     if p["quality"] > 1:
-        command += f" --quality {p['quality']}"
+        argv.append("--quality")
+        argv.append(str(p["quality"]))
     if p["arch"]:
-        command += f" --arch {p['arch']}"
+        argv.append("--arch")
+        argv.append(p["arch"])
     if p["search_string"]:
-        command += f" --search '{p['search_string']}'"
+        argv.append("--search")
+        argv.append(p["search_string"])
     if p["additional_args"]:
-        command += f" {p['additional_args']}"
-    return command
+        argv.extend(shlex.split(p["additional_args"]))
+    return shlex.join(argv)
 
 
 def _libc_database_command(p: dict) -> str:
@@ -149,44 +156,45 @@ def _libc_database_command(p: dict) -> str:
     base_command = "cd /opt/libc-database 2>/dev/null || cd ~/libc-database 2>/dev/null || echo 'libc-database not found'"
 
     if action == "find":
-        command = f"{base_command} && ./find {symbols}"
+        argv = ["./find"] + shlex.split(symbols)
     elif action == "dump":
-        command = f"{base_command} && ./dump {libc_id}"
+        argv = ["./dump", libc_id]
     elif action == "download":
-        command = f"{base_command} && ./download {libc_id}"
+        argv = ["./download", libc_id]
     else:
         raise ToolValidationError(f"Invalid action: {action}")
 
+    command = f"{base_command} && {shlex.join(argv)}"
     if p["additional_args"]:
-        command += f" {p['additional_args']}"
+        command += " " + shlex.join(shlex.split(p["additional_args"]))
     return command
 
 
 def _objdump_command(p: dict) -> str:
-    command = "objdump"
-    command += " -d" if p["disassemble"] else " -x"
+    argv = ["objdump", "-d" if p["disassemble"] else "-x"]
     if p["additional_args"]:
-        command += f" {p['additional_args']}"
-    command += f" {p['binary']}"
-    return command
+        argv.extend(shlex.split(p["additional_args"]))
+    argv.append(p["binary"])
+    return shlex.join(argv)
 
 
 def _strings_command(p: dict) -> str:
-    command = f"strings -n {p['min_len']}"
+    argv = ["strings", "-n", str(p["min_len"])]
     if p["additional_args"]:
-        command += f" {p['additional_args']}"
-    command += f" {p['file_path']}"
-    return command
+        argv.extend(shlex.split(p["additional_args"]))
+    argv.append(p["file_path"])
+    return shlex.join(argv)
 
 
 def _xxd_command(p: dict) -> str:
-    command = f"xxd -s {p['offset']}"
+    argv = ["xxd", "-s", p["offset"]]
     if p["length"]:
-        command += f" -l {p['length']}"
+        argv.append("-l")
+        argv.append(p["length"])
     if p["additional_args"]:
-        command += f" {p['additional_args']}"
-    command += f" {p['file_path']}"
-    return command
+        argv.extend(shlex.split(p["additional_args"]))
+    argv.append(p["file_path"])
+    return shlex.join(argv)
 
 
 SPECS = [

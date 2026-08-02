@@ -1,4 +1,5 @@
 import os
+import shlex
 
 from server_core.tool_spec import ParamSpec, ToolSpec, ToolValidationError
 
@@ -14,19 +15,21 @@ def _cleanup_tmp_script_postprocess(raw, params: dict):
 
 
 def _gdb_command(p: dict) -> str:
-    command = f"gdb {p['binary']}"
+    argv = ["gdb", p["binary"]]
     if p["script_file"]:
-        command += f" -x {p['script_file']}"
+        argv.append("-x")
+        argv.append(p["script_file"])
     if p["commands"]:
         temp_script = "/tmp/gdb_commands.txt"
         with open(temp_script, "w") as f:
             f.write(p["commands"])
-        command += f" -x {temp_script}"
+        argv.append("-x")
+        argv.append(temp_script)
         p["_tmp_script"] = temp_script
     if p["additional_args"]:
-        command += f" {p['additional_args']}"
-    command += " -batch"
-    return command
+        argv.extend(shlex.split(p["additional_args"]))
+    argv.append("-batch")
+    return shlex.join(argv)
 
 
 def _gdb_peda_command(p: dict) -> str:
@@ -34,27 +37,32 @@ def _gdb_peda_command(p: dict) -> str:
     if not binary and not attach_pid and not core_file:
         raise ToolValidationError("Binary, PID, or core file parameter is required")
 
-    command = "gdb -q"
+    argv = ["gdb", "-q"]
     if binary:
-        command += f" {binary}"
+        argv.append(binary)
     if core_file:
-        command += f" {core_file}"
+        argv.append(core_file)
     if attach_pid:
-        command += f" -p {attach_pid}"
+        argv.append("-p")
+        argv.append(str(attach_pid))
 
     if p["commands"]:
         temp_script = "/tmp/gdb_peda_commands.txt"
         peda_commands = f"\nsource ~/peda/peda.py\n{p['commands']}\nquit\n"
         with open(temp_script, "w") as f:
             f.write(peda_commands)
-        command += f" -x {temp_script}"
+        argv.append("-x")
+        argv.append(temp_script)
         p["_tmp_script"] = temp_script
     else:
-        command += " -ex 'source ~/peda/peda.py' -ex 'quit'"
+        argv.append("-ex")
+        argv.append("source ~/peda/peda.py")
+        argv.append("-ex")
+        argv.append("quit")
 
     if p["additional_args"]:
-        command += f" {p['additional_args']}"
-    return command
+        argv.extend(shlex.split(p["additional_args"]))
+    return shlex.join(argv)
 
 
 def _radare2_command(p: dict) -> str:
@@ -63,13 +71,13 @@ def _radare2_command(p: dict) -> str:
         temp_script = "/tmp/r2_commands.txt"
         with open(temp_script, "w") as f:
             f.write(p["commands"])
-        command = f"r2 -i {temp_script} -q {binary}"
+        argv = ["r2", "-i", temp_script, "-q", binary]
         p["_tmp_script"] = temp_script
     else:
-        command = f"r2 -q {binary}"
+        argv = ["r2", "-q", binary]
     if p["additional_args"]:
-        command += f" {p['additional_args']}"
-    return command
+        argv.extend(shlex.split(p["additional_args"]))
+    return shlex.join(argv)
 
 
 SPECS = [

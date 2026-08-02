@@ -1,39 +1,47 @@
+import shlex
+
 from server_core.tool_spec import ParamSpec, ToolSpec
 
 
 def _arjun_command(p: dict) -> str:
-    parts = [f"arjun -u {p['url']} -m {p['method']} -t {p['threads']}"]
+    argv = ["arjun", "-u", p["url"], "-m", p["method"], "-t", str(p["threads"])]
     if p["wordlist"]:
-        parts.append(f"-w {p['wordlist']}")
+        argv.append("-w")
+        argv.append(p["wordlist"])
     if p["delay"] and int(p["delay"]) > 0:
-        parts.append(f"-d {p['delay']}")
+        argv.append("-d")
+        argv.append(str(p["delay"]))
     if p["stable"]:
-        parts.append("--stable")
+        argv.append("--stable")
     if p["additional_args"]:
-        parts.append(p["additional_args"])
-    return " ".join(parts)
+        argv.extend(shlex.split(p["additional_args"]))
+    return shlex.join(argv)
 
 
 def _paramspider_command(p: dict) -> str:
-    parts = [f"paramspider -d {p['domain']} -l {p['level']}"]
+    argv = ["paramspider", "-d", p["domain"], "-l", str(p["level"])]
     if p["exclude"]:
-        parts.append(f"--exclude {p['exclude']}")
+        argv.append("--exclude")
+        argv.append(p["exclude"])
     if p["output"]:
-        parts.append(f"-o {p['output']}")
+        argv.append("-o")
+        argv.append(p["output"])
     if p["additional_args"]:
-        parts.append(p["additional_args"])
-    return " ".join(parts)
+        argv.extend(shlex.split(p["additional_args"]))
+    return shlex.join(argv)
 
 
 def _x8_command(p: dict) -> str:
-    parts = [f"x8 -u {p['url']} -w {p['wordlist']} -X {p['method']}"]
+    argv = ["x8", "-u", p["url"], "-w", p["wordlist"], "-X", p["method"]]
     if p["body"]:
-        parts.append(f"-b '{p['body']}'")
+        argv.append("-b")
+        argv.append(p["body"])
     if p["headers"]:
-        parts.append(f"-H '{p['headers']}'")
+        argv.append("-H")
+        argv.append(p["headers"])
     if p["additional_args"]:
-        parts.append(p["additional_args"])
-    return " ".join(parts)
+        argv.extend(shlex.split(p["additional_args"]))
+    return shlex.join(argv)
 
 
 SPECS = [

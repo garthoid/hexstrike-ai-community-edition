@@ -30,6 +30,7 @@ import logging
 import os
 import re
 import shutil
+import threading
 from typing import Any, Dict, List, Optional
 import server_core.config_core as config_core
 
@@ -63,6 +64,7 @@ class SessionStore:
         self._sessions_dir = os.path.join(self._data_dir, SESSIONS_DIR_NAME)
         self._completed_dir = os.path.join(self._sessions_dir, COMPLETED_DIR_NAME)
         self._templates_dir = os.path.join(self._sessions_dir, TEMPLATES_DIR_NAME)
+        self._lock = threading.Lock()
         self._ensure_dirs()
         self._migrate_flat_files()
 
@@ -164,48 +166,50 @@ class SessionStore:
 
     def save(self, session_id: str, session_dict: Dict[str, Any]) -> bool:
         """Save a session dict to disk. Idempotent — safe to call repeatedly."""
-        try:
-            session_dir = self._session_dir(session_id)
-            os.makedirs(session_dir, exist_ok=True)
-            path = self._session_path(session_id)
-            tmp_path = path + ".tmp"
-            with open(tmp_path, "w", encoding="utf-8") as f:
-                json.dump(session_dict, f, indent=2, default=str)
-            os.replace(tmp_path, path)
-            return True
-        except (OSError, TypeError) as exc:
-            logger.error(f"💾 Failed to save session {session_id}: {exc}")
-            return False
+        with self._lock:
+            try:
+                session_dir = self._session_dir(session_id)
+                os.makedirs(session_dir, exist_ok=True)
+                path = self._session_path(session_id)
+                tmp_path = path + ".tmp"
+                with open(tmp_path, "w", encoding="utf-8") as f:
+                    json.dump(session_dict, f, indent=2, default=str)
+                os.replace(tmp_path, path)
+                return True
+            except (OSError, TypeError) as exc:
+                logger.error(f"💾 Failed to save session {session_id}: {exc}")
+                return False
 
     def archive(self, session_id: str, session_dict: Dict[str, Any]) -> bool:
         """Move a completed session to the completed directory, preserving notes."""
-        try:
-            completed_session_dir = self._completed_dir_for(session_id)
-            os.makedirs(completed_session_dir, exist_ok=True)
-            # Write the new session.json in completed/
-            path = self._completed_path(session_id)
-            tmp_path = path + ".tmp"
-            with open(tmp_path, "w", encoding="utf-8") as f:
-                json.dump(session_dict, f, indent=2, default=str)
-            os.replace(tmp_path, path)
+        with self._lock:
+            try:
+                completed_session_dir = self._completed_dir_for(session_id)
+                os.makedirs(completed_session_dir, exist_ok=True)
+                # Write the new session.json in completed/
+                path = self._completed_path(session_id)
+                tmp_path = path + ".tmp"
+                with open(tmp_path, "w", encoding="utf-8") as f:
+                    json.dump(session_dict, f, indent=2, default=str)
+                os.replace(tmp_path, path)
 
-            # Move notes if they exist
-            active_notes = self._notes_dir(session_id, completed=False)
-            completed_notes = self._notes_dir(session_id, completed=True)
-            if os.path.isdir(active_notes) and not os.path.exists(completed_notes):
-                shutil.move(active_notes, completed_notes)
+                # Move notes if they exist
+                active_notes = self._notes_dir(session_id, completed=False)
+                completed_notes = self._notes_dir(session_id, completed=True)
+                if os.path.isdir(active_notes) and not os.path.exists(completed_notes):
+                    shutil.move(active_notes, completed_notes)
 
-            # Remove the entire active session folder
-            active_dir = self._session_dir(session_id)
-            if os.path.isdir(active_dir):
-                shutil.rmtree(active_dir)
+                # Remove the entire active session folder
+                active_dir = self._session_dir(session_id)
+                if os.path.isdir(active_dir):
+                    shutil.rmtree(active_dir)
 
-            self._prune_completed()
-            logger.info(f"📦 Archived session {session_id}")
-            return True
-        except (OSError, TypeError) as exc:
-            logger.error(f"💾 Failed to archive session {session_id}: {exc}")
-            return False
+                self._prune_completed()
+                logger.info(f"📦 Archived session {session_id}")
+                return True
+            except (OSError, TypeError) as exc:
+                logger.error(f"💾 Failed to archive session {session_id}: {exc}")
+                return False
 
     # ── Read ──────────────────────────────────────────────────────────
 

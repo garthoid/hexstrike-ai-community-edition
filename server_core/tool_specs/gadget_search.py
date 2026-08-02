@@ -1,13 +1,16 @@
+import shlex
+
 from server_core.tool_spec import ParamSpec, ToolSpec
 
 
 def _ropgadget_command(p: dict) -> str:
-    command = f"ROPgadget --binary {p['binary']}"
+    argv = ["ROPgadget", "--binary", p["binary"]]
     if p["gadget_type"]:
-        command += f" --only '{p['gadget_type']}'"
+        argv.append("--only")
+        argv.append(p["gadget_type"])
     if p["additional_args"]:
-        command += f" {p['additional_args']}"
-    return command
+        argv.extend(shlex.split(p["additional_args"]))
+    return shlex.join(argv)
 
 
 SPECS = [

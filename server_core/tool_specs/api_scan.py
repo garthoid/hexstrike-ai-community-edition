@@ -1,11 +1,12 @@
 import base64
 import json
+import shlex
 
 from server_core.tool_spec import ParamSpec, ToolSpec, ToolValidationError
 
 
 def _api_schema_analyzer_command(p: dict) -> str:
-    return f"curl -s '{p['schema_url']}'"
+    return shlex.join(["curl", "-s", p["schema_url"]])
 
 
 def _api_schema_analyzer_postprocess(raw: dict, p: dict) -> dict:
@@ -99,18 +100,27 @@ def _graphql_scanner_commands(p: dict) -> list:
             }
             """
         clean_query = introspection_query.replace("\n", " ").replace("  ", " ").strip()
-        commands.append(
-            f"curl -s -X POST -H 'Content-Type: application/json' "
-            f"-d '{{\"query\":\"{clean_query}\"}}' '{p['endpoint']}'"
-        )
+        payload = f'{{"query":"{clean_query}"}}'
+        commands.append(shlex.join([
+            "curl", "-s", "-X", "POST",
+            "-H", "Content-Type: application/json",
+            "-d", payload, p["endpoint"],
+        ]))
 
     deep_query = "{ " * p["query_depth"] + "field" + " }" * p["query_depth"]
-    commands.append(
-        f"curl -s -X POST -H 'Content-Type: application/json' -d '{{\"query\":\"{deep_query}\"}}' {p['endpoint']}"
-    )
+    payload = f'{{"query":"{deep_query}"}}'
+    commands.append(shlex.join([
+        "curl", "-s", "-X", "POST",
+        "-H", "Content-Type: application/json",
+        "-d", payload, p["endpoint"],
+    ]))
 
-    batch_query = "[" + ",".join(['{\"query\":\"{field}\"}' for _ in range(10)]) + "]"
-    commands.append(f"curl -s -X POST -H 'Content-Type: application/json' -d '{batch_query}' {p['endpoint']}")
+    batch_query = "[" + ",".join(['{"query":"{field}"}' for _ in range(10)]) + "]"
+    commands.append(shlex.join([
+        "curl", "-s", "-X", "POST",
+        "-H", "Content-Type: application/json",
+        "-d", batch_query, p["endpoint"],
+    ]))
 
     return commands
 
@@ -177,7 +187,7 @@ def _jwt_analyzer_commands(p: dict) -> list:
 
     none_header = base64.b64encode(b'{"alg":"none","typ":"JWT"}').decode().rstrip("=")
     none_token = f"{none_header}.{none_token_parts[1]}."
-    return [f"curl -s -H 'Authorization: Bearer {none_token}' '{p['target_url']}'"]
+    return [shlex.join(["curl", "-s", "-H", f"Authorization: Bearer {none_token}", p["target_url"]])]
 
 
 def _jwt_analyzer_postprocess(raw_list: list, p: dict) -> dict:

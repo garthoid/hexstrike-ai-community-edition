@@ -1,17 +1,21 @@
+import shlex
+
 from server_core.tool_spec import ParamSpec, ToolSpec
 
 
 def _falco_command(p: dict) -> str:
-    command = f"timeout {p['duration']} falco"
+    argv = ["timeout", str(p["duration"]), "falco"]
     if p["config_file"]:
-        command += f" --config {p['config_file']}"
+        argv.append("--config")
+        argv.append(p["config_file"])
     if p["rules_file"]:
-        command += f" --rules {p['rules_file']}"
+        argv.append("--rules")
+        argv.append(p["rules_file"])
     if p["output_format"] == "json":
-        command += " --json"
+        argv.append("--json")
     if p["additional_args"]:
-        command += f" {p['additional_args']}"
-    return command
+        argv.extend(shlex.split(p["additional_args"]))
+    return shlex.join(argv)
 
 
 SPECS = [

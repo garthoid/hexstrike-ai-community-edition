@@ -1,28 +1,37 @@
+import shlex
+
 from server_core.tool_spec import ParamSpec, ToolSpec
 
 
 def _nbtscan_command(p: dict) -> str:
-    command = f"nbtscan -t {p['timeout']}"
+    argv = ["nbtscan", "-t", str(p["timeout"])]
     if p["verbose"]:
-        command += " -v"
-    command += f" {p['target']}"
+        argv.append("-v")
+    argv.append(p["target"])
     if p["additional_args"]:
-        command += f" {p['additional_args']}"
-    return command
+        argv.extend(shlex.split(p["additional_args"]))
+    return shlex.join(argv)
 
 
 def _enum4linux_command(p: dict) -> str:
-    return f"enum4linux {p['additional_args']} {p['target']}"
+    argv = ["enum4linux"]
+    if p["additional_args"]:
+        argv.extend(shlex.split(p["additional_args"]))
+    argv.append(p["target"])
+    return shlex.join(argv)
 
 
 def _enum4linux_ng_command(p: dict) -> str:
-    command = f"enum4linux-ng {p['target']}"
+    argv = ["enum4linux-ng", p["target"]]
     if p["username"]:
-        command += f" -u {p['username']}"
+        argv.append("-u")
+        argv.append(p["username"])
     if p["password"]:
-        command += f" -p {p['password']}"
+        argv.append("-p")
+        argv.append(p["password"])
     if p["domain"]:
-        command += f" -d {p['domain']}"
+        argv.append("-d")
+        argv.append(p["domain"])
 
     enum_options = []
     if p["shares"]:
@@ -34,57 +43,68 @@ def _enum4linux_ng_command(p: dict) -> str:
     if p["policy"]:
         enum_options.append("P")
     if enum_options:
-        command += f" -A {','.join(enum_options)}"
+        argv.append("-A")
+        argv.append(",".join(enum_options))
 
     if p["additional_args"]:
-        command += f" {p['additional_args']}"
-    return command
+        argv.extend(shlex.split(p["additional_args"]))
+    return shlex.join(argv)
 
 
 def _netexec_command(p: dict) -> str:
-    command = f"nxc {p['protocol']} {p['target']}"
+    argv = ["nxc", p["protocol"], p["target"]]
     if p["username"]:
-        command += f" -u {p['username']}"
+        argv.append("-u")
+        argv.append(p["username"])
     if p["password"]:
-        command += f" -p {p['password']}"
+        argv.append("-p")
+        argv.append(p["password"])
     if p["hash"]:
-        command += f" -H {p['hash']}"
+        argv.append("-H")
+        argv.append(p["hash"])
     if p["module"]:
-        command += f" -M {p['module']}"
+        argv.append("-M")
+        argv.append(p["module"])
     if p["additional_args"]:
-        command += f" {p['additional_args']}"
-    return command
+        argv.extend(shlex.split(p["additional_args"]))
+    return shlex.join(argv)
 
 
 def _smbmap_command(p: dict) -> str:
-    command = f"smbmap -H {p['target']}"
+    argv = ["smbmap", "-H", p["target"]]
     if p["username"]:
-        command += f" -u {p['username']}"
+        argv.append("-u")
+        argv.append(p["username"])
     if p["password"]:
-        command += f" -p {p['password']}"
+        argv.append("-p")
+        argv.append(p["password"])
     if p["domain"]:
-        command += f" -d {p['domain']}"
+        argv.append("-d")
+        argv.append(p["domain"])
     if p["additional_args"]:
-        command += f" {p['additional_args']}"
-    return command
+        argv.extend(shlex.split(p["additional_args"]))
+    return shlex.join(argv)
 
 
 def _rpcclient_command(p: dict) -> str:
+    rpc_argv = ["rpcclient"]
     if p["username"] and p["password"]:
-        auth_string = f"-U {p['username']}%{p['password']}"
+        rpc_argv += ["-U", f"{p['username']}%{p['password']}"]
     elif p["username"]:
-        auth_string = f"-U {p['username']}"
+        rpc_argv += ["-U", p["username"]]
     else:
-        auth_string = "-U ''"
+        rpc_argv += ["-U", ""]
 
     if p["domain"]:
-        auth_string += f" -W {p['domain']}"
+        rpc_argv += ["-W", p["domain"]]
+
+    rpc_argv.append(p["target"])
+    if p["additional_args"]:
+        rpc_argv += shlex.split(p["additional_args"])
 
     command_sequence = p["commands"].replace(";", "\n")
-    command = f"echo -e '{command_sequence}' | rpcclient {auth_string} {p['target']}"
-    if p["additional_args"]:
-        command += f" {p['additional_args']}"
-    return command
+    echo_argv = ["echo", "-e", command_sequence]
+    return shlex.join(echo_argv) + " | " + shlex.join(rpc_argv)
 
 
 SPECS = [

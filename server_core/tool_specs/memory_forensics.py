@@ -1,23 +1,26 @@
+import shlex
+
 from server_core.tool_spec import ParamSpec, ToolSpec
 
 
 def _volatility_command(p: dict) -> str:
-    parts = [f"volatility -f {p['memory_file']}"]
+    argv = ["volatility", "-f", p["memory_file"]]
     if p["profile"]:
-        parts.append(f"--profile={p['profile']}")
-    parts.append(p["plugin"])
+        argv.append(f"--profile={p['profile']}")
+    argv.append(p["plugin"])
     if p["additional_args"]:
-        parts.append(p["additional_args"])
-    return " ".join(parts)
+        argv.extend(shlex.split(p["additional_args"]))
+    return shlex.join(argv)
 
 
 def _volatility3_command(p: dict) -> str:
-    parts = [f"vol -f {p['memory_file']} {p['plugin']}"]
+    argv = ["vol", "-f", p["memory_file"], p["plugin"]]
     if p["output_file"]:
-        parts.append(f"-o {p['output_file']}")
+        argv.append("-o")
+        argv.append(p["output_file"])
     if p["additional_args"]:
-        parts.append(p["additional_args"])
-    return " ".join(parts)
+        argv.extend(shlex.split(p["additional_args"]))
+    return shlex.join(argv)
 
 
 SPECS = [

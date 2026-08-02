@@ -1,32 +1,41 @@
+import shlex
+
 from server_core.tool_spec import ParamSpec, ToolSpec
 
 
 def _checkov_command(p: dict) -> str:
-    parts = [f"checkov -d {p['directory']}"]
+    argv = ["checkov", "-d", p["directory"]]
     if p["framework"]:
-        parts.append(f"--framework {p['framework']}")
+        argv.append("--framework")
+        argv.append(p["framework"])
     if p["check"]:
-        parts.append(f"--check {p['check']}")
+        argv.append("--check")
+        argv.append(p["check"])
     if p["skip_check"]:
-        parts.append(f"--skip-check {p['skip_check']}")
+        argv.append("--skip-check")
+        argv.append(p["skip_check"])
     if p["output_format"]:
-        parts.append(f"--output {p['output_format']}")
+        argv.append("--output")
+        argv.append(p["output_format"])
     if p["additional_args"]:
-        parts.append(p["additional_args"])
-    return " ".join(parts)
+        argv.extend(shlex.split(p["additional_args"]))
+    return shlex.join(argv)
 
 
 def _terrascan_command(p: dict) -> str:
-    parts = [f"terrascan scan -t {p['scan_type']} -d {p['iac_dir']}"]
+    argv = ["terrascan", "scan", "-t", p["scan_type"], "-d", p["iac_dir"]]
     if p["policy_type"]:
-        parts.append(f"-p {p['policy_type']}")
+        argv.append("-p")
+        argv.append(p["policy_type"])
     if p["output_format"]:
-        parts.append(f"-o {p['output_format']}")
+        argv.append("-o")
+        argv.append(p["output_format"])
     if p["severity"]:
-        parts.append(f"--severity {p['severity']}")
+        argv.append("--severity")
+        argv.append(p["severity"])
     if p["additional_args"]:
-        parts.append(p["additional_args"])
-    return " ".join(parts)
+        argv.extend(shlex.split(p["additional_args"]))
+    return shlex.join(argv)
 
 
 SPECS = [

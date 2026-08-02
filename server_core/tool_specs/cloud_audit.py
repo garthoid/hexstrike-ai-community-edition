@@ -1,3 +1,5 @@
+import shlex
+
 from pathlib import Path
 
 from server_core.tool_spec import ParamSpec, ToolSpec
@@ -6,18 +8,23 @@ from server_core.tool_spec import ParamSpec, ToolSpec
 def _prowler_command(p: dict) -> str:
     Path(p["output_dir"]).mkdir(parents=True, exist_ok=True)
 
-    parts = [f"prowler {p['provider']}"]
+    argv = ["prowler", p["provider"]]
     if p["profile"]:
-        parts.append(f"--profile {p['profile']}")
+        argv.append("--profile")
+        argv.append(p["profile"])
     if p["region"]:
-        parts.append(f"--region {p['region']}")
+        argv.append("--region")
+        argv.append(p["region"])
     if p["checks"]:
-        parts.append(f"--checks {p['checks']}")
-    parts.append(f"--output-directory {p['output_dir']}")
-    parts.append(f"--output-format {p['output_format']}")
+        argv.append("--checks")
+        argv.append(p["checks"])
+    argv.append("--output-directory")
+    argv.append(p["output_dir"])
+    argv.append("--output-format")
+    argv.append(p["output_format"])
     if p["additional_args"]:
-        parts.append(p["additional_args"])
-    return " ".join(parts)
+        argv.extend(shlex.split(p["additional_args"]))
+    return shlex.join(argv)
 
 
 def _prowler_postprocess(raw: dict, p: dict) -> dict:
@@ -28,17 +35,21 @@ def _prowler_postprocess(raw: dict, p: dict) -> dict:
 def _scout_suite_command(p: dict) -> str:
     Path(p["report_dir"]).mkdir(parents=True, exist_ok=True)
 
-    parts = [f"scout {p['provider']}"]
+    argv = ["scout", p["provider"]]
     if p["profile"] and p["provider"] == "aws":
-        parts.append(f"--profile {p['profile']}")
+        argv.append("--profile")
+        argv.append(p["profile"])
     if p["services"]:
-        parts.append(f"--services {p['services']}")
+        argv.append("--services")
+        argv.append(p["services"])
     if p["exceptions"]:
-        parts.append(f"--exceptions {p['exceptions']}")
-    parts.append(f"--report-dir {p['report_dir']}")
+        argv.append("--exceptions")
+        argv.append(p["exceptions"])
+    argv.append("--report-dir")
+    argv.append(p["report_dir"])
     if p["additional_args"]:
-        parts.append(p["additional_args"])
-    return " ".join(parts)
+        argv.extend(shlex.split(p["additional_args"]))
+    return shlex.join(argv)
 
 
 def _scout_suite_postprocess(raw: dict, p: dict) -> dict:

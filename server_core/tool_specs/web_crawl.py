@@ -1,3 +1,5 @@
+import shlex
+
 from server_core.tool_spec import ParamSpec, ToolSpec, ToolValidationError
 
 
@@ -65,34 +67,35 @@ def _gospider_command(p: dict) -> str:
         parts.append("--version")
 
     if p["additional_args"]:
-        parts.append(p["additional_args"])
+        parts += shlex.split(p["additional_args"])
 
-    return " ".join(parts)
+    return shlex.join(parts)
 
 
 def _hakrawler_command(p: dict) -> str:
-    command = f"echo '{p['url']}' | hakrawler -d {p['depth']}"
+    echo_argv = ["echo", p["url"]]
+    argv = ["hakrawler", "-d", str(p["depth"])]
     if p["forms"]:
-        command += " -s"
+        argv.append("-s")
     if p["robots"] or p["sitemap"] or p["wayback"]:
-        command += " -subs"
-    command += " -u"
+        argv.append("-subs")
+    argv.append("-u")
     if p["additional_args"]:
-        command += f" {p['additional_args']}"
-    return command
+        argv.extend(shlex.split(p["additional_args"]))
+    return shlex.join(echo_argv) + " | " + shlex.join(argv)
 
 
 def _katana_command(p: dict) -> str:
-    command = f"katana -u {p['url']} -d {p['depth']}"
+    argv = ["katana", "-u", p["url"], "-d", str(p["depth"])]
     if p["js_crawl"]:
-        command += " -jc"
+        argv.append("-jc")
     if p["form_extraction"]:
-        command += " -fx"
+        argv.append("-fx")
     if p["output_format"] == "json":
-        command += " -jsonl"
+        argv.append("-jsonl")
     if p["additional_args"]:
-        command += f" {p['additional_args']}"
-    return command
+        argv.extend(shlex.split(p["additional_args"]))
+    return shlex.join(argv)
 
 
 SPECS = [

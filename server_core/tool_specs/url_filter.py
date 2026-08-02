@@ -1,15 +1,18 @@
+import shlex
+
 from server_core.tool_spec import ParamSpec, ToolSpec
 
 
 def _uro_command(p: dict) -> str:
-    command = f"echo '{p['urls']}' | uro"
+    echo_argv = ["echo", p["urls"]]
+    uro_argv = ["uro"]
     if p["whitelist"]:
-        command += f" --whitelist {p['whitelist']}"
+        uro_argv += ["--whitelist", p["whitelist"]]
     if p["blacklist"]:
-        command += f" --blacklist {p['blacklist']}"
+        uro_argv += ["--blacklist", p["blacklist"]]
     if p["additional_args"]:
-        command += f" {p['additional_args']}"
-    return command
+        uro_argv += shlex.split(p["additional_args"])
+    return shlex.join(echo_argv) + " | " + shlex.join(uro_argv)
 
 
 SPECS = [

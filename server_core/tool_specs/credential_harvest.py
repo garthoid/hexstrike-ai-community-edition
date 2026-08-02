@@ -1,3 +1,5 @@
+import shlex
+
 from server_core.tool_spec import ParamSpec, ToolSpec, ToolValidationError
 
 
@@ -14,104 +16,124 @@ def _responder_command(p: dict) -> str:
     if not p["interface"]:
         raise ToolValidationError("Interface parameter is required")
 
-    parts = [f"timeout {p['duration']} responder -I {p['interface']}"]
+    argv = ["timeout", str(p["duration"]), "responder", "-I", p["interface"]]
     if p["analyze"]:
-        parts.append("-A")
+        argv.append("-A")
     if p["wpad"]:
-        parts.append("-w")
+        argv.append("-w")
     if p["force_wpad_auth"]:
-        parts.append("-F")
+        argv.append("-F")
     if p["fingerprint"]:
-        parts.append("-f")
+        argv.append("-f")
     if p["additional_args"]:
-        parts.append(p["additional_args"])
-    return " ".join(parts)
+        argv.extend(shlex.split(p["additional_args"]))
+    return shlex.join(argv)
 
 
 def _vaultrip_command(p: dict) -> str:
-    command = f"vaultrip {p['target']}"
+    argv = ["vaultrip", p["target"]]
 
     if not _bool(p["local"]):
-        command += " --no-local"
+        argv.append("--no-local")
     if not _bool(p["memory"]):
-        command += " --no-memory"
+        argv.append("--no-memory")
     if not _bool(p["browser"]):
-        command += " --no-browser"
+        argv.append("--no-browser")
     if not _bool(p["system"]):
-        command += " --no-system"
+        argv.append("--no-system")
     if not _bool(p["kerberos"]):
-        command += " --no-kerberos"
+        argv.append("--no-kerberos")
 
     if p["dump_path"]:
-        command += f" --dumps {p['dump_path']}"
+        argv.append("--dumps")
+        argv.append(p["dump_path"])
 
     if p["target_user"]:
-        command += f" --user {p['target_user']}"
+        argv.append("--user")
+        argv.append(p["target_user"])
 
     if p["target_pid"]:
-        command += f" --pid {int(p['target_pid'])}"
+        argv.append("--pid")
+        argv.append(str(int(p["target_pid"])))
 
     if _bool(p["remote"]):
         if p["ssh_host"]:
-            command += f" --remote {p['ssh_host']}"
+            argv.append("--remote")
+            argv.append(p["ssh_host"])
         if p["ssh_user"]:
-            command += f" --ssh-user {p['ssh_user']}"
+            argv.append("--ssh-user")
+            argv.append(p["ssh_user"])
         if p["ssh_key"]:
-            command += f" --ssh-key {p['ssh_key']}"
+            argv.append("--ssh-key")
+            argv.append(p["ssh_key"])
         if p["ssh_password"]:
-            command += f" --ssh-pass {p['ssh_password']!r}"
+            argv.append("--ssh-pass")
+            argv.append(p["ssh_password"])
         if p["ssh_port"] and int(p["ssh_port"]) != 22:
-            command += f" --ssh-port {int(p['ssh_port'])}"
+            argv.append("--ssh-port")
+            argv.append(str(int(p["ssh_port"])))
 
     if _bool(p["verbose"]):
-        command += " -v"
+        argv.append("-v")
 
     if p["timeout"] and int(p["timeout"]) != 30:
-        command += f" --timeout {int(p['timeout'])}"
+        argv.append("--timeout")
+        argv.append(str(int(p["timeout"])))
 
     # Active attack modules — explicit opt-in
     if _bool(p["dcsync"]):
-        command += " --dcsync"
+        argv.append("--dcsync")
 
     if _bool(p["pth"]):
-        command += " --pth"
+        argv.append("--pth")
 
     if _bool(p["ptt"]):
         if p["ptt_ticket"]:
-            command += f" --ptt --ptt-ticket {p['ptt_ticket']}"
+            argv.append("--ptt")
+            argv.append("--ptt-ticket")
+            argv.append(p["ptt_ticket"])
 
     if _bool(p["forge_golden"]):
-        command += " --forge-golden"
+        argv.append("--forge-golden")
 
     if _bool(p["forge_silver"]):
         if p["forge_silver_spn"]:
-            command += f" --forge-silver --forge-silver-spn {p['forge_silver_spn']}"
+            argv.append("--forge-silver")
+            argv.append("--forge-silver-spn")
+            argv.append(p["forge_silver_spn"])
 
     if p["dc_host"]:
-        command += f" --dc {p['dc_host']}"
+        argv.append("--dc")
+        argv.append(p["dc_host"])
 
     if p["ad_domain"]:
-        command += f" --domain {p['ad_domain']}"
+        argv.append("--domain")
+        argv.append(p["ad_domain"])
 
     if p["domain_sid"]:
-        command += f" --domain-sid {p['domain_sid']}"
+        argv.append("--domain-sid")
+        argv.append(p["domain_sid"])
 
     if p["krbtgt_hash"]:
-        command += f" --krbtgt-hash {p['krbtgt_hash']}"
+        argv.append("--krbtgt-hash")
+        argv.append(p["krbtgt_hash"])
 
     if p["attack_user"]:
-        command += f" --attack-user {p['attack_user']}"
+        argv.append("--attack-user")
+        argv.append(p["attack_user"])
 
     if p["attack_hash"]:
-        command += f" --attack-hash {p['attack_hash']}"
+        argv.append("--attack-hash")
+        argv.append(p["attack_hash"])
 
     if p["attack_cmd"] and p["attack_cmd"] != "whoami":
-        command += f" --attack-cmd {p['attack_cmd']!r}"
+        argv.append("--attack-cmd")
+        argv.append(p["attack_cmd"])
 
     if p["additional_args"]:
-        command += f" {p['additional_args']}"
+        argv.extend(shlex.split(p["additional_args"]))
 
-    return command
+    return shlex.join(argv)
 
 
 def _vaultrip_postprocess(raw: dict, p: dict) -> dict:

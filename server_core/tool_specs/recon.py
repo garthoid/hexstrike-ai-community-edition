@@ -1,32 +1,39 @@
+import shlex
+
 from server_core.tool_spec import ParamSpec, ToolSpec, ToolValidationError
 
 
 def _amass_command(p: dict) -> str:
-    command = f"amass {p['mode']} -d {p['domain']}"
+    argv = ["amass", p["mode"], "-d", p["domain"]]
     if p["additional_args"]:
-        command += f" {p['additional_args']}"
-    return command
+        argv.extend(shlex.split(p["additional_args"]))
+    return shlex.join(argv)
 
 
 def _assetfinder_command(p: dict) -> str:
-    command = "assetfinder"
+    argv = ["assetfinder"]
     if p["only_subdomains"]:
-        command += " --subs-only"
-    command += f" {p['domain']}"
+        argv.append("--subs-only")
+    argv.append(p["domain"])
     if p["additional_args"]:
-        command += f" {p['additional_args']}"
-    return command
+        argv.extend(shlex.split(p["additional_args"]))
+    return shlex.join(argv)
 
 
 def _autorecon_command(p: dict) -> str:
-    command = f"autorecon {p['target']} -o {p['output_dir']} --heartbeat {p['heartbeat']} --timeout {p['timeout']}"
+    argv = [
+        "autorecon", p["target"], "-o", p["output_dir"],
+        "--heartbeat", str(p["heartbeat"]), "--timeout", str(p["timeout"]),
+    ]
     if p["port_scans"] != "default":
-        command += f" --port-scans {p['port_scans']}"
+        argv.append("--port-scans")
+        argv.append(p["port_scans"])
     if p["service_scans"] != "default":
-        command += f" --service-scans {p['service_scans']}"
+        argv.append("--service-scans")
+        argv.append(p["service_scans"])
     if p["additional_args"]:
-        command += f" {p['additional_args']}"
-    return command
+        argv.extend(shlex.split(p["additional_args"]))
+    return shlex.join(argv)
 
 
 def _massdns_command(p: dict) -> str:
@@ -35,70 +42,70 @@ def _massdns_command(p: dict) -> str:
     if p["status_format"] and p["status_format"] not in {"json", "ansi"}:
         raise ToolValidationError("status_format must be either 'json' or 'ansi'")
 
-    command_parts = ["massdns"]
+    argv = ["massdns"]
     if p["bindto"]:
-        command_parts.extend(["-b", p["bindto"]])
+        argv.extend(["-b", p["bindto"]])
     if p["busy_poll"]:
-        command_parts.append("--busy-poll")
+        argv.append("--busy-poll")
     if p["resolve_count"]:
-        command_parts.extend(["-c", str(p["resolve_count"])])
+        argv.extend(["-c", str(p["resolve_count"])])
     if p["drop_group"]:
-        command_parts.extend(["--drop-group", p["drop_group"]])
+        argv.extend(["--drop-group", p["drop_group"]])
     if p["drop_user"]:
-        command_parts.extend(["--drop-user", p["drop_user"]])
+        argv.extend(["--drop-user", p["drop_user"]])
     if p["extended_input"]:
-        command_parts.append("--extended-input")
+        argv.append("--extended-input")
     if p["filter"]:
-        command_parts.extend(["--filter", str(p["filter"])])
+        argv.extend(["--filter", str(p["filter"])])
     if p["flush"]:
-        command_parts.append("--flush")
+        argv.append("--flush")
     if p["ignore"]:
-        command_parts.extend(["--ignore", str(p["ignore"])])
+        argv.extend(["--ignore", str(p["ignore"])])
     if p["interval"]:
-        command_parts.extend(["-i", str(p["interval"])])
+        argv.extend(["-i", str(p["interval"])])
     if p["error_log"]:
-        command_parts.extend(["-l", p["error_log"]])
+        argv.extend(["-l", p["error_log"]])
     if p["norecurse"]:
-        command_parts.append("--norecurse")
+        argv.append("--norecurse")
     if p["output"]:
-        command_parts.extend(["-o", p["output"]])
+        argv.extend(["-o", p["output"]])
     if p["predictable"]:
-        command_parts.append("--predictable")
+        argv.append("--predictable")
     if p["processes"]:
-        command_parts.extend(["--processes", str(p["processes"])])
+        argv.extend(["--processes", str(p["processes"])])
     if p["quiet"]:
-        command_parts.append("-q")
+        argv.append("-q")
     if p["rand_src_ipv6"]:
-        command_parts.extend(["--rand-src-ipv6", p["rand_src_ipv6"]])
+        argv.extend(["--rand-src-ipv6", p["rand_src_ipv6"]])
     if p["rcvbuf"]:
-        command_parts.extend(["--rcvbuf", str(p["rcvbuf"])])
+        argv.extend(["--rcvbuf", str(p["rcvbuf"])])
     if p["retry"]:
-        command_parts.extend(["--retry", str(p["retry"])])
+        argv.extend(["--retry", str(p["retry"])])
     if p["resolvers"]:
-        command_parts.extend(["-r", p["resolvers"]])
+        argv.extend(["-r", p["resolvers"]])
     if p["root"]:
-        command_parts.append("--root")
+        argv.append("--root")
     if p["hashmap_size"]:
-        command_parts.extend(["-s", str(p["hashmap_size"])])
+        argv.extend(["-s", str(p["hashmap_size"])])
     if p["sndbuf"]:
-        command_parts.extend(["--sndbuf", str(p["sndbuf"])])
+        argv.extend(["--sndbuf", str(p["sndbuf"])])
     if p["status_format"]:
-        command_parts.extend(["--status-format", p["status_format"]])
+        argv.extend(["--status-format", p["status_format"]])
     if p["sticky"]:
-        command_parts.append("--sticky")
+        argv.append("--sticky")
     if p["socket_count"]:
-        command_parts.extend(["--socket-count", str(p["socket_count"])])
+        argv.extend(["--socket-count", str(p["socket_count"])])
     if p["record_type"]:
-        command_parts.extend(["-t", p["record_type"]])
+        argv.extend(["-t", p["record_type"]])
     if p["verify_ip"]:
-        command_parts.append("--verify-ip")
+        argv.append("--verify-ip")
     if p["outfile"]:
-        command_parts.extend(["-w", p["outfile"]])
+        argv.extend(["-w", p["outfile"]])
     if p["additional_args"]:
-        command_parts.append(p["additional_args"])
+        argv.extend(shlex.split(p["additional_args"]))
     if p["domainlist"]:
-        command_parts.append(p["domainlist"])
-    return " ".join(command_parts)
+        argv.append(p["domainlist"])
+    return shlex.join(argv)
 
 
 def _shuffledns_command(p: dict) -> str:
@@ -127,73 +134,76 @@ def _shuffledns_command(p: dict) -> str:
         if mode == "bruteforce" and not p["wordlist"]:
             raise ToolValidationError("wordlist is required when mode is bruteforce")
 
-    command_parts = ["shuffledns"]
+    argv = ["shuffledns"]
     for d in normalized_domains:
-        command_parts.extend(["-d", d])
+        argv.extend(["-d", d])
     if p["auto_domain"]:
-        command_parts.append("-ad")
+        argv.append("-ad")
     if p["list"]:
-        command_parts.extend(["-l", p["list"]])
+        argv.extend(["-l", p["list"]])
     if p["wordlist"]:
-        command_parts.extend(["-w", p["wordlist"]])
+        argv.extend(["-w", p["wordlist"]])
     if p["resolver"]:
-        command_parts.extend(["-r", p["resolver"]])
+        argv.extend(["-r", p["resolver"]])
     if p["trusted_resolver"]:
-        command_parts.extend(["-tr", p["trusted_resolver"]])
+        argv.extend(["-tr", p["trusted_resolver"]])
     if p["raw_input"]:
-        command_parts.extend(["-ri", p["raw_input"]])
+        argv.extend(["-ri", p["raw_input"]])
     if mode:
-        command_parts.extend(["-mode", mode])
+        argv.extend(["-mode", mode])
     if p["threads"]:
-        command_parts.extend(["-t", str(p["threads"])])
+        argv.extend(["-t", str(p["threads"])])
     if p["output"]:
-        command_parts.extend(["-o", p["output"]])
+        argv.extend(["-o", p["output"]])
     if p["json"]:
-        command_parts.append("-j")
+        argv.append("-j")
     if p["wildcard_output"]:
-        command_parts.extend(["-wo", p["wildcard_output"]])
+        argv.extend(["-wo", p["wildcard_output"]])
     if p["massdns"]:
-        command_parts.extend(["-m", p["massdns"]])
+        argv.extend(["-m", p["massdns"]])
     if p["massdns_cmd"]:
-        command_parts.extend(["-mcmd", p["massdns_cmd"]])
+        argv.extend(["-mcmd", p["massdns_cmd"]])
     if p["directory"]:
-        command_parts.extend(["-directory", p["directory"]])
+        argv.extend(["-directory", p["directory"]])
     if p["retries"]:
-        command_parts.extend(["-retries", str(p["retries"])])
+        argv.extend(["-retries", str(p["retries"])])
     if p["strict_wildcard"]:
-        command_parts.append("-sw")
+        argv.append("-sw")
     if p["wildcard_threads"]:
-        command_parts.extend(["-wt", str(p["wildcard_threads"])])
+        argv.extend(["-wt", str(p["wildcard_threads"])])
     if p["silent"]:
-        command_parts.append("-silent")
+        argv.append("-silent")
     if p["version"]:
-        command_parts.append("-version")
+        argv.append("-version")
     if p["verbose"]:
-        command_parts.append("-v")
+        argv.append("-v")
     if p["no_color"]:
-        command_parts.append("-nc")
+        argv.append("-nc")
     if p["update"]:
-        command_parts.append("-up")
+        argv.append("-up")
     if p["disable_update_check"]:
-        command_parts.append("-duc")
+        argv.append("-duc")
     if p["additional_args"]:
-        command_parts.append(p["additional_args"])
-    return " ".join(command_parts)
+        argv.extend(shlex.split(p["additional_args"]))
+    return shlex.join(argv)
 
 
 def _subfinder_command(p: dict) -> str:
-    command = f"subfinder -d {p['domain']}"
+    argv = ["subfinder", "-d", p["domain"]]
     if p["silent"]:
-        command += " -silent"
+        argv.append("-silent")
     if p["all_sources"]:
-        command += " -all"
+        argv.append("-all")
     if p["additional_args"]:
-        command += f" {p['additional_args']}"
-    return command
+        argv.extend(shlex.split(p["additional_args"]))
+    return shlex.join(argv)
 
 
 def _theharvester_command(p: dict) -> str:
-    return f"theHarvester -d {p['domain']} {p['additional_args']}"
+    argv = ["theHarvester", "-d", p["domain"]]
+    if p["additional_args"]:
+        argv.extend(shlex.split(p["additional_args"]))
+    return shlex.join(argv)
 
 
 SPECS = [

@@ -18,6 +18,13 @@
 ### Dependencies
 - Migrated Python dependency management from `dependencies/requirements*.txt` to `pyproject.toml` + `uv.lock`.
 
+### Security & hardening
+- Server now refuses to start if bound to a non-loopback host with no API token configured.
+- Closed command-injection risk across ~35 tool builders — commands are now built as safely-quoted argv lists instead of raw string interpolation.
+- Closed a Python source-injection risk in the Pwntools exploit generator.
+- Added rate limiting to NyxStrike's own API.
+- Fixed a race where concurrent browser-agent requests could stomp on the same Selenium driver.
+
 ## 1.7.0 - phishfalcon (2026-07-28)
 
 ### Navigation

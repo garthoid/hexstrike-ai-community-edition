@@ -1,6 +1,7 @@
 from flask import Blueprint, request, jsonify
 import json
 import logging
+import threading
 import time
 import requests
 from datetime import datetime
@@ -21,9 +22,14 @@ class BrowserAgent:
         self.screenshots = []
         self.page_sources = []
         self.network_logs = []
+        self._lock = threading.Lock()
 
     def setup_browser(self, headless: bool = True, proxy_port: Optional[int] = None):
         """Setup Chrome browser with security testing options"""
+        with self._lock:
+            return self._setup_browser_locked(headless, proxy_port)
+
+    def _setup_browser_locked(self, headless: bool = True, proxy_port: Optional[int] = None):
         try:
             from selenium.webdriver.chrome.options import Options
             from selenium.webdriver.chrome.webdriver import WebDriver as ChromeWebDriver
@@ -67,9 +73,13 @@ class BrowserAgent:
 
     def navigate_and_inspect(self, url: str, wait_time: int = 5) -> dict:
         """Navigate to URL and perform comprehensive inspection"""
+        with self._lock:
+            return self._navigate_and_inspect_locked(url, wait_time)
+
+    def _navigate_and_inspect_locked(self, url: str, wait_time: int = 5) -> dict:
         try:
             if self.driver is None:
-                if not self.setup_browser():
+                if not self._setup_browser_locked():
                     return {'success': False, 'error': 'Failed to setup browser'}
 
             driver = self.driver
@@ -469,10 +479,11 @@ class BrowserAgent:
 
     def close_browser(self):
         """Close the browser instance"""
-        if self.driver:
-            self.driver.quit()
-            self.driver = None
-            logger.info(f"{ModernVisualEngine.format_tool_status('BrowserAgent', 'SUCCESS', 'Browser Closed')}")
+        with self._lock:
+            if self.driver:
+                self.driver.quit()
+                self.driver = None
+                logger.info(f"{ModernVisualEngine.format_tool_status('BrowserAgent', 'SUCCESS', 'Browser Closed')}")
 
 
 # Global instance

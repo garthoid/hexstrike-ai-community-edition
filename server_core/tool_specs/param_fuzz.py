@@ -1,11 +1,14 @@
+import shlex
+
 from server_core.tool_spec import ParamSpec, ToolSpec
 
 
 def _qsreplace_command(p: dict) -> str:
-    command = f"echo '{p['urls']}' | qsreplace '{p['replacement']}'"
+    echo_argv = ["echo", p["urls"]]
+    qsreplace_argv = ["qsreplace", p["replacement"]]
     if p["additional_args"]:
-        command += f" {p['additional_args']}"
-    return command
+        qsreplace_argv += shlex.split(p["additional_args"])
+    return shlex.join(echo_argv) + " | " + shlex.join(qsreplace_argv)
 
 
 SPECS = [

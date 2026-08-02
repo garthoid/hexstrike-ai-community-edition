@@ -24,13 +24,13 @@ _HURL_MODE_FLAGS = {
 
 
 def _anew_command(p: dict) -> str:
+    echo_argv = ["echo", p["input_data"]]
+    anew_argv = ["anew"]
     if p["output_file"]:
-        command = f"echo '{p['input_data']}' | anew {p['output_file']}"
-    else:
-        command = f"echo '{p['input_data']}' | anew"
+        anew_argv.append(p["output_file"])
     if p["additional_args"]:
-        command += f" {p['additional_args']}"
-    return command
+        anew_argv += shlex.split(p["additional_args"])
+    return shlex.join(echo_argv) + " | " + shlex.join(anew_argv)
 
 
 def _hurl_command(p: dict) -> str:

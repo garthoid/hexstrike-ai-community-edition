@@ -14,22 +14,22 @@ def _httpx_command(p: dict) -> str:
     httpx_bin_template = binary_overrides.get("httpx", "")
     httpx_bin = httpx_bin_template.replace("{HOME}", home_path) if httpx_bin_template else "httpx"
 
-    command = f"{httpx_bin} -u {p['target']} -t {p['threads']}"
+    argv = [httpx_bin, "-u", p["target"], "-t", str(p["threads"])]
     if p["probe"]:
-        command += " -probe"
+        argv.append("-probe")
     if p["tech_detect"]:
-        command += " -tech-detect"
+        argv.append("-tech-detect")
     if p["status_code"]:
-        command += " -sc"
+        argv.append("-sc")
     if p["content_length"]:
-        command += " -cl"
+        argv.append("-cl")
     if p["title"]:
-        command += " -title"
+        argv.append("-title")
     if p["web_server"]:
-        command += " -server"
+        argv.append("-server")
     if p["additional_args"]:
-        command += f" {p['additional_args']}"
-    return command
+        argv.extend(shlex.split(p["additional_args"]))
+    return shlex.join(argv)
 
 
 def _append_value(args, flag, value):

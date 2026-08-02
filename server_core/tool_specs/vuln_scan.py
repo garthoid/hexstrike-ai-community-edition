@@ -1,17 +1,22 @@
+import shlex
+
 from server_core.tool_spec import ParamSpec, ToolSpec
 
 
 def _nuclei_command(p: dict) -> str:
-    command = f"nuclei -u {p['target']}"
+    argv = ["nuclei", "-u", p["target"]]
     if p["severity"]:
-        command += f" -severity {p['severity']}"
+        argv.append("-severity")
+        argv.append(p["severity"])
     if p["tags"]:
-        command += f" -tags {p['tags']}"
+        argv.append("-tags")
+        argv.append(p["tags"])
     if p["template"]:
-        command += f" -t {p['template']}"
+        argv.append("-t")
+        argv.append(p["template"])
     if p["additional_args"]:
-        command += f" {p['additional_args']}"
-    return command
+        argv.extend(shlex.split(p["additional_args"]))
+    return shlex.join(argv)
 
 
 SPECS = [

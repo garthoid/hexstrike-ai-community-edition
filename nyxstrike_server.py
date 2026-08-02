@@ -14,6 +14,8 @@ import logging
 import os
 import threading
 from flask import Flask, request, abort, jsonify
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
 import server_core.config_core as config_core
 from server_core.modern_visual_engine import ModernVisualEngine
 from server_core.singletons import run_history, tool_stats
@@ -34,6 +36,13 @@ logger = logging.getLogger(__name__)
 app = Flask(__name__)
 app.config['JSON_SORT_KEYS'] = False
 
+limiter = Limiter(
+    get_remote_address,
+    app=app,
+    default_limits=["120 per minute"],
+    storage_uri="memory://",
+)
+
 # API Configuration
 API_PORT = int(os.environ.get('NYXSTRIKE_PORT', 8888))
 API_HOST = os.environ.get('NYXSTRIKE_HOST', '127.0.0.1')  # e.g. export NYXSTRIKE_HOST=0.0.0.0
@@ -47,7 +56,6 @@ CACHE_TTL = config_core.get("CACHE_TTL", 3600)  # 1 hour default TTL
 
 @app.before_request
 def optional_bearer_auth():
-    # If no token is configured, allow all requests
     if not API_TOKEN:
         return
 
@@ -67,7 +75,7 @@ def require_json_for_post():
     if request.method != "POST":
         return
     if not request.content_type or not request.content_type.startswith("application/json"):
-        return  # multipart uploads and other non-JSON POSTs are handled by their own routes
+        return
     if request.content_length != 0 and request.json is None:
         return jsonify({
             "error": "Request body must be valid JSON with Content-Type: application/json",
@@ -149,11 +157,12 @@ def record_tool_run(response):
     params = request.json or {}
   except Exception:
     params = {}
+
   try:
     body = response.get_json(silent=True) or {}
   except Exception:
     body = {}
-  # Only record responses that look like tool execution results
+
   if "stdout" in body or "stderr" in body or "return_code" in body:
     session_id = (params.get("session_id") or "") if isinstance(params, dict) else ""
     chained_run = run_history.record(
@@ -163,13 +172,13 @@ def record_tool_run(response):
       result=body,
       session_id=session_id,
     )
-    # A run is "successful" when the tool reported success AND produced output.
     ran_ok = bool(body.get("success", False)) and bool(str(body.get("stdout", "")).strip())
     tool_stats.record(tool=tool_name, success=ran_ok)
     context_key = _build_tool_context_key(path, params, body)
+
     if context_key:
       tool_stats.record_contextual(tool=tool_name, success=ran_ok, context_key=context_key)
-    # Emit a tool_run event on the associated session when a session_id is present
+
     if session_id:
       try:
         status_label = "succeeded" if ran_ok else "completed"
@@ -229,9 +238,14 @@ if __name__ == "__main__":
     if args.host != API_HOST:
         API_HOST = args.host
 
+    _LOOPBACK_HOSTS = ("127.0.0.1", "localhost", "::1")
+    if API_HOST not in _LOOPBACK_HOSTS and not API_TOKEN:
+        parser.error(
+            f"Refusing to bind to non-loopback host {API_HOST!r} without NYXSTRIKE_API_TOKEN set. "
+            "Set the env var or bind to 127.0.0.1."
+        )
+
     if os.environ.get('WERKZEUG_RUN_MAIN') != 'true':
-        # Enhanced startup messages with beautiful formatting.
-        # ANSI codes have zero visible width, so we track visible length manually
         C = ModernVisualEngine.COLORS
         BOX_WIDTH = 69  # visible characters between the two │ borders (including leading space)
 
@@ -265,7 +279,6 @@ if __name__ == "__main__":
         print('\n'.join(lines), flush=True)
 
     # Suppress Flask's click.echo() startup banner ("* Serving Flask app", "* Debug mode").
-    # These bypass the logging system entirely, so a logging filter cannot catch them.
     import flask.cli as _flask_cli
     _flask_cli.show_server_banner = lambda *_a, **_kw: None
 

@@ -1,11 +1,13 @@
+import shlex
+
 from server_core.tool_spec import ParamSpec, ToolSpec
 
 
 def _wafw00f_command(p: dict) -> str:
-    command = f"wafw00f {p['target']}"
+    argv = ["wafw00f", p["target"]]
     if p["additional_args"]:
-        command += f" {p['additional_args']}"
-    return command
+        argv.extend(shlex.split(p["additional_args"]))
+    return shlex.join(argv)
 
 
 SPECS = [

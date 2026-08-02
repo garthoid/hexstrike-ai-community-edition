@@ -1,3 +1,5 @@
+import shlex
+
 from pathlib import Path
 
 from server_core.tool_spec import ParamSpec, ToolSpec
@@ -6,13 +8,14 @@ from server_core.tool_spec import ParamSpec, ToolSpec
 def _foremost_command(p: dict) -> str:
     Path(p["output_dir"]).mkdir(parents=True, exist_ok=True)
 
-    command = f"foremost -o {p['output_dir']}"
+    argv = ["foremost", "-o", p["output_dir"]]
     if p["file_types"]:
-        command += f" -t {p['file_types']}"
+        argv.append("-t")
+        argv.append(p["file_types"])
     if p["additional_args"]:
-        command += f" {p['additional_args']}"
-    command += f" {p['input_file']}"
-    return command
+        argv.extend(shlex.split(p["additional_args"]))
+    argv.append(p["input_file"])
+    return shlex.join(argv)
 
 
 def _foremost_postprocess(raw: dict, p: dict) -> dict:

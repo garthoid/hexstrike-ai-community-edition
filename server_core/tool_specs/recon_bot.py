@@ -1,12 +1,15 @@
+import shlex
+
 from server_core.tool_spec import ParamSpec, ToolSpec
 
 
-def _bbot_command(p: dict):
-    cmd_parts = ["bbot", "-t " + p["target"]]
+def _bbot_command(p: dict) -> str:
+    argv = ["bbot", "-t", p["target"]]
     for key, value in p["parameters"].items():
         if isinstance(value, str) and value:
-            cmd_parts.append(f"-{key} {value}")
-    return " ".join(cmd_parts)
+            argv.append(f"-{key}")
+            argv.append(value)
+    return shlex.join(argv)
 
 
 SPECS = [

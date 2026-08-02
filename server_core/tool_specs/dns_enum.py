@@ -1,24 +1,29 @@
+import shlex
+
 from server_core.tool_spec import ParamSpec, ToolSpec
 
 
 def _fierce_command(p: dict) -> str:
-    parts = [f"fierce --domain {p['domain']}"]
+    argv = ["fierce", "--domain", p["domain"]]
     if p["dns_server"]:
-        parts.append(f"--dns-servers {p['dns_server']}")
+        argv.append("--dns-servers")
+        argv.append(p["dns_server"])
     if p["additional_args"]:
-        parts.append(p["additional_args"])
-    return " ".join(parts)
+        argv.extend(shlex.split(p["additional_args"]))
+    return shlex.join(argv)
 
 
 def _dnsenum_command(p: dict) -> str:
-    parts = [f"dnsenum {p['domain']}"]
+    argv = ["dnsenum", p["domain"]]
     if p["dns_server"]:
-        parts.append(f"--dnsserver {p['dns_server']}")
+        argv.append("--dnsserver")
+        argv.append(p["dns_server"])
     if p["wordlist"]:
-        parts.append(f"--file {p['wordlist']}")
+        argv.append("--file")
+        argv.append(p["wordlist"])
     if p["additional_args"]:
-        parts.append(p["additional_args"])
-    return " ".join(parts)
+        argv.extend(shlex.split(p["additional_args"]))
+    return shlex.join(argv)
 
 
 SPECS = [

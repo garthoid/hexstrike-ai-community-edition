@@ -1,3 +1,5 @@
+import shlex
+
 from server_core.tool_spec import ParamSpec, ToolSpec, ToolValidationError
 
 
@@ -5,75 +7,90 @@ def _arp_scan_command(p: dict) -> str:
     if not p["target"] and not p["local_network"]:
         raise ToolValidationError("Target parameter or local_network flag is required")
 
-    command = f"arp-scan -t {p['timeout']} -r {p['retry']}"
+    argv = ["arp-scan", "-t", str(p["timeout"]), "-r", str(p["retry"])]
     if p["interface"]:
-        command += f" -I {p['interface']}"
+        argv.append("-I")
+        argv.append(p["interface"])
     if p["local_network"]:
-        command += " -l"
+        argv.append("-l")
     else:
-        command += f" {p['target']}"
+        argv.append(p["target"])
     if p["additional_args"]:
-        command += f" {p['additional_args']}"
-    return command
+        argv.extend(shlex.split(p["additional_args"]))
+    return shlex.join(argv)
 
 
 def _masscan_command(p: dict) -> str:
-    command = f"masscan {p['target']} -p{p['ports']} --rate={p['rate']}"
+    argv = ["masscan", p["target"], f"-p{p['ports']}", f"--rate={p['rate']}"]
     if p["interface"]:
-        command += f" -e {p['interface']}"
+        argv.append("-e")
+        argv.append(p["interface"])
     if p["router_mac"]:
-        command += f" --router-mac {p['router_mac']}"
+        argv.append("--router-mac")
+        argv.append(p["router_mac"])
     if p["source_ip"]:
-        command += f" --source-ip {p['source_ip']}"
+        argv.append("--source-ip")
+        argv.append(p["source_ip"])
     if p["banners"]:
-        command += " --banners"
+        argv.append("--banners")
     if p["additional_args"]:
-        command += f" {p['additional_args']}"
-    return command
+        argv.extend(shlex.split(p["additional_args"]))
+    return shlex.join(argv)
 
 
 def _rustscan_command(p: dict) -> str:
-    command = f"rustscan -a {p['target']} --ulimit {p['ulimit']} -b {p['batch_size']} -t {p['timeout']}"
+    argv = [
+        "rustscan", "-a", p["target"],
+        "--ulimit", str(p["ulimit"]), "-b", str(p["batch_size"]), "-t", str(p["timeout"]),
+    ]
     if p["ports"]:
-        command += f" -p {p['ports']}"
+        argv.append("-p")
+        argv.append(p["ports"])
     if p["scripts"]:
-        command += " -- -sC -sV"
+        argv.append("--")
+        argv.append("-sC")
+        argv.append("-sV")
     if p["additional_args"]:
-        command += f" {p['additional_args']}"
-    return command
+        argv.extend(shlex.split(p["additional_args"]))
+    return shlex.join(argv)
 
 
 def _nmap_command(p: dict) -> str:
-    command = f"nmap {p['scan_type']}"
+    argv = ["nmap"] + shlex.split(p["scan_type"])
     if p["ports"]:
-        command += f" -p {p['ports']}"
+        argv.append("-p")
+        argv.append(p["ports"])
     if p["additional_args"]:
-        command += f" {p['additional_args']}"
-    command += f" {p['target']}"
-    return command
+        argv.extend(shlex.split(p["additional_args"]))
+    argv.append(p["target"])
+    return shlex.join(argv)
 
 
 def _nmap_advanced_command(p: dict) -> str:
-    command = f"nmap {p['scan_type']} {p['target']}"
+    argv = ["nmap"] + shlex.split(p["scan_type"]) + [p["target"]]
     if p["ports"]:
-        command += f" -p {p['ports']}"
+        argv.append("-p")
+        argv.append(p["ports"])
     if p["stealth"]:
-        command += " -T2 -f --mtu 24"
+        argv.append("-T2")
+        argv.append("-f")
+        argv.append("--mtu")
+        argv.append("24")
     else:
-        command += f" -{p['timing']}"
+        argv.append(f"-{p['timing']}")
     if p["os_detection"]:
-        command += " -O"
+        argv.append("-O")
     if p["version_detection"]:
-        command += " -sV"
+        argv.append("-sV")
     if p["aggressive"]:
-        command += " -A"
+        argv.append("-A")
     if p["nse_scripts"]:
-        command += f" --script={p['nse_scripts']}"
+        argv.append(f"--script={p['nse_scripts']}")
     elif not p["aggressive"]:
-        command += " -sC"
+        argv.append("-sC")
     if p["additional_args"]:
-        command += f" {p['additional_args']}"
-    return command
+        argv.extend(shlex.split(p["additional_args"]))
+    return shlex.join(argv)
 
 
 SPECS = [

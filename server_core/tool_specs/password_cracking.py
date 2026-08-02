@@ -1,4 +1,5 @@
 import os
+import shlex
 import tempfile
 
 from server_core.singletons import ROCKYOU_PATH
@@ -6,10 +7,11 @@ from server_core.tool_spec import ParamSpec, ToolSpec, ToolValidationError
 
 
 def _aircrack_ng_command(p: dict) -> str:
-    command = f"aircrack-ng {' '.join(p['capture_files'])} -w {p['wordlist']}"
+    argv = ["aircrack-ng", *p["capture_files"], "-w", p["wordlist"]]
     if p["bssid"]:
-        command += f" -b {p['bssid']}"
-    return command
+        argv.append("-b")
+        argv.append(p["bssid"])
+    return shlex.join(argv)
 
 
 def _write_tmp_hash(p: dict, hash_value: str) -> str:
@@ -35,64 +37,76 @@ def _hashcat_command(p: dict) -> str:
 
     target = hash_file if hash_file else _write_tmp_hash(p, hash_value)
 
-    command = f"hashcat -m {p['hash_type']} -a {p['attack_mode']} {target}"
+    argv = ["hashcat", "-m", p["hash_type"], "-a", p["attack_mode"], target]
     if p["attack_mode"] == "0" and p["wordlist"]:
-        command += f" {p['wordlist']}"
+        argv.append(p["wordlist"])
     elif p["attack_mode"] == "3" and p["mask"]:
-        command += f" {p['mask']}"
+        argv.append(p["mask"])
     if p["additional_args"]:
-        command += f" {p['additional_args']}"
-    return command
+        argv.extend(shlex.split(p["additional_args"]))
+    return shlex.join(argv)
 
 
 def _hashid_command(p: dict) -> str:
-    return f"hashid {p['hash_value']} {p['additional_args']}"
+    argv = ["hashid", p["hash_value"]]
+    if p["additional_args"]:
+        argv.extend(shlex.split(p["additional_args"]))
+    return shlex.join(argv)
 
 
 def _hydra_command(p: dict) -> str:
     if not (p["username"] or p["username_file"]) or not (p["password"] or p["password_file"]):
         raise ToolValidationError("Username/username_file and password/password_file are required")
 
-    command = "hydra -t 4"
+    argv = ["hydra", "-t", "4"]
     if p["username"]:
-        command += f" -l {p['username']}"
+        argv.append("-l")
+        argv.append(p["username"])
     elif p["username_file"]:
-        command += f" -L {p['username_file']}"
+        argv.append("-L")
+        argv.append(p["username_file"])
     if p["password"]:
-        command += f" -p {p['password']}"
+        argv.append("-p")
+        argv.append(p["password"])
     elif p["password_file"]:
-        command += f" -P {p['password_file']}"
+        argv.append("-P")
+        argv.append(p["password_file"])
     if p["additional_args"]:
-        command += f" {p['additional_args']}"
-    command += f" {p['target']} {p['service']}"
-    return command
+        argv.extend(shlex.split(p["additional_args"]))
+    argv.append(p["target"])
+    argv.append(p["service"])
+    return shlex.join(argv)
 
 
 def _john_command(p: dict) -> str:
-    command = "john"
+    argv = ["john"]
     if p["format"]:
-        command += f" --format={p['format']}"
+        argv.append(f"--format={p['format']}")
     if p["wordlist"]:
-        command += f" --wordlist={p['wordlist']}"
+        argv.append(f"--wordlist={p['wordlist']}")
     if p["additional_args"]:
-        command += f" {p['additional_args']}"
-    command += f" {p['hash_file']}"
-    return command
+        argv.extend(shlex.split(p["additional_args"]))
+    argv.append(p["hash_file"])
+    return shlex.join(argv)
 
 
 def _medusa_command(p: dict) -> str:
-    command = f"medusa -h {p['target']} -M {p['module']}"
+    argv = ["medusa", "-h", p["target"], "-M", p["module"]]
     if p["username"]:
-        command += f" -u {p['username']}"
+        argv.append("-u")
+        argv.append(p["username"])
     elif p["username_file"]:
-        command += f" -U {p['username_file']}"
+        argv.append("-U")
+        argv.append(p["username_file"])
     if p["password"]:
-        command += f" -p {p['password']}"
+        argv.append("-p")
+        argv.append(p["password"])
     elif p["password_file"]:
-        command += f" -P {p['password_file']}"
+        argv.append("-P")
+        argv.append(p["password_file"])
     if p["additional_args"]:
-        command += f" {p['additional_args']}"
-    return command
+        argv.extend(shlex.split(p["additional_args"]))
+    return shlex.join(argv)
 
 
 def _ophcrack_command(p: dict) -> str:
@@ -108,17 +122,20 @@ def _ophcrack_command(p: dict) -> str:
     else:
         target = _write_tmp_hash(p, hash_value)
 
-    command = "ophcrack -g"
+    argv = ["ophcrack", "-g"]
     if p["tables_dir"]:
         if not os.path.isdir(p["tables_dir"]):
             raise ToolValidationError(f"tables_dir not found: {p['tables_dir']}")
-        command += f" -d {p['tables_dir']}"
+        argv.append("-d")
+        argv.append(p["tables_dir"])
     if p["tables"]:
-        command += f" -t {p['tables']}"
-    command += f" -f {target}"
+        argv.append("-t")
+        argv.append(p["tables"])
+    argv.append("-f")
+    argv.append(target)
     if p["additional_args"]:
-        command += f" {p['additional_args']}"
-    return command
+        argv.extend(shlex.split(p["additional_args"]))
+    return shlex.join(argv)
 
 
 def _patator_command(p: dict) -> str:
@@ -129,22 +146,22 @@ def _patator_command(p: dict) -> str:
     if password and password_file:
         raise ToolValidationError("Specify only one of password or password_file")
 
-    command = f"patator {p['module']} host={p['target']}"
+    argv = ["patator", p["module"], f"host={p['target']}"]
     if username:
-        command += f" user={username}"
+        argv.append(f"user={username}")
     elif username_file:
         if not os.path.isfile(username_file):
             raise ToolValidationError(f"username_file not found: {username_file}")
-        command += f" user=FILE:{username_file}"
+        argv.append(f"user=FILE:{username_file}")
     if password:
-        command += f" password={password}"
+        argv.append(f"password={password}")
     elif password_file:
         if not os.path.isfile(password_file):
             raise ToolValidationError(f"password_file not found: {password_file}")
-        command += f" password=FILE:{password_file}"
+        argv.append(f"password=FILE:{password_file}")
     if p["additional_args"]:
-        command += f" {p['additional_args']}"
-    return command
+        argv.extend(shlex.split(p["additional_args"]))
+    return shlex.join(argv)
 
 
 SPECS = [

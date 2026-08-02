@@ -1,28 +1,32 @@
+import shlex
+
 from server_core.tool_spec import ParamSpec, ToolSpec
 
 
 def _gau_command(p: dict) -> str:
-    command = f"gau {p['domain']}"
+    argv = ["gau", p["domain"]]
     if p["providers"] != "wayback,commoncrawl,otx,urlscan":
-        command += f" --providers {p['providers']}"
+        argv.append("--providers")
+        argv.append(p["providers"])
     if p["include_subs"]:
-        command += " --subs"
+        argv.append("--subs")
     if p["blacklist"]:
-        command += f" --blacklist {p['blacklist']}"
+        argv.append("--blacklist")
+        argv.append(p["blacklist"])
     if p["additional_args"]:
-        command += f" {p['additional_args']}"
-    return command
+        argv.extend(shlex.split(p["additional_args"]))
+    return shlex.join(argv)
 
 
 def _waybackurls_command(p: dict) -> str:
-    command = f"waybackurls {p['domain']}"
+    argv = ["waybackurls", p["domain"]]
     if p["get_versions"]:
-        command += " --get-versions"
+        argv.append("--get-versions")
     if p["no_subs"]:
-        command += " --no-subs"
+        argv.append("--no-subs")
     if p["additional_args"]:
-        command += f" {p['additional_args']}"
-    return command
+        argv.extend(shlex.split(p["additional_args"]))
+    return shlex.join(argv)
 
 
 SPECS = [

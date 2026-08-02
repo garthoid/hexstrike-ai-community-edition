@@ -14,6 +14,8 @@ tools) to capture call_args and inspect the exact command string built by
 each handler.
 """
 
+import shlex
+
 import pytest
 from unittest.mock import patch, MagicMock
 
@@ -277,8 +279,10 @@ class TestSqlmapCommandBuilder:
             r = _post(client, "/api/tools/sqlmap", {"url": "http://example.invalid/page?id=1"})
             assert r.status_code == 200
             cmd = mock_exec.call_args[0][0]
-            assert "sqlmap -u http://example.invalid/page?id=1" in cmd
-            assert "--batch" in cmd
+            tokens = shlex.split(cmd)
+            assert tokens[:2] == ["sqlmap", "-u"]
+            assert tokens[2] == "http://example.invalid/page?id=1"
+            assert "--batch" in tokens
 
     def test_requires_url(self, client):
         r = _post(client, "/api/tools/sqlmap", {})

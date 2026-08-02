@@ -1,11 +1,13 @@
+import shlex
+
 from server_core.tool_spec import ParamSpec, ToolSpec
 
 
 def _hashpump_command(p: dict) -> str:
-    command = f"hashpump -s {p['signature']} -d '{p['data']}' -k {p['key_length']} -a '{p['append_data']}'"
+    argv = ["hashpump", "-s", p["signature"], "-d", p["data"], "-k", p["key_length"], "-a", p["append_data"]]
     if p["additional_args"]:
-        command += f" {p['additional_args']}"
-    return command
+        argv.extend(shlex.split(p["additional_args"]))
+    return shlex.join(argv)
 
 
 SPECS = [

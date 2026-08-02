@@ -1,41 +1,53 @@
+import shlex
+
 from server_core.tool_spec import ParamSpec, ToolSpec
 
 
 def _kube_bench_command(p: dict) -> str:
-    parts = ["kube-bench"]
+    argv = ["kube-bench"]
     if p["targets"]:
-        parts.append(f"--targets {p['targets']}")
+        argv.append("--targets")
+        argv.append(p["targets"])
     if p["version"]:
-        parts.append(f"--version {p['version']}")
+        argv.append("--version")
+        argv.append(p["version"])
     if p["config_dir"]:
-        parts.append(f"--config-dir {p['config_dir']}")
+        argv.append("--config-dir")
+        argv.append(p["config_dir"])
     if p["output_format"]:
-        parts.append(f"--outputfile /tmp/kube-bench-results.{p['output_format']} --json")
+        argv.append("--outputfile")
+        argv.append(f"/tmp/kube-bench-results.{p['output_format']}")
+        argv.append("--json")
     if p["additional_args"]:
-        parts.append(p["additional_args"])
-    return " ".join(parts)
+        argv.extend(shlex.split(p["additional_args"]))
+    return shlex.join(argv)
 
 
 def _kube_hunter_command(p: dict) -> str:
-    parts = ["kube-hunter"]
+    argv = ["kube-hunter"]
     if p["target"]:
-        parts.append(f"--remote {p['target']}")
+        argv.append("--remote")
+        argv.append(p["target"])
     elif p["remote"]:
-        parts.append(f"--remote {p['remote']}")
+        argv.append("--remote")
+        argv.append(p["remote"])
     elif p["cidr"]:
-        parts.append(f"--cidr {p['cidr']}")
+        argv.append("--cidr")
+        argv.append(p["cidr"])
     elif p["interface"]:
-        parts.append(f"--interface {p['interface']}")
+        argv.append("--interface")
+        argv.append(p["interface"])
     else:
-        parts.append("--pod")
+        argv.append("--pod")
 
     if p["active"]:
-        parts.append("--active")
+        argv.append("--active")
     if p["report"]:
-        parts.append(f"--report {p['report']}")
+        argv.append("--report")
+        argv.append(p["report"])
     if p["additional_args"]:
-        parts.append(p["additional_args"])
-    return " ".join(parts)
+        argv.extend(shlex.split(p["additional_args"]))
+    return shlex.join(argv)
 
 
 SPECS = [

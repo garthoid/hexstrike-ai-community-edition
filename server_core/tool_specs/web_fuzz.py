@@ -7,60 +7,75 @@ DEFAULT_WFUZZ_WORDLIST = "/usr/share/wfuzz/wordlist/general/common.txt"
 
 
 def _dirb_command(p: dict) -> str:
-    command = f"dirb {p['url']} {p['wordlist']}"
+    argv = ["dirb", p["url"], p["wordlist"]]
     if p["additional_args"]:
-        command += f" {p['additional_args']}"
-    return command
+        argv.extend(shlex.split(p["additional_args"]))
+    return shlex.join(argv)
 
 
 def _dirsearch_command(p: dict) -> str:
-    command = f"dirsearch -u {p['url']} -e {p['extensions']} -w {p['wordlist']} -t {p['threads']}"
+    argv = ["dirsearch", "-u", p["url"], "-e", p["extensions"], "-w", p["wordlist"], "-t", str(p["threads"])]
     if p["recursive"]:
-        command += " -r"
+        argv.append("-r")
     if p["additional_args"]:
-        command += f" {p['additional_args']}"
-    return command
+        argv.extend(shlex.split(p["additional_args"]))
+    return shlex.join(argv)
 
 
 def _dotdotpwn_command(p: dict) -> str:
-    command = f"dotdotpwn -m {p['module']} -h {p['target']}"
+    argv = ["dotdotpwn", "-m", p["module"], "-h", p["target"]]
     if p["additional_args"]:
-        command += f" {p['additional_args']}"
-    command += " -b"
-    return command
+        argv.extend(shlex.split(p["additional_args"]))
+    argv.append("-b")
+    return shlex.join(argv)
 
 
 def _feroxbuster_command(p: dict) -> str:
-    command = f"feroxbuster -u {p['url']} -w {p['wordlist']} -t {p['threads']}"
+    argv = ["feroxbuster", "-u", p["url"], "-w", p["wordlist"], "-t", str(p["threads"])]
     if p["additional_args"]:
-        command += f" {p['additional_args']}"
-    return command
+        argv.extend(shlex.split(p["additional_args"]))
+    return shlex.join(argv)
 
 
 def _ffuf_command(p: dict) -> str:
     url, wordlist, mode = p["url"], p["wordlist"], p["mode"]
-    command = "ffuf"
+    argv = ["ffuf"]
     if mode == "directory":
-        command += f" -u {url}/FUZZ -w {wordlist}"
+        argv.append("-u")
+        argv.append(f"{url}/FUZZ")
+        argv.append("-w")
+        argv.append(wordlist)
     elif mode == "vhost":
-        command += f" -u {url} -H 'Host: FUZZ' -w {wordlist}"
+        argv.append("-u")
+        argv.append(url)
+        argv.append("-H")
+        argv.append("Host: FUZZ")
+        argv.append("-w")
+        argv.append(wordlist)
     elif mode == "parameter":
-        command += f" -u {url}?FUZZ=value -w {wordlist}"
+        argv.append("-u")
+        argv.append(f"{url}?FUZZ=value")
+        argv.append("-w")
+        argv.append(wordlist)
     else:
-        command += f" -u {url} -w {wordlist}"
-    command += f" -mc {p['match_codes']}"
+        argv.append("-u")
+        argv.append(url)
+        argv.append("-w")
+        argv.append(wordlist)
+    argv.append("-mc")
+    argv.append(p["match_codes"])
     if p["additional_args"]:
-        command += f" {p['additional_args']}"
-    return command
+        argv.extend(shlex.split(p["additional_args"]))
+    return shlex.join(argv)
 
 
 def _gobuster_command(p: dict) -> str:
     if p["mode"] not in ["dir", "dns", "fuzz", "vhost"]:
         raise ToolValidationError(f"Invalid mode: {p['mode']}. Must be one of: dir, dns, fuzz, vhost")
-    command = f"gobuster {p['mode']} -u {p['url']} -w {p['wordlist']}"
+    argv = ["gobuster", p["mode"], "-u", p["url"], "-w", p["wordlist"]]
     if p["additional_args"]:
-        command += f" {p['additional_args']}"
-    return command
+        argv.extend(shlex.split(p["additional_args"]))
+    return shlex.join(argv)
 
 
 def _wfuzz_command(p: dict) -> str:

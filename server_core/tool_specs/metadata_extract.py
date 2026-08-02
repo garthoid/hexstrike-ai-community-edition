@@ -1,16 +1,18 @@
+import shlex
+
 from server_core.tool_spec import ParamSpec, ToolSpec
 
 
 def _exiftool_command(p: dict) -> str:
-    command = "exiftool"
+    argv = ["exiftool"]
     if p["output_format"]:
-        command += f" -{p['output_format']}"
+        argv.append(f"-{p['output_format']}")
     if p["tags"]:
-        command += f" -{p['tags']}"
+        argv.append(f"-{p['tags']}")
     if p["additional_args"]:
-        command += f" {p['additional_args']}"
-    command += f" {p['file_path']}"
-    return command
+        argv.extend(shlex.split(p["additional_args"]))
+    argv.append(p["file_path"])
+    return shlex.join(argv)
 
 
 SPECS = [

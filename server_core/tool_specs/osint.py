@@ -1,3 +1,5 @@
+import shlex
+
 from server_core.tool_spec import ParamSpec, ToolSpec
 
 
@@ -6,22 +8,27 @@ def _wrap_output(raw, p: dict) -> dict:
 
 
 def _parsero_command(p: dict) -> str:
-    return f"parsero -u {p['target']} {p['additional_args']}"
+    argv = ["parsero", "-u", p["target"]]
+    if p["additional_args"]:
+        argv.extend(shlex.split(p["additional_args"]))
+    return shlex.join(argv)
 
 
 def _sherlock_command(p: dict) -> str:
-    return f"sherlock {p['username']} --output sherlock_results/{p['username']}.json --json"
+    argv = ["sherlock", p["username"], "--output", f"sherlock_results/{p['username']}.json", "--json"]
+    return shlex.join(argv)
 
 
 def _spiderfoot_command(p: dict) -> str:
-    return f"spiderfoot -s {p['target']}"
+    return shlex.join(["spiderfoot", "-s", p["target"]])
 
 
 def _sublist3r_command(p: dict) -> str:
-    command = f"sublist3r -d {p['domain']} -t {p['threads']}"
+    argv = ["sublist3r", "-d", p["domain"], "-t", str(p["threads"])]
     if p["engine"]:
-        command += f" -e {p['engine']}"
-    return command
+        argv.append("-e")
+        argv.append(p["engine"])
+    return shlex.join(argv)
 
 
 SPECS = [

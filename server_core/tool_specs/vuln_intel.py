@@ -1,3 +1,5 @@
+import shlex
+
 from server_core.tool_spec import ParamSpec, ToolSpec, ToolValidationError
 
 
@@ -6,14 +8,18 @@ def _vulnx_command(p: dict) -> str:
     if not (cve_id or search):
         raise ToolValidationError("At least one of cve_id or search must be provided")
 
-    command = "vulnx"
+    argv = ["vulnx"]
     if cve_id:
-        command += f" id {cve_id}"
+        argv.append("id")
+        argv.append(cve_id)
     if search:
-        command += f' search "{search}"'
+        argv.append("search")
+        argv.append(search)
     if auth:
-        command += f' auth --api-key "{auth}"'
-    return command
+        argv.append("auth")
+        argv.append("--api-key")
+        argv.append(auth)
+    return shlex.join(argv)
 
 
 SPECS = [

@@ -1,3 +1,5 @@
+import shlex
+
 from server_core.tool_spec import ParamSpec, ToolSpec, ToolValidationError
 
 
@@ -6,27 +8,30 @@ def _steghide_command(p: dict) -> str:
     cover_file = p["cover_file"]
 
     if action == "extract":
-        command = f"steghide extract -sf {cover_file}"
+        argv = ["steghide", "extract", "-sf", cover_file]
         if p["output_file"]:
-            command += f" -xf {p['output_file']}"
+            argv.append("-xf")
+            argv.append(p["output_file"])
     elif action == "embed":
         if not p["embed_file"]:
             raise ToolValidationError("Embed file required for embed action")
-        command = f"steghide embed -cf {cover_file} -ef {p['embed_file']}"
+        argv = ["steghide", "embed", "-cf", cover_file, "-ef", p["embed_file"]]
     elif action == "info":
-        command = f"steghide info {cover_file}"
+        argv = ["steghide", "info", cover_file]
     else:
         raise ToolValidationError("Invalid action. Use: extract, embed, info")
 
     if p["passphrase"]:
-        command += f" -p {p['passphrase']}"
+        argv.append("-p")
+        argv.append(p["passphrase"])
     else:
-        command += " -p ''"
+        argv.append("-p")
+        argv.append("")
 
     if p["additional_args"]:
-        command += f" {p['additional_args']}"
+        argv.extend(shlex.split(p["additional_args"]))
 
-    return command
+    return shlex.join(argv)
 
 
 SPECS = [
