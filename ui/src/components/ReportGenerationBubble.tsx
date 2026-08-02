@@ -1,14 +1,13 @@
 import { useEffect } from 'react'
-import { createPortal } from 'react-dom'
 import { FileText, RefreshCw, CheckCircle, XCircle, X } from 'lucide-react'
 import { useReportGenState } from '../hooks/useReportGenerating'
 import { reportGenDismiss, reportGenNavigate } from '../app/reportGeneration'
 import './ReportGenerationBubble.css'
 
 /**
- * Floating bubble rendered in the bottom-left of the screen.
+ * Status card anchored under the TopBar (rendered as a TopBar child, so it
+ * survives page navigation without needing its own body-level portal).
  * Shows while a report is generating, then shows result with saved path.
- * Mounts globally via portal so it survives page navigation.
  */
 export function ReportGenerationBubble() {
   const state = useReportGenState()
@@ -22,7 +21,7 @@ export function ReportGenerationBubble() {
 
   if (state.status === 'idle') return null
 
-  const bubble = (
+  return (
     <div className={`report-bubble report-bubble--${state.status}`}>
       <div className="report-bubble-icon">
         {state.status === 'generating' && <RefreshCw size={14} className="spin" />}
@@ -61,6 +60,4 @@ export function ReportGenerationBubble() {
       )}
     </div>
   )
-
-  return createPortal(bubble, document.body)
 }

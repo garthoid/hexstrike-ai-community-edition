@@ -2,9 +2,9 @@
 
 .report-bubble {
   position: fixed;
-  bottom: 20px;
-  left: 20px;
-  z-index: 320;
+  top: 50px;
+  right: 16px;
+  z-index: 150;
   display: flex;
   align-items: flex-start;
   gap: 10px;
@@ -131,7 +131,7 @@
 @keyframes bubble-in {
   from {
     opacity: 0;
-    transform: translateY(10px) scale(0.96);
+    transform: translateY(-8px) scale(0.96);
   }
   to {
     opacity: 1;

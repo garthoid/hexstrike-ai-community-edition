@@ -308,6 +308,10 @@
   top: 33px;
 }
 
+.layout--demo .report-bubble {
+  top: 83px;
+}
+
 .topbar-brand {
   display: flex;
   align-items: center;
@@ -398,94 +402,6 @@
 
 .topbar-link-btn {
   text-decoration: none;
-}
-
-.topbar-action-desktop {
-  display: none;
-}
-
-.quick-actions-fab {
-  position: fixed;
-  right: 10px;
-  bottom: 10px;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 8px;
-  z-index: 260;
-}
-
-.quick-actions-panel {
-  min-width: 176px;
-  border: 1px solid color-mix(in srgb, var(--accent) 36%, var(--border));
-  border-radius: 8px;
-  background:
-    linear-gradient(180deg, color-mix(in srgb, var(--accent) 10%, transparent), color-mix(in srgb, var(--accent-alt) 7%, transparent)),
-    var(--bg-card);
-  box-shadow: 0 12px 26px rgba(0, 0, 0, 0.32);
-  overflow: hidden;
-}
-
-.quick-actions-item {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  border: none;
-  border-bottom: 1px solid color-mix(in srgb, var(--accent) 26%, var(--border));
-  background: transparent;
-  color: var(--text-h);
-  font-size: 12px;
-  padding: 9px 10px;
-  text-align: left;
-  cursor: pointer;
-}
-
-.quick-actions-item-icon {
-  font-size: 11px;
-  font-weight: 700;
-  line-height: 1;
-}
-
-.quick-actions-trigger {
-  width: 40px;
-  height: 40px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  border: 1px solid color-mix(in srgb, var(--accent) 42%, var(--border));
-  border-radius: 50%;
-  background: var(--bg-card2);
-  color: var(--text-h);
-  cursor: pointer;
-  box-shadow:
-    0 10px 20px rgba(0, 0, 0, 0.26),
-    0 0 0 1px color-mix(in srgb, var(--accent) 18%, transparent);
-}
-
-.quick-actions-fab .quick-actions-panel {
-  display: none;
-}
-
-.quick-actions-fab.open .quick-actions-panel {
-  display: flex;
-  flex-direction: column;
-}
-
-.quick-actions-item:last-child {
-  border-bottom: none;
-}
-
-.quick-actions-item:hover {
-  background: color-mix(in srgb, var(--accent) 13%, var(--bg-card2));
-}
-
-.quick-actions-trigger:hover {
-  background: color-mix(in srgb, var(--accent) 22%, var(--bg-card2));
-}
-
-.quick-actions-fab.open .quick-actions-trigger {
-  border-color: color-mix(in srgb, var(--accent-warm) 45%, var(--border));
-  color: color-mix(in srgb, var(--accent-warm) 75%, var(--text-h));
 }
 
 .theme-menu {
@@ -1383,6 +1299,17 @@
 
   .layout--demo .topbar {
     top: 47px;
+  }
+
+  .report-bubble {
+    top: 66px;
+    right: 10px;
+    left: 10px;
+    max-width: none;
+  }
+
+  .layout--demo .report-bubble {
+    top: 105px;
   }
 
   .topbar-brand {

@@ -1,13 +1,12 @@
 import { useEffect, useRef, useState } from 'react'
 import './TopBar.css'
 import faviconUrl from '../favicon-16x16.png'
-import { RefreshCw, Lock, Github, Palette, Menu } from 'lucide-react'
+import { RefreshCw, Lock, Menu } from 'lucide-react'
 import { clearToken, hasToken, type WebDashboardResponse } from '../api'
 import { type ThemeId } from './themes'
-import { DiscordIcon } from '../components/DiscordIcon'
 import { ThemePickerModal } from '../components/ThemePickerModal'
 import { UpdateModal } from '../components/UpdateModal'
-import { QuickActionsFab } from '../components/QuickActionsFab'
+import { ReportGenerationBubble } from '../components/ReportGenerationBubble'
 
 interface TopBarProps {
   lastRefresh: Date | null
@@ -160,6 +159,13 @@ export function TopBar({
         </div>
 
         <div className="topbar-right">
+          <button
+            className="icon-btn"
+            title="Command palette (Ctrl/Cmd+K)"
+            onClick={onOpenCommandPalette}
+          >
+          <span className="palette-icon-k mono">K</span>
+        </button>
         <div
           className={`status-dot ${health?.status === 'healthy' ? (showRefreshButton ? 'polling' : 'online') : error ? 'error' : 'loading'}${statusPulse ? ' status-dot--pulse' : ''}`}
           title={statusTooltip}
@@ -170,38 +176,6 @@ export function TopBar({
             <RefreshCw size={14} className={loading ? 'spin' : ''} />
           </button>
         )}
-        <a
-          className="icon-btn topbar-link-btn topbar-action-desktop"
-          href="https://github.com/CommonHuman-Lab/nyxstrike"
-          target="_blank"
-          rel="noreferrer"
-          title="View on GitHub"
-        >
-          <Github size={14} />
-        </a>
-        <a
-          className="icon-btn topbar-link-btn topbar-action-desktop"
-          href="https://discord.gg/aC8Q2xJFgp"
-          target="_blank"
-          rel="noreferrer"
-          title="Join Discord community"
-        >
-          <DiscordIcon />
-        </a>
-        <button
-          className="icon-btn topbar-action-desktop"
-          title="Command palette (Ctrl/Cmd+K)"
-          onClick={onOpenCommandPalette}
-        >
-          <span className="palette-icon-k mono">K</span>
-        </button>
-        <button
-          className="icon-btn topbar-action-desktop"
-          title="Change theme"
-          onClick={() => setThemeModalOpen(true)}
-        >
-          <Palette size={14} />
-        </button>
         {hasToken() && (
           <button className="icon-btn" onClick={() => { clearToken(); onSignOut() }} title="Sign out">
             <Lock size={14} />
@@ -210,10 +184,7 @@ export function TopBar({
       </div>
     </header>
 
-      <QuickActionsFab
-        onOpenCommandPalette={onOpenCommandPalette}
-        onOpenThemeModal={() => setThemeModalOpen(true)}
-      />
+      <ReportGenerationBubble />
     </>
   )
 }

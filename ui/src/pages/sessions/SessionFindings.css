@@ -411,11 +411,13 @@
 }
 
 .timeline-event-icon {
-  font-size: 13px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   flex-shrink: 0;
   width: 20px;
-  text-align: center;
   margin-top: 1px;
+  color: var(--text-dim);
 }
 
 .timeline-event-body {

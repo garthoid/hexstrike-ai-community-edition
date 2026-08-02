@@ -1,1 +1,0 @@
-import{i as e}from"./rolldown-runtime-aKtaBQYM.js";import{Zt as t}from"./vendor-lucide-C3zZeh7V.js";var n=e(t(),1);function r(e,t){(0,n.useEffect)(()=>{if(!e)return;function n(e){e.key===`Escape`&&(e.preventDefault(),t())}return window.addEventListener(`keydown`,n),()=>window.removeEventListener(`keydown`,n)},[e,t])}export{r as t};

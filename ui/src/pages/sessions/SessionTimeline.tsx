@@ -1,14 +1,16 @@
+import type { ComponentType } from 'react'
+import { CircleDot, RefreshCw, Bot, Search, FileText, Brain, FileEdit, Settings, Dot } from 'lucide-react'
 import type { SessionSummary, SessionEvent } from '../../api'
 
-const EVENT_ICONS: Record<string, string> = {
-  session_created: '🟢',
-  status_changed: '🔄',
-  handover: '🤖',
-  finding_added: '🔍',
-  report_generated: '📄',
-  ai_report_generated: '🧠',
-  note_added: '📝',
-  tool_run: '⚙️',
+const EVENT_ICONS: Record<string, ComponentType<{ size?: number }>> = {
+  session_created: CircleDot,
+  status_changed: RefreshCw,
+  handover: Bot,
+  finding_added: Search,
+  report_generated: FileText,
+  ai_report_generated: Brain,
+  note_added: FileEdit,
+  tool_run: Settings,
 }
 
 function fmtTs(ts: number): string {
@@ -21,11 +23,11 @@ function fmtTs(ts: number): string {
 }
 
 function EventRow({ evt }: { evt: SessionEvent }) {
-  const icon = EVENT_ICONS[evt.type] ?? '•'
+  const Icon = EVENT_ICONS[evt.type] ?? Dot
   const label = evt.type.replace(/_/g, ' ')
   return (
     <div className="timeline-event">
-      <span className="timeline-event-icon">{icon}</span>
+      <span className="timeline-event-icon"><Icon size={14} /></span>
       <div className="timeline-event-body">
         <div className="timeline-event-header">
           <span className="timeline-event-type">{label}</span>
@@ -57,7 +59,7 @@ export function SessionTimeline({ session }: { session: SessionSummary }) {
       ts,
       el: (
         <div key={`handover-${h.timestamp}`} className="timeline-event">
-          <span className="timeline-event-icon">🤖</span>
+          <span className="timeline-event-icon"><Bot size={14} /></span>
           <div className="timeline-event-body">
             <div className="timeline-event-header">
               <span className="timeline-event-type">handover — {h.category}</span>

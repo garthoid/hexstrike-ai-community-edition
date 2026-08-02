@@ -18,7 +18,6 @@ import { useRunHistory } from './app/useRunHistory'
 import { useDashboardData } from './app/useDashboardData'
 import { useDemoBootstrap } from './app/useDemoBootstrap'
 import { CommandPalette } from './components/CommandPalette'
-import { ReportGenerationBubble } from './components/ReportGenerationBubble'
 import { ChatWidget } from './components/ChatWidget'
 import { usePageVisibility } from './hooks/usePageVisibility'
 import { usePersistentState } from './hooks/usePersistentState'
@@ -95,7 +94,6 @@ export default function App() {
           tools={tools}
           onSelectTool={handleCommandSelectTool}
         />
-        <ReportGenerationBubble />
         <ChatWidget
           llmAvailable={health?.llm_status?.available ?? false}
           currentPage={page}
