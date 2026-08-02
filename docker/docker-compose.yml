@@ -1,8 +1,8 @@
 services:
   nyxstrike:
     build:
-      context: .
-      dockerfile: Dockerfile
+      context: ..
+      dockerfile: docker/Dockerfile
     image: nyxstrike:latest
     container_name: nyxstrike
     ports:

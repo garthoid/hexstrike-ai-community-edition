@@ -42,6 +42,6 @@ ENV NYXSTRIKE_PORT=8888
 EXPOSE 8888
 
 # ── Entrypoint ─────────────────────────────────────────────────────────────────
-RUN chmod +x docker-entrypoint.sh
+RUN chmod +x docker/docker-entrypoint.sh
 
-ENTRYPOINT ["/opt/nyxstrike/docker-entrypoint.sh"]
+ENTRYPOINT ["/opt/nyxstrike/docker/docker-entrypoint.sh"]

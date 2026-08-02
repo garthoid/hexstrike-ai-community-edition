@@ -25,6 +25,6 @@ output/
 git_tools/
 
 # Docker itself
-Dockerfile
-docker-compose.yml
+docker/Dockerfile
+docker/docker-compose.yml
 .dockerignore

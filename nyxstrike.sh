@@ -259,7 +259,7 @@ while [[ $# -gt 0 ]]; do
       INSTALL_AI_MODEL=true
       AI_LARGE_MODE=true
       OLLAMA_MODEL_BASE="huihui_ai/gemma-4-abliterated:e4b"
-      OLLAMA_MODELFILE="${ROOT_DIR}/Modelfiles/Modelfile.gemma4-e4b"
+      OLLAMA_MODELFILE="${ROOT_DIR}/ops/Modelfiles/Modelfile.gemma4-e4b"
       export NYXSTRIKE_LLM_WARMUP=1
       DO_SETUP=true
       shift
@@ -268,7 +268,7 @@ while [[ $# -gt 0 ]]; do
       INSTALL_AI_MODEL=true
       AI_SMALL_MODE=true
       OLLAMA_MODEL_BASE="huihui_ai/qwen3.5-abliterated:2B"
-      OLLAMA_MODELFILE="${ROOT_DIR}/Modelfiles/Modelfile.qwen3-2b"
+      OLLAMA_MODELFILE="${ROOT_DIR}/ops/Modelfiles/Modelfile.qwen3-2b"
       export NYXSTRIKE_LLM_WARMUP=1
       DO_SETUP=true
       shift
