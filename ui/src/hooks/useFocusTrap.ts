@@ -7,6 +7,13 @@ export function useFocusTrap(containerRef: RefObject<HTMLElement | null>, active
   useEffect(() => {
     if (!active) return
 
+    const previouslyFocused = document.activeElement as HTMLElement | null
+    const container = containerRef.current
+    if (container && !container.contains(document.activeElement)) {
+      const first = container.querySelector<HTMLElement>(FOCUSABLE_SELECTOR)
+      first?.focus()
+    }
+
     function onKeyDown(e: KeyboardEvent) {
       if (e.key !== 'Tab') return
       const container = containerRef.current
@@ -25,6 +32,9 @@ export function useFocusTrap(containerRef: RefObject<HTMLElement | null>, active
     }
 
     document.addEventListener('keydown', onKeyDown)
-    return () => document.removeEventListener('keydown', onKeyDown)
+    return () => {
+      document.removeEventListener('keydown', onKeyDown)
+      previouslyFocused?.focus()
+    }
   }, [active, containerRef])
 }

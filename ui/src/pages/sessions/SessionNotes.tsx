@@ -10,6 +10,7 @@ import { fmtTs, formatBytes } from '../../shared/utils'
 import { ConfirmActionModal } from '../../components/modals/ConfirmActionModal'
 import { CollapseChevron } from '../../components/data-display/CollapseChevron'
 import { useToast } from '../../components/feedback/ToastProvider'
+import { LoadingState } from '../../components/ui/LoadingState'
 import { UploadNoteModal } from './UploadNoteModal'
 import { useFolderManager } from './useFolderManager'
 
@@ -310,9 +311,9 @@ export function SessionNotes({ sessionId, initialOpenPath, onInitialOpenConsumed
       {/* Note modal */}
       {openModal && (
         <Suspense fallback={
-          <div className="modal-backdrop">
-            <div className="modal">
-              <div className="loading-state"><div className="spin spin--sm spin--green" /></div>
+          <div className="sheet-backdrop">
+            <div className="sheet sheet--md">
+              <LoadingState label="Loading note…" />
             </div>
           </div>
         }>

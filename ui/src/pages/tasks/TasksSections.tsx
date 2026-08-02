@@ -6,7 +6,8 @@ import {
 import type { ProcessDashboardResponse } from '../../api'
 import { KpiStrip } from '../../components/data-display/KpiStrip'
 import type { StreamStatus } from './useProcessDashboard'
-import { useEscapeClose } from '../../hooks/useEscapeClose'
+import { Sheet } from '../../components/modals/Sheet'
+import { EmptyState } from '../../components/ui/EmptyState'
 
 function formatStatValue(value: unknown): string {
   if (value === null || value === undefined) return 'n/a'
@@ -169,47 +170,37 @@ export function PoolStatsModal({
   poolStats: Record<string, unknown>
   onClose: () => void
 }) {
-  useEscapeClose(open, onClose)
-
-  if (!open) return null
-
   const entries = Object.entries(poolStats).filter(([k]) => !['success', 'timestamp'].includes(k))
 
   return (
-    <div className="modal-backdrop" onClick={onClose}>
-      <div className="modal modal--wide" onClick={e => e.stopPropagation()}>
-        <div className="modal-header">
-          <div className="modal-title-row">
-            <span className="modal-name">Worker Pool Stats</span>
-          </div>
-          <button className="modal-close" onClick={onClose}>Close</button>
-        </div>
-        <div className="modal-body">
-          {entries.length === 0 ? (
-            <div className="tasks-empty tasks-empty--compact">
-              <ListTodo size={24} color="var(--text-dim)" />
-              <p>No stats available</p>
+    <Sheet
+      isOpen={open}
+      onClose={onClose}
+      variant="centered"
+      size="lg"
+      ariaLabel="Worker Pool Stats"
+      title={<span className="modal-name">Worker Pool Stats</span>}
+    >
+      {entries.length === 0 ? (
+        <EmptyState icon={<ListTodo size={24} />} title="No stats available" />
+      ) : (
+        <div className="tasks-stats-grid">
+          {entries.map(([k, v]) => (
+            <div key={k} className="tasks-stats-item">
+              <span className="tasks-stats-key">{k.replace(/_/g, ' ')}</span>
+              <span
+                className="tasks-stats-val mono"
+                title={typeof v === 'object' ? JSON.stringify(v) : undefined}
+              >
+                {formatStatValue(v)}
+              </span>
+              {typeof v === 'object' && !Array.isArray(v) && (
+                <span className="tasks-stats-sub">{summarizeObjectKeys(v)}</span>
+              )}
             </div>
-          ) : (
-            <div className="tasks-stats-grid">
-              {entries.map(([k, v]) => (
-                <div key={k} className="tasks-stats-item">
-                  <span className="tasks-stats-key">{k.replace(/_/g, ' ')}</span>
-                  <span
-                    className="tasks-stats-val mono"
-                    title={typeof v === 'object' ? JSON.stringify(v) : undefined}
-                  >
-                    {formatStatValue(v)}
-                  </span>
-                  {typeof v === 'object' && !Array.isArray(v) && (
-                    <span className="tasks-stats-sub">{summarizeObjectKeys(v)}</span>
-                  )}
-                </div>
-              ))}
-            </div>
-          )}
+          ))}
         </div>
-      </div>
-    </div>
+      )}
+    </Sheet>
   )
 }

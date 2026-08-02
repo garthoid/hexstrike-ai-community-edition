@@ -1,4 +1,4 @@
-.confirm-action-modal {
+.sheet--centered.confirm-action-modal {
   max-width: 520px;
   border-color: color-mix(in srgb, var(--danger) 30%, var(--border));
   background:

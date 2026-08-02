@@ -1,4 +1,4 @@
-.command-palette {
+.sheet--centered.command-palette {
   width: min(760px, 95vw);
   max-height: 72vh;
 }

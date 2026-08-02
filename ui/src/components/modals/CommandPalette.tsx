@@ -104,10 +104,10 @@ export function CommandPalette({ open, onClose, setPage, tools, onSelectTool }: 
   if (!open) return null
 
   return createPortal(
-    <div className="modal-backdrop" onClick={onClose}>
+    <div className="sheet-backdrop sheet-backdrop--centered" onClick={onClose}>
       <div
         ref={dialogRef}
-        className="modal command-palette"
+        className="sheet sheet--centered command-palette"
         role="dialog"
         aria-modal="true"
         aria-label="Command palette"

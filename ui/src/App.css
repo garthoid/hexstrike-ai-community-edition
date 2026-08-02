@@ -1450,49 +1450,6 @@
 }
 
 /* ── Tool Detail Modal ───────────────────────────────────────────────────── */
-.modal-backdrop {
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.65);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 1300;
-  padding: 20px;
-}
-
-.modal {
-  background:
-    linear-gradient(180deg, color-mix(in srgb, var(--accent) 6%, var(--bg-card)), var(--bg-card) 26%),
-    var(--bg-card);
-  border: 1px solid color-mix(in srgb, var(--accent) 18%, var(--border));
-  border-radius: 10px;
-  width: 100%;
-  max-width: 560px;
-  max-height: 85vh;
-  display: flex;
-  flex-direction: column;
-  box-shadow:
-    0 20px 60px rgba(0, 0, 0, 0.62),
-    0 0 0 1px color-mix(in srgb, var(--accent) 10%, transparent);
-}
-
-.modal-header {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  padding: 18px 20px 14px;
-  border-bottom: 1px solid var(--border);
-  gap: 12px;
-}
-
-.modal-title-row {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  flex-wrap: wrap;
-}
-
 .modal-name {
   font-size: 17px;
   font-weight: 600;
@@ -1529,26 +1486,6 @@
   color: var(--red);
   background: color-mix(in srgb, var(--red) 12%, transparent);
   border: 1px solid color-mix(in srgb, var(--red) 30%, transparent);
-}
-
-.modal-close {
-  background: none;
-  border: none;
-  cursor: pointer;
-  color: var(--text-dim);
-  padding: 2px;
-  display: flex;
-  flex-shrink: 0;
-  transition: color 0.15s;
-}
-.modal-close:hover { color: var(--red); }
-
-.modal-body {
-  overflow-y: auto;
-  padding: 18px 20px 22px;
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
 }
 
 .modal-desc {
@@ -1723,6 +1660,43 @@
 
 .sheet--sm { width: 380px; }
 .sheet--lg { width: 640px; }
+
+.sheet-backdrop--centered {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.sheet--centered {
+  position: relative;
+  top: auto;
+  right: auto;
+  bottom: auto;
+  width: 100%;
+  max-width: 560px;
+  max-height: 85vh;
+  border-left: none;
+  border: 1px solid color-mix(in srgb, var(--accent) 18%, var(--border));
+  border-radius: 10px;
+  box-shadow:
+    0 20px 60px rgba(0, 0, 0, 0.62),
+    0 0 0 1px color-mix(in srgb, var(--accent) 10%, transparent);
+  animation: sheet-pop-in var(--t-modal-pop);
+}
+.sheet--centered.sheet--sm { max-width: 420px; }
+.sheet--centered.sheet--lg { max-width: 720px; }
+
+@keyframes sheet-pop-in {
+  from { opacity: 0; transform: scale(0.96) translateY(8px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sheet--centered {
+    animation: none;
+  }
+}
 
 .sheet-header {
   display: flex;
