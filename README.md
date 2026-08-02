@@ -9,7 +9,7 @@
 
 # NyxStrike
 
-## AI-powered offensive security orchestration engine
+### AI-powered offensive security orchestration engine
 
 *⚡ From target → recon → exploit chain in minutes*
 
