@@ -3,6 +3,7 @@ from flask import Blueprint, send_from_directory, send_file, abort
 
 _STATIC_DIR = os.path.join(
     os.path.dirname(os.path.dirname(os.path.dirname(__file__))),
+    "frontend",
     "dashboard",
 )
 

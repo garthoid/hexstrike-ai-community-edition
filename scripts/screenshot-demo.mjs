@@ -5,7 +5,7 @@
 // capture a full set of page screenshots, for README/marketing/PR screenshots.
 //
 // Usage:
-//   1. Start the dashboard dev server: cd ui && npm run dev
+//   1. Start the dashboard dev server: cd frontend/ui && npm run dev
 //   2. Install dependencies once:
 //        npm install && npx playwright install chromium
 //   3. Run:
@@ -18,7 +18,7 @@
 //   OUT_DIR              default ./screenshots (next to this script)
 //
 // What it does: loads the dashboard with demo mode enabled (?demo=1, see
-// ui/src/app/demoUtils.ts), then visits and screenshots each page in nav order.
+// frontend/ui/src/app/demoUtils.ts), then visits and screenshots each page in nav order.
 
 import { chromium } from "playwright";
 import fs from "fs";
@@ -33,7 +33,7 @@ const OUT = process.env.OUT_DIR ?? path.join(SCRIPT_DIR, "screenshots");
 
 fs.mkdirSync(OUT, { recursive: true });
 
-// Matches ui/src/app/navRegistry.ts NAV_ENTRIES order.
+// Matches frontend/ui/src/app/navRegistry.ts NAV_ENTRIES order.
 const pages = [
   ["01-dashboard", ""],
   ["02-run", "run"],

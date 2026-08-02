@@ -8,7 +8,7 @@ git_tools/
 .pytest_cache/
 
 # Web UI build output
-ui/node_modules/
+frontend/ui/node_modules/
 
 # Claude worktrees
 .claude/worktrees/

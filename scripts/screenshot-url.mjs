@@ -33,7 +33,7 @@ const BASE_URL = process.env.BASE_URL ?? "http://localhost:5173";
 const API_TOKEN = process.env.NYXSTRIKE_API_TOKEN ?? null;
 const FULL_PAGE = process.env.FULL_PAGE !== "false";
 
-// Keep in sync with ui/src/app/themes.ts THEME_OPTIONS.
+// Keep in sync with frontend/ui/src/app/themes.ts THEME_OPTIONS.
 const THEME_IDS = [
   "dark", "unicorn", "forest", "solarized", "ocean-glass",
   "crimson-night", "retro-crt", "nord",

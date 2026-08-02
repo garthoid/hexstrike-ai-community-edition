@@ -16,7 +16,7 @@
 #   ./scripts/make-demo-content.sh demo       # just the page-by-page demo gif
 #   ./scripts/make-demo-content.sh themes     # just the themes gif + slices jpg
 #
-# Requires the UI dev server running (cd ui && npm run dev), playwright
+# Requires the UI dev server running (cd frontend/ui && npm run dev), playwright
 # (npx playwright install chromium) and ffmpeg/ffprobe on PATH. Env var
 # BASE_URL is forwarded to the screenshot scripts as-is.
 
