@@ -4,7 +4,7 @@ import {
   PauseCircle, PlayCircle, StopCircle, ListTodo,
 } from 'lucide-react'
 import type { ProcessDashboardResponse } from '../../api'
-import { KpiStrip } from '../../components/KpiStrip'
+import { KpiStrip } from '../../components/data-display/KpiStrip'
 import type { StreamStatus } from './useProcessDashboard'
 import { useEscapeClose } from '../../hooks/useEscapeClose'
 

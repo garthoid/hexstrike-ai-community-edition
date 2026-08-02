@@ -1,0 +1,72 @@
+.ui-tooltip-wrap {
+  position: relative;
+  display: inline-flex;
+}
+
+.ui-tooltip {
+  position: absolute;
+  z-index: 400;
+  padding: 4px 8px;
+  border-radius: var(--radius-xs);
+  background: var(--bg-card2);
+  border: 1px solid var(--border);
+  color: var(--text-h);
+  font-size: 11px;
+  font-weight: 500;
+  white-space: nowrap;
+  box-shadow: var(--shadow-sm);
+  pointer-events: none;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(2px);
+  transition: opacity var(--t-fast) var(--ease-out-expressive), transform var(--t-fast) var(--ease-out-expressive), visibility var(--t-fast);
+  transition-delay: 0s;
+}
+
+.ui-tooltip-wrap:hover .ui-tooltip,
+.ui-tooltip-wrap:focus-within .ui-tooltip {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+  transition-delay: 0.35s;
+}
+
+.ui-tooltip--top {
+  bottom: calc(100% + 6px);
+  left: 50%;
+  transform: translate(-50%, 2px);
+}
+.ui-tooltip-wrap:hover .ui-tooltip--top,
+.ui-tooltip-wrap:focus-within .ui-tooltip--top {
+  transform: translate(-50%, 0);
+}
+
+.ui-tooltip--bottom {
+  top: calc(100% + 6px);
+  left: 50%;
+  transform: translate(-50%, -2px);
+}
+.ui-tooltip-wrap:hover .ui-tooltip--bottom,
+.ui-tooltip-wrap:focus-within .ui-tooltip--bottom {
+  transform: translate(-50%, 0);
+}
+
+.ui-tooltip--left {
+  right: calc(100% + 6px);
+  top: 50%;
+  transform: translate(2px, -50%);
+}
+.ui-tooltip-wrap:hover .ui-tooltip--left,
+.ui-tooltip-wrap:focus-within .ui-tooltip--left {
+  transform: translate(0, -50%);
+}
+
+.ui-tooltip--right {
+  left: calc(100% + 6px);
+  top: 50%;
+  transform: translate(-2px, -50%);
+}
+.ui-tooltip-wrap:hover .ui-tooltip--right,
+.ui-tooltip-wrap:focus-within .ui-tooltip--right {
+  transform: translate(0, -50%);
+}

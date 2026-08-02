@@ -2,8 +2,8 @@ import { useCallback, useEffect, useState } from 'react'
 import { Brain, RefreshCw } from 'lucide-react'
 import { api } from '../../api'
 import type { LlmSession, LlmVulnerability } from '../../api/types/llm'
-import { CollapseChevron } from '../../components/CollapseChevron'
-import { useToast } from '../../components/ToastProvider'
+import { CollapseChevron } from '../../components/data-display/CollapseChevron'
+import { useToast } from '../../components/feedback/ToastProvider'
 
 const RISK_COLOR: Record<string, string> = {
   CRITICAL: 'var(--red)',

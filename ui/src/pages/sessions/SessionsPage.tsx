@@ -12,11 +12,11 @@ import {
   type SessionTemplate,
   type Tool,
 } from '../../api'
-import { KpiStrip } from '../../components/KpiStrip'
-import { ConfirmActionModal } from '../../components/ConfirmActionModal'
-import { InformationModal } from '../../components/InformationModal'
-import { Sheet } from '../../components/Sheet'
-import { useToast } from '../../components/ToastProvider'
+import { KpiStrip } from '../../components/data-display/KpiStrip'
+import { ConfirmActionModal } from '../../components/modals/ConfirmActionModal'
+import { InformationModal } from '../../components/modals/InformationModal'
+import { Sheet } from '../../components/modals/Sheet'
+import { useToast } from '../../components/feedback/ToastProvider'
 import { BrowserPage } from '../../components/layout/BrowserPage'
 import { START_MODES, type StartMode } from './constants'
 import { StartSessionModal } from './SessionsSections'

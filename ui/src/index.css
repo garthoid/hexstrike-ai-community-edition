@@ -84,6 +84,18 @@
   --t-slow: 0.3s;
   --t-modal-pop: 0.18s cubic-bezier(0.16, 1, 0.3, 1);
 
+  /* Easing — "expressive" motion vocabulary layered on the durations above */
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --ease-out-expressive: cubic-bezier(0.16, 1, 0.3, 1);
+
+  /* Elevation */
+  --shadow-sm: 0 2px 6px rgba(0, 0, 0, 0.18);
+  --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.28);
+  --shadow-lg: 0 16px 40px rgba(0, 0, 0, 0.38);
+
+  /* Stagger step used by useStaggerReveal */
+  --stagger-step: 40ms;
+
   /* Semantic backgrounds */
   --bg-main: var(--bg-card);
   --bg-soft: var(--bg-card2);

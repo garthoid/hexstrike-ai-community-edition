@@ -2,7 +2,7 @@ import { RefreshCw, Target } from 'lucide-react'
 import { useEffect, useMemo, useRef } from 'react'
 import type { AttackChainStep } from '../../api'
 import type { StartMode } from './constants'
-import { Sheet } from '../../components/Sheet'
+import { Sheet } from '../../components/modals/Sheet'
 
 export function StartSessionModal({
   startMode,

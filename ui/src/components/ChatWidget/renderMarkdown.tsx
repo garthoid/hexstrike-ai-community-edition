@@ -3,7 +3,7 @@
 
 import { createElement, Fragment } from 'react'
 import type { ReactNode } from 'react'
-import { CodeBlock } from '../CodeBlock'
+import { CodeBlock } from '../data-display/CodeBlock'
 
 function renderInline(text: string): ReactNode[] {
   // Process bold (**text**), italic (*text*), inline code (`code`)

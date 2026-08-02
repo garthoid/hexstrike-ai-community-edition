@@ -1,6 +1,6 @@
 import { useCallback, useState } from 'react'
 import { api } from '../../api'
-import { useToast } from '../../components/ToastProvider'
+import { useToast } from '../../components/feedback/ToastProvider'
 
 function slugify(raw: string): string {
   return raw

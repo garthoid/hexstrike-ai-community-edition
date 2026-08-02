@@ -3,7 +3,7 @@ import { Copy, Check, Play, RefreshCw, ListPlus, Download, Send } from 'lucide-r
 import { api } from '../../api'
 import type { WorkbenchOperation } from '../../api'
 import { downloadWorkbenchOutput } from './fileIO'
-import { SendToLootModal } from '../../components/SendToLootModal'
+import { SendToLootModal } from '../../components/modals/SendToLootModal'
 
 interface OperationPanelProps {
   operation: WorkbenchOperation

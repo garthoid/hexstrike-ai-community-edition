@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { api, type Settings, type WordlistEntry, type PersonalityPreset, type BinaryPathTestResponse } from '../../api'
-import { useToast } from '../../components/ToastProvider'
+import { useToast } from '../../components/feedback/ToastProvider'
 
 const WORDLIST_TYPE_OPTIONS = ['password', 'directory', 'params', 'subdomain', 'username', 'general']
 const SPEED_OPTIONS = ['fast', 'medium', 'slow']

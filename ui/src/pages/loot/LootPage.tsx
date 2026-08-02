@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { createPortal } from 'react-dom'
-import { ConfirmActionModal } from '../../components/ConfirmActionModal'
-import { Sheet } from '../../components/Sheet'
-import { useToast } from '../../components/ToastProvider'
+import { ConfirmActionModal } from '../../components/modals/ConfirmActionModal'
+import { Sheet } from '../../components/modals/Sheet'
+import { useToast } from '../../components/feedback/ToastProvider'
 import { BrowserPage } from '../../components/layout/BrowserPage'
 import {
   Plus, Trash2, Edit2, Search, X, KeyRound, Package, RefreshCw,

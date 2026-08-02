@@ -6,9 +6,9 @@ import type { RunHistoryEntry } from '../../shared/types'
 import { exportEntry, safeFixed } from '../../shared/utils'
 import { resultText, type StepState } from './sessionDetailUtils'
 import type { ChainSuggestion } from './sessionDetailUtils'
-import { ActionButton } from '../../components/ActionButton'
+import { ActionButton } from '../../components/ui/ActionButton'
 import { api } from '../../api'
-import { useToast } from '../../components/ToastProvider'
+import { useToast } from '../../components/feedback/ToastProvider'
 
 interface SessionDetailWorkbenchProps {
   isCompleted: boolean

@@ -7,9 +7,9 @@ import {
 import { api } from '../../api'
 import type { SessionNote, SessionNoteSearchResult } from '../../api/types'
 import { fmtTs, formatBytes } from '../../shared/utils'
-import { ConfirmActionModal } from '../../components/ConfirmActionModal'
-import { CollapseChevron } from '../../components/CollapseChevron'
-import { useToast } from '../../components/ToastProvider'
+import { ConfirmActionModal } from '../../components/modals/ConfirmActionModal'
+import { CollapseChevron } from '../../components/data-display/CollapseChevron'
+import { useToast } from '../../components/feedback/ToastProvider'
 import { UploadNoteModal } from './UploadNoteModal'
 import { useFolderManager } from './useFolderManager'
 

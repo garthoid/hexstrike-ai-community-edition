@@ -5,8 +5,8 @@ import {
   Cpu, Database, Earth, Eye, Fingerprint, Lock, Server, Shield, Wand, Wifi, XCircle, Zap,
 } from 'lucide-react'
 import type { Tool, WebDashboardResponse } from '../../api'
-import { ToolModal } from '../../components/ToolModal'
-import { CollapseChevron } from '../../components/CollapseChevron'
+import { ToolModal } from '../../components/modals/ToolModal'
+import { CollapseChevron } from '../../components/data-display/CollapseChevron'
 import { getCatTools, getToolAvailabilityAgeLabel } from './utils'
 
 const CATEGORY_ICONS: Record<string, React.ReactNode> = {

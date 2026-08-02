@@ -2,7 +2,7 @@ import { useRef, useState } from 'react'
 import { FileText, Upload, AlertTriangle } from 'lucide-react'
 import { api } from '../../api'
 import { formatBytes } from '../../shared/utils'
-import { Sheet } from '../../components/Sheet'
+import { Sheet } from '../../components/modals/Sheet'
 
 function slugify(raw: string): string {
   return raw

@@ -6,7 +6,7 @@ import { FileText, Edit2, Eye, Trash2, Download, Save } from 'lucide-react'
 import { RefreshCw } from 'lucide-react'
 import { api } from '../../api'
 import type { SessionNote } from '../../api/types'
-import { Sheet } from '../../components/Sheet'
+import { Sheet } from '../../components/modals/Sheet'
 import 'easymde/dist/easymde.min.css'
 
 type ModalMode = 'view' | 'edit'

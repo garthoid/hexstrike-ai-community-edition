@@ -61,6 +61,50 @@
   100% { transform: scale(1)   rotate(360deg); opacity: 0.7; }
 }
 
+/* ── Stagger reveal ──────────────────────────────────────────────────────── */
+/* Paired with useStaggerReveal — set --stagger-index on each item via style prop. */
+@keyframes stagger-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.stagger-item {
+  animation: stagger-in var(--t-slow) var(--ease-out-expressive) both;
+  animation-delay: calc(var(--stagger-index, 0) * var(--stagger-step));
+}
+
+/* ── Press feedback ──────────────────────────────────────────────────────── */
+/* Satisfying button/toggle micro-interaction: a quick spring-back scale on press. */
+.press-feedback {
+  transition: transform var(--t-fast) var(--ease-spring);
+}
+.press-feedback:active:not(:disabled) {
+  transform: scale(0.96);
+}
+
+/* ── Animated empty state ────────────────────────────────────────────────── */
+@keyframes empty-state-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes empty-state-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-4px); }
+}
+
 /* ── Drag reorder ────────────────────────────────────────────────────────── */
 .drag-reorder-item {
   transition: opacity 0.15s, transform 0.15s;

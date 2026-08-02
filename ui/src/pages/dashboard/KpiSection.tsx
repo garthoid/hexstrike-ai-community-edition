@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { Activity, Shield, Wrench, Zap } from 'lucide-react'
 import type { Tool, WebDashboardResponse } from '../../api'
-import { StatCard } from '../../components/StatCard'
+import { StatCard } from '../../components/data-display/StatCard'
 import type { RunHistoryEntry } from '../../shared/types'
 import { uptimeStr } from '../../shared/utils'
 import { getCommandsCardData } from './utils'

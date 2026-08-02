@@ -4,9 +4,9 @@ import faviconUrl from '../favicon-16x16.png'
 import { RefreshCw, Lock, Menu } from 'lucide-react'
 import { clearToken, hasToken, type WebDashboardResponse } from '../api'
 import { type ThemeId } from './themes'
-import { ThemePickerModal } from '../components/ThemePickerModal'
-import { UpdateModal } from '../components/UpdateModal'
-import { ReportGenerationBubble } from '../components/ReportGenerationBubble'
+import { ThemePickerModal } from '../components/modals/ThemePickerModal'
+import { UpdateModal } from '../components/modals/UpdateModal'
+import { ReportGenerationBubble } from '../components/feedback/ReportGenerationBubble'
 
 interface TopBarProps {
   lastRefresh: Date | null

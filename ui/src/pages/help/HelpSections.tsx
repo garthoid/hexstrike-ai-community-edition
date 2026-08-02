@@ -1,6 +1,6 @@
 import { Terminal, FlaskConical, Keyboard, Layout } from 'lucide-react'
-import { CodeBlock } from '../../components/CodeBlock'
-import { CollapsibleSection } from '../../components/CollapsibleSection'
+import { CodeBlock } from '../../components/data-display/CodeBlock'
+import { CollapsibleSection } from '../../components/data-display/CollapsibleSection'
 import type { IdeConfig } from './ideConfigs'
 
 const MCP_FLAGS: Array<[string, string, string]> = [

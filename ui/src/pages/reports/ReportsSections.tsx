@@ -1,7 +1,7 @@
 import type { RunHistoryEntry } from '../../shared/types'
 import { getGroupStats, groupByDate, type GroupBy } from './reportUtils'
 import { safeFixed } from '../../shared/utils'
-import { CollapseChevron } from '../../components/CollapseChevron'
+import { CollapseChevron } from '../../components/data-display/CollapseChevron'
 
 export function ReportsTimelineSection({
   runHistory,

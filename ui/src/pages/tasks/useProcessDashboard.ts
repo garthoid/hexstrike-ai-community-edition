@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { api } from '../../api'
 import type { ProcessDashboardResponse, ProcessesStreamResponse } from '../../api'
-import { useToast } from '../../components/ToastProvider'
+import { useToast } from '../../components/feedback/ToastProvider'
 
 export type StreamStatus = 'polling' | 'streaming' | 'error'
 

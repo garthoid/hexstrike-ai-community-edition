@@ -2,8 +2,8 @@ import { useState } from 'react'
 import {
   BarChart2, CheckCircle, Clock, TrendingUp, FileText,
 } from 'lucide-react'
-import { KpiStrip } from '../../components/KpiStrip'
-import { RunResultModal } from '../../components/RunResultModal'
+import { KpiStrip } from '../../components/data-display/KpiStrip'
+import { RunResultModal } from '../../components/modals/RunResultModal'
 import { BrowserPage } from '../../components/layout/BrowserPage'
 import { type RunHistoryEntry } from '../../shared/types'
 import { ReportsBreakdownSection, ReportsTimelineSection } from './ReportsSections'

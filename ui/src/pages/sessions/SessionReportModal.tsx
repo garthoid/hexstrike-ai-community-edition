@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Download, FileText, Brain, Archive, RefreshCw } from 'lucide-react'
 import { api } from '../../api'
-import { Sheet } from '../../components/Sheet'
+import { Sheet } from '../../components/modals/Sheet'
 import { reportGenStart, reportGenDone, reportGenError } from '../../app/reportGeneration'
 import type { SessionSummary } from '../../api'
 

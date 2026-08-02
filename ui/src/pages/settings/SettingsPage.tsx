@@ -1,6 +1,6 @@
 import { Palette, RefreshCw, Trash2, XCircle } from 'lucide-react'
 import { useState } from 'react'
-import { ThemePickerModal } from '../../components/ThemePickerModal'
+import { ThemePickerModal } from '../../components/modals/ThemePickerModal'
 import { THEME_OPTIONS, type ThemeId } from '../../app/themes'
 import { useSettingsData } from './useSettingsData'
 import {

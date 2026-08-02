@@ -1,4 +1,4 @@
-import { Sheet } from '../../components/Sheet'
+import { Sheet } from '../../components/modals/Sheet'
 
 interface TemplateModalProps {
   show: boolean

@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react'
 import { Plus, Trash2, Edit2, Shield, Search, X } from 'lucide-react'
 import { api } from '../../api'
-import { Sheet } from '../../components/Sheet'
+import { Sheet } from '../../components/modals/Sheet'
 import type { SessionSummary, SessionFinding, CreateFindingPayload } from '../../api'
 
 const SEVERITIES = ['critical', 'high', 'medium', 'low', 'info'] as const

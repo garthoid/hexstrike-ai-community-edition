@@ -11,9 +11,9 @@ import { useDragReorder } from '../../hooks/useDragReorder'
 import { usePersistentState } from '../../hooks/usePersistentState'
 import { downloadWorkbenchOutput } from './fileIO'
 import { downloadRecipeAsFile, parseRecipeFile } from './recipeIO'
-import { ConfirmActionModal } from '../../components/ConfirmActionModal'
-import { SendToLootModal } from '../../components/SendToLootModal'
-import { useToast } from '../../components/ToastProvider'
+import { ConfirmActionModal } from '../../components/modals/ConfirmActionModal'
+import { SendToLootModal } from '../../components/modals/SendToLootModal'
+import { useToast } from '../../components/feedback/ToastProvider'
 
 export interface RecipeStep {
   stepId: string

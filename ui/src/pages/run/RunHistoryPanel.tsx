@@ -2,10 +2,10 @@ import React, { useMemo } from 'react'
 import { RefreshCw, XCircle, Server } from 'lucide-react'
 import type { Dispatch, SetStateAction } from 'react'
 import type { RunHistoryEntry } from '../../shared/types'
-import { ConfirmActionModal } from '../../components/ConfirmActionModal'
-import { CollapseChevron } from '../../components/CollapseChevron'
+import { ConfirmActionModal } from '../../components/modals/ConfirmActionModal'
+import { CollapseChevron } from '../../components/data-display/CollapseChevron'
 import { filterHistory, groupHistoryByDate } from './utils'
-import { useToast } from '../../components/ToastProvider'
+import { useToast } from '../../components/feedback/ToastProvider'
 
 interface RunHistoryPanelProps {
   history: RunHistoryEntry[]

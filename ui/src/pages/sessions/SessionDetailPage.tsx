@@ -10,9 +10,9 @@ import { SessionTimeline } from './SessionTimeline'
 import { SessionTopology } from './SessionTopology'
 import { SessionReportModal } from './SessionReportModal'
 import { TemplateModal } from './TemplateModal'
-import { ConfirmActionModal } from '../../components/ConfirmActionModal'
-import { InformationModal } from '../../components/InformationModal'
-import { useToast } from '../../components/ToastProvider'
+import { ConfirmActionModal } from '../../components/modals/ConfirmActionModal'
+import { InformationModal } from '../../components/modals/InformationModal'
+import { useToast } from '../../components/feedback/ToastProvider'
 import { registerReportNavigation, reportGenStart, reportGenDone, reportGenError } from '../../app/reportGeneration'
 import {
   buildStepChainSuggestion,

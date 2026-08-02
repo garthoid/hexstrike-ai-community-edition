@@ -1,0 +1,31 @@
+.ui-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 6px;
+  padding: 48px 16px;
+  color: var(--text-dim);
+  animation: empty-state-in var(--t-slow) var(--ease-out-expressive) both;
+}
+
+.ui-empty-state-icon {
+  margin-bottom: 6px;
+  color: var(--text-dim);
+  animation: empty-state-float 3s ease-in-out infinite;
+}
+
+.ui-empty-state-title {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--text-h);
+}
+
+.ui-empty-state-description {
+  font-size: 12.5px;
+  max-width: 360px;
+}
+
+.ui-empty-state-action {
+  margin-top: 8px;
+}

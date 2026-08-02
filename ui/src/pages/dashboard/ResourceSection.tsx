@@ -3,7 +3,7 @@ import { Area, AreaChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'rec
 import type { WebDashboardResponse } from '../../api'
 import type { HistoryPoint } from '../../shared/types'
 import { fmt, formatBytes } from '../../shared/utils'
-import { GaugeBar } from '../../components/GaugeBar'
+import { GaugeBar } from '../../components/data-display/GaugeBar'
 import { useSystemResources } from './useSystemResources'
 
 function ResourceChart({ data }: { data: HistoryPoint[] }) {

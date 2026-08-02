@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
 import { Plus, Trash2, MessageSquare } from 'lucide-react'
-import { ConfirmActionModal } from '../ConfirmActionModal'
+import { ConfirmActionModal } from '../modals/ConfirmActionModal'
 import type { ChatSession } from '../../api'
 
 interface ChatSidebarProps {
