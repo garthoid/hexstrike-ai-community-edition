@@ -292,6 +292,8 @@ export const api = {
     get<SessionIntegrityResponse>(`/api/sessions/${sessionId}/verify-integrity`),
   /** Returns the URL to trigger a notes zip download in the browser */
   exportSessionNotesUrl: (sessionId: string) => `/api/sessions/${sessionId}/notes/export`,
+  /** Returns the URL to trigger an HTML report download in the browser */
+  exportSessionHtmlReportUrl: (sessionId: string) => `/api/sessions/${sessionId}/report/html`,
 
   // ── Credentials ──────────────────────────────────────────────────────────
   credentials: (params?: { session_id?: string; host?: string; service?: string; tag?: string; q?: string }) => {

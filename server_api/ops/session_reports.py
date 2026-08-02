@@ -170,7 +170,6 @@ def generate_ai_report(session_id: str):
 
 
 # ── HTML report export ────────────────────────────────────────────────────────
-# TODO: Add to frontend UI as "Download HTML Report" button that calls this endpoint with POST.
 @api_session_reports_bp.route("/api/sessions/<session_id>/report/html", methods=["GET", "POST"])
 def generate_html_report(session_id: str):
   """Generate and download a standalone HTML report for the session."""

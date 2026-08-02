@@ -138,6 +138,11 @@ export function SessionReportModal({ isOpen, session, onClose, llmAvailable = fa
     window.open(url, '_blank')
   }
 
+  function handleHtmlReportDownload() {
+    const url = api.exportSessionHtmlReportUrl(session.session_id)
+    window.open(url, '_blank')
+  }
+
   return (
     <Sheet
       isOpen
@@ -243,6 +248,14 @@ export function SessionReportModal({ isOpen, session, onClose, llmAvailable = fa
                 </button>
               </>
             )}
+
+            <button
+              className="session-action-btn"
+              onClick={handleHtmlReportDownload}
+              title="Download a standalone HTML report for this session"
+            >
+              <Download size={12} /> Download HTML Report
+            </button>
 
             <button
               className="session-action-btn"
