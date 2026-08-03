@@ -44,7 +44,7 @@ def _make_gateway():
     mcp = MagicMock()
     mcp.tool = tool_decorator
 
-    from mcp_tools.gateway import register_gateway_tools
+    from mcp_client.mcp_tools.gateway import register_gateway_tools
     register_gateway_tools(mcp, api_client)
 
     return registered, api_client

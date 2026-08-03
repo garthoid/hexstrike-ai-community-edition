@@ -1,6 +1,6 @@
-from mcp_core.cli_colors import CliColors
-from mcp_tools import *
-from mcp_tools._generic.registrar import register_toolspec_category
+from mcp_client.mcp_core.cli_colors import CliColors
+from mcp_client.mcp_tools import *
+from mcp_client.mcp_tools._generic.registrar import register_toolspec_category
 
 def resolve_profile_dependencies(profiles):
     resolved = set()

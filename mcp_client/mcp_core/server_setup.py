@@ -1,14 +1,14 @@
 from pathlib import Path
 from typing import Optional
 from fastmcp import FastMCP
-from mcp_tools.gateway import register_gateway_tools
-from mcp_core.tool_profiles import (
+from mcp_client.mcp_tools.gateway import register_gateway_tools
+from mcp_client.mcp_core.tool_profiles import (
     TOOL_PROFILES,
     DEFAULT_PROFILE,
     FULL_PROFILE,
     resolve_profile_dependencies,
 )
-from mcp_core.plugin_mcp_loader import load_plugin_tools
+from mcp_client.mcp_core.plugin_mcp_loader import load_plugin_tools
 
 try:
     from fastmcp.server.providers.skills import SkillsDirectoryProvider

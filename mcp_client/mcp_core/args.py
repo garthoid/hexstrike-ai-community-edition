@@ -1,5 +1,5 @@
 import argparse
-from mcp_core.api_client import DEFAULT_API_SERVER_URL, DEFAULT_REQUEST_TIMEOUT
+from mcp_client.mcp_core.api_client import DEFAULT_API_SERVER_URL, DEFAULT_REQUEST_TIMEOUT
 
 def parse_args():
     """Parse command line arguments."""

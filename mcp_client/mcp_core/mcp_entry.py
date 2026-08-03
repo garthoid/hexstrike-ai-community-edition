@@ -1,8 +1,8 @@
 import sys
 import logging
 import backend.server_core.config_core as config_core
-from mcp_core.server_setup import setup_mcp_server
-from mcp_core.api_client import ApiClient
+from mcp_client.mcp_core.server_setup import setup_mcp_server
+from mcp_client.mcp_core.api_client import ApiClient
 
 def run_mcp(args, logger):
     """Run the main MCP server logic."""
