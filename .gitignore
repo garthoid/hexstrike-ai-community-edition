@@ -26,3 +26,4 @@ install_log.txt
 /ops/scripts/screenshots/
 /ops/scripts/themes/
 /ops/scripts/content/
+/ops/scripts/package-lock.json

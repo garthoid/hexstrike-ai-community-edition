@@ -7,7 +7,7 @@
 // Usage:
 //   1. Start the dashboard dev server: cd frontend/ui && npm run dev
 //   2. Install dependencies once:
-//        npm install && npx playwright install chromium
+//        cd ops/scripts && npm install && npx playwright install chromium
 //   3. Run:
 //        node ops/scripts/screenshot-demo.mjs
 //

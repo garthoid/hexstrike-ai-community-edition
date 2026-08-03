@@ -17,8 +17,9 @@
 #   ./ops/scripts/make-demo-content.sh themes     # just the themes gif + slices jpg
 #
 # Requires the UI dev server running (cd frontend/ui && npm run dev), playwright
-# (npx playwright install chromium) and ffmpeg/ffprobe on PATH. Env var
-# BASE_URL is forwarded to the screenshot scripts as-is.
+# installed in this directory (cd ops/scripts && npm install && npx playwright
+# install chromium) and ffmpeg/ffprobe on PATH. Env var BASE_URL is forwarded
+# to the screenshot scripts as-is.
 
 set -euo pipefail
 
