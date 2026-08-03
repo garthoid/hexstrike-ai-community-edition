@@ -135,7 +135,9 @@ def register_impacket(mcp, api_client, logger, CliColors):
         extra_args: str = "",
     ) -> Dict[str, Any]:
         """
-        Convenience wrapper for common AD enumeration Impacket scripts such as:
+        Convenience wrapper for common AD enumeration Impacket scripts.
+
+        Supports scripts such as:
           - GetADUsers
           - GetADComputers
           - GetNPUsers
