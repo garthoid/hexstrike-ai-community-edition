@@ -1,4 +1,4 @@
-from server_core.enhanced_command_executor import _clean_output
+from backend.server_core.enhanced_command_executor import _clean_output
 
 
 def test_clean_output_strips_ansi_for_any_command():

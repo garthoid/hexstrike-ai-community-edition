@@ -7,7 +7,7 @@ auto-discovery registry backing the Workbench data-transform toolset.
 No subprocess, no Flask, no network calls.
 """
 
-from server_core.workbench.registry import (
+from backend.server_core.workbench.registry import (
     CATEGORIES,
     OPERATIONS,
     Operation,

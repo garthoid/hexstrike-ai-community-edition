@@ -8,8 +8,8 @@ No subprocess, no Flask, no server calls, no real HTTP probes: TargetProfile
 is built directly rather than via decision_engine.analyze_target().
 """
 
-import server_core.session_flow as session_flow
-from server_core.singletons import decision_engine
+import backend.server_core.session_flow as session_flow
+from backend.server_core.singletons import decision_engine
 from shared.target_profile import TargetProfile
 from shared.target_types import TargetType
 

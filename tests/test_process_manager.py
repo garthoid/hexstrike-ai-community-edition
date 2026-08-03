@@ -7,7 +7,7 @@ No subprocess, no Flask, no server calls.
 
 from unittest.mock import MagicMock
 
-from server_core.process_manager import ProcessManager, active_processes
+from backend.server_core.process_manager import ProcessManager, active_processes
 
 
 def _cleanup(pid):

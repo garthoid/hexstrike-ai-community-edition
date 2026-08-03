@@ -5,7 +5,7 @@ from pathlib import Path
 
 from flask import Blueprint, jsonify, request
 
-from server_core.command_executor import execute_command
+from backend.server_core.command_executor import execute_command
 
 logger = logging.getLogger(__name__)
 blueprint = Blueprint("plugin_h2csmuggler", __name__)

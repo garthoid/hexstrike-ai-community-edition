@@ -1,6 +1,6 @@
 import sys
 import logging
-import server_core.config_core as config_core
+import backend.server_core.config_core as config_core
 from mcp_core.server_setup import setup_mcp_server
 from mcp_core.api_client import ApiClient
 

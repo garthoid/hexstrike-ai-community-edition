@@ -16,19 +16,19 @@ import threading
 from flask import Flask, request, abort, jsonify
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
-import server_core.config_core as config_core
-from server_core.modern_visual_engine import ModernVisualEngine
-from server_core.singletons import run_history, tool_stats
-from server_core.session_flow import append_event as _append_event, append_run_log as _append_run_log
-from server_api import register_blueprints
-from server_api.ops.web_dashboard import initialize_update_status_check
-from server_core.plugin_loader import load_plugins
+import backend.server_core.config_core as config_core
+from backend.server_core.modern_visual_engine import ModernVisualEngine
+from backend.server_core.singletons import run_history, tool_stats
+from backend.server_core.session_flow import append_event as _append_event, append_run_log as _append_run_log
+from backend.server_api import register_blueprints
+from backend.server_api.ops.web_dashboard import initialize_update_status_check
+from backend.server_core.plugin_loader import load_plugins
 
 # ============================================================================
 # LOGGING CONFIGURATION (MUST BE FIRST)
 # ============================================================================
 
-from server_core.setup_logging import setup_logging
+from backend.server_core.setup_logging import setup_logging
 setup_logging()
 logger = logging.getLogger(__name__)
 
@@ -89,7 +89,7 @@ initialize_update_status_check()
 # Pre-load the Ollama model in the background so it's ready before the first request.
 # Only runs when NYXSTRIKE_LLM_WARMUP=1 is set (done automatically by -ai / -ai-small flags).
 def _warm_up_llm() -> None:
-  from server_core.singletons import llm_client
+  from backend.server_core.singletons import llm_client
   llm_client.warm_up()
 
 if os.environ.get("NYXSTRIKE_LLM_WARMUP") == "1":

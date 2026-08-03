@@ -12,7 +12,7 @@ No subprocess, no Flask, no server calls.
 
 import pytest
 
-from server_core.enhanced_command_executor import (
+from backend.server_core.enhanced_command_executor import (
     _clean_output,
     _is_decorative_line,
     _is_banner_text_line,

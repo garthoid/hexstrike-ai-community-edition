@@ -14,7 +14,7 @@ import time
 
 import pytest
 
-from server_core.tool_stats_store import (
+from backend.server_core.tool_stats_store import (
     BAYES_PRIOR_STRENGTH,
     MIN_RUNS_FOR_LIVE,
     RECENCY_HALF_LIFE_DAYS,

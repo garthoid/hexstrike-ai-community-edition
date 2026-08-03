@@ -1,7 +1,7 @@
 import pytest
 from unittest.mock import patch, MagicMock
 
-from server_core.singletons import decision_engine
+from backend.server_core.singletons import decision_engine
 from nyxstrike_server import app
 
 _MOCK_RESULT = {"success": True, "output": "mocked", "returncode": 0}

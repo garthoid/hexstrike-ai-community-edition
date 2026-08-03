@@ -79,7 +79,7 @@ def pytest_configure(config):
         p.start()
 
     from nyxstrike_server import app as _app
-    from server_core.plugin_loader import _load_tool_plugin
+    from backend.server_core.plugin_loader import _load_tool_plugin
 
     if "_plugin_tool_server_api_h2csmuggler" not in sys.modules:
         _load_tool_plugin(_app, "h2csmuggler", set(), set())

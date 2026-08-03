@@ -10,7 +10,7 @@ execute_fn is always a plain Python MagicMock — no real subprocess is ever cal
 
 import pytest
 from unittest.mock import MagicMock, patch, call
-from server_core.error_handling import (
+from backend.server_core.error_handling import (
     RecoveryExecutor,
     IntelligentErrorHandler,
     RecoveryAction,

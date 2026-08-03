@@ -8,7 +8,7 @@ no Flask, no network calls, so these are safe/cheap to run on every commit.
 
 import pytest
 
-from server_core.workbench.registry import get_operation
+from backend.server_core.workbench.registry import get_operation
 
 
 def run(op_id: str, **params) -> dict:

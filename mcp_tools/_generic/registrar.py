@@ -17,7 +17,7 @@ import asyncio
 import importlib
 from typing import Any, Dict
 
-from server_core.tool_spec import ToolSpec
+from backend.server_core.tool_spec import ToolSpec
 
 _TYPE_NAMES = {str: "str", bool: "bool", int: "int", float: "float", list: "list", dict: "dict"}
 
@@ -72,6 +72,6 @@ def register_tool_from_spec(mcp, api_client, logger, spec: ToolSpec):
 def register_toolspec_category(mcp, api_client, logger, category: str):
     """Auto-load server_core.tool_specs.<category> and register every tool in it.
     """
-    module = importlib.import_module(f"server_core.tool_specs.{category}")
+    module = importlib.import_module(f"backend.server_core.tool_specs.{category}")
     for spec in module.SPECS:
         register_tool_from_spec(mcp, api_client, logger, spec)

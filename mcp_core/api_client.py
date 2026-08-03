@@ -4,7 +4,7 @@ import time
 import threading
 from typing import Dict, Any, Optional
 
-import server_core.config_core as config_core
+import backend.server_core.config_core as config_core
 
 DEFAULT_API_SERVER_URL = config_core.get("DEFAULT_API_SERVER_URL", "http://127.0.0.1:8888")
 DEFAULT_REQUEST_TIMEOUT = config_core.get("REQUEST_TIMEOUT", 0)

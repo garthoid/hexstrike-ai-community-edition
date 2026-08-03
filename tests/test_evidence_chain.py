@@ -10,14 +10,14 @@ No subprocess, no Flask, no server calls.
 
 import pytest
 
-from server_core.evidence_chain import (
+from backend.server_core.evidence_chain import (
     GENESIS_HASH,
     chain_entry,
     compute_hash,
     find_run_by_hash,
     verify_chain,
 )
-from server_core.run_history_store import RunHistoryStore
+from backend.server_core.run_history_store import RunHistoryStore
 
 
 def _make_raw_entry(i: int) -> dict:

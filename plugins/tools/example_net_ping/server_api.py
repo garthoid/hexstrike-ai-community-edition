@@ -10,7 +10,7 @@ The plugin loader registers it with the Flask app automatically.
 import re
 import logging
 from flask import Blueprint, request, jsonify
-from server_core.command_executor import execute_command
+from backend.server_core.command_executor import execute_command
 
 logger = logging.getLogger(__name__)
 

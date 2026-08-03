@@ -9,7 +9,7 @@ No subprocess, no Flask, no server calls.
 
 import pytest
 
-from server_core.intelligence.tool_catalog import (
+from backend.server_core.intelligence.tool_catalog import (
     build_tool_catalog,
     objective_alias,
     objective_settings,
@@ -220,7 +220,7 @@ class TestToolRegistryToolSpecConsistency:
         return by_endpoint
 
     def test_every_toolspec_endpoint_has_a_registry_entry(self):
-        from server_core.tool_spec import iter_all_specs
+        from backend.server_core.tool_spec import iter_all_specs
 
         registry_by_endpoint = self._registry_by_endpoint()
         missing = sorted(
@@ -234,7 +234,7 @@ class TestToolRegistryToolSpecConsistency:
         )
 
     def test_registry_params_match_toolspec_contract(self):
-        from server_core.tool_spec import iter_all_specs, to_tool_definition
+        from backend.server_core.tool_spec import iter_all_specs, to_tool_definition
 
         registry_by_endpoint = self._registry_by_endpoint()
         problems = []
