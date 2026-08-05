@@ -26,8 +26,8 @@ TOOL_PROFILES = {
     ],
 
     "active_directory": [
+        lambda mcp, client, logger: register_toolspec_category(mcp, client, logger, "active_directory"),
         lambda mcp, client, logger: register_impacket(mcp, client, logger, CliColors),
-        lambda mcp, client, logger: register_ldapdomaindump_tool(mcp, client, logger),
     ],
 
     "api_audit": [
@@ -244,6 +244,7 @@ TOOL_PROFILES = {
 
     #Tools for Python environment interaction and code execution
     "python_env": [
+        lambda mcp, client, logger: register_toolspec_category(mcp, client, logger, "python_env"),
         lambda mcp, client, logger: register_python_env_tools(mcp, client, logger),
     ],
 

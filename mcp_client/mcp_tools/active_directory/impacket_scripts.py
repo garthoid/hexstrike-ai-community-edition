@@ -6,9 +6,11 @@ def register_impacket(mcp, api_client, logger, CliColors):
     """
     Register MCP tools for generic Impacket script execution.
 
-    Expected backend endpoints:
-      - POST /api/tool/active_directory/impacket
+    Expected backend endpoint:
       - POST /api/tool/active_directory/impacket/spec
+
+    Note: the main "impacket_run" tool (POST /api/tool/active_directory/impacket)
+    is registered declaratively via register_toolspec_category("active_directory").
     """
 
     async def _run_post(endpoint: str, data: Dict[str, Any]) -> Dict[str, Any]:
@@ -16,75 +18,6 @@ def register_impacket(mcp, api_client, logger, CliColors):
         return await loop.run_in_executor(
             None, lambda: api_client.safe_post(endpoint, data)
         )
-
-    @mcp.tool()
-    async def impacket_run(
-        script: str,
-        target: str = "",
-        options: Optional[Dict[str, Any]] = None,
-        positional: Optional[list[str]] = None,
-        positional_map: Optional[Dict[str, Any]] = None,
-        extra_args: str = "",
-        use_recovery: bool = True,
-    ) -> Dict[str, Any]:
-        """
-        Execute any supported Impacket script through the generic backend wrapper.
-
-        Args:
-            script: Impacket script name without the 'impacket-' prefix
-                    (e.g. GetADUsers, GetNPUsers, psexec, smbclient)
-            target: Primary target/credential string for scripts that require it
-            options: Dictionary of script flags/options, e.g.
-                     {"dc-ip": "10.10.10.10", "all": True, "debug": True}
-            positional: Extra positional arguments as a list, e.g.
-                        ["input.kirbi", "output.ccache"]
-            positional_map: Named positional arguments if backend supports them
-            extra_args: Raw extra CLI args for edge cases
-            use_recovery: Whether backend should use enhanced recovery logic
-
-        Returns:
-            Execution result from the API backend
-        """
-        data: Dict[str, Any] = {
-            "script": script,
-            "target": target,
-            "options": options or {},
-            "positional": positional or [],
-            "positional_map": positional_map or {},
-            "extra_args": extra_args,
-            "use_recovery": use_recovery,
-        }
-
-        logger.info(
-            f"{CliColors.FIRE_RED}🧨 Starting Impacket script: {script}"
-            f"{f' against {target}' if target else ''}{CliColors.RESET}"
-        )
-
-        result = await _run_post("api/tool/active_directory/impacket", data)
-
-        if result.get("success"):
-            logger.info(
-                f"{CliColors.SUCCESS}✅ Impacket script completed: {script}{CliColors.RESET}"
-            )
-
-            if result.get("recovery_info", {}).get("recovery_applied"):
-                recovery_info = result["recovery_info"]
-                attempts = recovery_info.get("attempts_made", 1)
-                logger.info(
-                    f"{CliColors.HIGHLIGHT_YELLOW}Recovery applied for {script}: "
-                    f"{attempts} attempts made{CliColors.RESET}"
-                )
-        else:
-            logger.error(
-                f"{CliColors.ERROR}❌ Impacket script failed: {script}{CliColors.RESET}"
-            )
-
-            if result.get("human_escalation"):
-                logger.error(
-                    f"{CliColors.CRITICAL}HUMAN ESCALATION REQUIRED{CliColors.RESET}"
-                )
-
-        return result
 
     @mcp.tool()
     async def impacket_get_spec(script: str) -> Dict[str, Any]:

@@ -38,7 +38,6 @@ def register_blueprints(app):
 
   #Active Directory
   app.register_blueprint(api_tools_impacket_bp)
-  app.register_blueprint(api_tool_active_directory_ldapdomaindump_bp)
 
   # OPS — General
   app.register_blueprint(api_visual_bp)
