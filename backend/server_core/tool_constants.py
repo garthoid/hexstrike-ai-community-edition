@@ -70,8 +70,4 @@ HEALTH_TOOL_CATEGORIES = {
     "data_processing": ["hurl", "anew"],
 
     #Not in use: httpie, postman, insomnia, "shodan-cli", "censys-cli", "have-i-been-pwned"
-    #"active_directory": [
-    #    "bloodhound-ce-python"
-    #    "certipy-ad", "mitm6", "adidnsdump", "pywerview"
-    #]
 }
