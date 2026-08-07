@@ -272,7 +272,6 @@ TOOL_PROFILES = {
     #Tools for intelligent decision making and tool selection based on task context and goals
     "ai_assist": [
         lambda mcp, client, logger: register_intelligent_decision_engine_tools(mcp, client, logger, CliColors),
-        lambda mcp, client, logger: register_llm_agent_tools(mcp, client, logger, CliColors),
         lambda mcp, client, logger: register_toolspec_category(mcp, client, logger, "ai_assist"),
     ],
 

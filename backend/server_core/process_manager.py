@@ -165,8 +165,8 @@ class AITaskManager:
 
         The underlying LLM HTTP call cannot be interrupted mid-flight, but
         marking the task cancelled immediately hides it from the UI.  The
-        ``analyze_session_endpoint`` checks ``is_cancelled`` in its finally
-        block and discards the result if True.
+        ``analyze_session``/``follow_up_session`` ToolSpec handlers check
+        ``is_cancelled`` after the call returns and discard the result if True.
 
         Returns True if the task was found, False otherwise.
         """
