@@ -1,6 +1,13 @@
+import logging
 import shlex
+from datetime import datetime
 
+from backend.server_api.web_framework.browser_agent import browser_agent
+from backend.server_api.web_framework.http_framework import http_framework
+from backend.server_core import ModernVisualEngine
 from backend.server_core.tool_spec import ParamSpec, ToolSpec, ToolValidationError
+
+logger = logging.getLogger(__name__)
 
 
 def _bool(val) -> bool:
@@ -16,6 +23,70 @@ def _findings_as_success_postprocess(raw, params: dict) -> dict:
     if raw.get("return_code") == 1:
         raw["success"] = True
     return raw
+
+
+def _burpsuite_alternative_handler(p: dict) -> dict:
+    target = p["target"]
+    scan_type = p["scan_type"]
+    headless = p["headless"]
+    max_depth = p["max_depth"]
+    max_pages = p["max_pages"]
+
+    logger.info(ModernVisualEngine.create_section_header("BURP SUITE ALTERNATIVE", "🔥", "BLOOD_RED"))
+    logger.info(ModernVisualEngine.format_highlighted_text(f"Starting {scan_type} scan of {target}", "RED"))
+
+    results = {
+        "target": target,
+        "scan_type": scan_type,
+        "timestamp": datetime.now().isoformat(),
+        "success": True,
+    }
+
+    if scan_type in ("comprehensive", "spider"):
+        logger.info(ModernVisualEngine.format_tool_status("BrowserAgent", "RUNNING", "Reconnaissance Phase"))
+        if not browser_agent.driver:
+            browser_agent.setup_browser(headless)
+        results["browser_analysis"] = browser_agent.navigate_and_inspect(target)
+
+    if scan_type in ("comprehensive", "spider"):
+        logger.info(ModernVisualEngine.format_tool_status("HTTP-Spider", "RUNNING", "Discovery Phase"))
+        results["spider_analysis"] = http_framework.spider_website(target, max_depth, max_pages)
+
+    if scan_type in ("comprehensive", "active"):
+        logger.info(ModernVisualEngine.format_tool_status("VulnScanner", "RUNNING", "Analysis Phase"))
+        discovered_urls = results.get("spider_analysis", {}).get("discovered_urls", [target])
+        vuln_results = []
+        for url in discovered_urls[:20]:
+            test_result = http_framework.intercept_request(url)
+            if test_result.get("success"):
+                vuln_results.append(test_result)
+        results["vulnerability_analysis"] = {
+            "tested_urls": len(vuln_results),
+            "total_vulnerabilities": len(http_framework.vulnerabilities),
+            "recent_vulnerabilities": http_framework._get_recent_vulns(20),
+        }
+
+    total_vulns = len(http_framework.vulnerabilities)
+    vuln_summary = {}
+    for vuln in http_framework.vulnerabilities:
+        severity = vuln.get("severity", "unknown")
+        vuln_summary[severity] = vuln_summary.get(severity, 0) + 1
+
+    results["summary"] = {
+        "total_vulnerabilities": total_vulns,
+        "vulnerability_breakdown": vuln_summary,
+        "pages_analyzed": len(results.get("spider_analysis", {}).get("discovered_urls", [])),
+        "security_score": max(0, 100 - (total_vulns * 5)),
+    }
+
+    logger.info(ModernVisualEngine.create_section_header("SCAN COMPLETE", "✅", "SUCCESS"))
+    logger.info(ModernVisualEngine.format_highlighted_text(
+        f"Found {total_vulns} vulnerabilities", "YELLOW" if total_vulns > 0 else "GREEN"
+    ))
+    for severity, count in vuln_summary.items():
+        logger.info(f"  {ModernVisualEngine.format_vulnerability_severity(severity, count)}")
+
+    return results
 
 
 def _breachsql_command(p: dict) -> str:
@@ -392,6 +463,24 @@ def _zap_command(p: dict) -> str:
 
 
 SPECS = [
+    ToolSpec(
+        name="burpsuite_alternative",
+        mcp_tool_name="burpsuite_alternative_scan",
+        endpoint="/api/tools/burpsuite-alternative",
+        category="web_scan",
+        description=(
+            "Comprehensive Burp Suite alternative combining HTTP framework and browser agent "
+            "for complete web security testing."
+        ),
+        params=[
+            ParamSpec("target", str, required=True, help_text="Target URL or domain to scan"),
+            ParamSpec("scan_type", str, default="comprehensive", help_text="Type of scan (comprehensive, spider, passive, active)"),
+            ParamSpec("headless", bool, default=True, help_text="Run browser in headless mode"),
+            ParamSpec("max_depth", int, default=3, help_text="Maximum crawling depth"),
+            ParamSpec("max_pages", int, default=50, help_text="Maximum pages to analyze"),
+        ],
+        handler=_burpsuite_alternative_handler,
+    ),
     ToolSpec(
         name="breachsql",
         mcp_tool_name="breachsql_scan",

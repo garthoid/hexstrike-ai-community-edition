@@ -174,7 +174,7 @@ SPECS = [
         ),
         params=[
             ParamSpec("script", str, required=True, help_text="Script name without 'impacket-' prefix"),
-            ParamSpec("target", str, default="", help_text="Target string expected by the script"),
+            ParamSpec("target", str, required=True, help_text="Target string expected by the script"),
             ParamSpec("dc_ip", str, default="", help_text="Domain controller IP"),
             ParamSpec("username", str, default="", help_text="Optional username for scripts/agent formatting"),
             ParamSpec("password", str, default="", help_text="Optional password for scripts/agent formatting"),
@@ -201,7 +201,7 @@ SPECS = [
         ),
         params=[
             ParamSpec("script", str, required=True, help_text="Script name without 'impacket-' prefix"),
-            ParamSpec("target", str, default="", help_text="Full target string"),
+            ParamSpec("target", str, required=True, help_text="Full target string"),
             ParamSpec("command", str, default="", help_text="Optional command to execute if supported by the script"),
             ParamSpec("hashes", str, default="", help_text="LM:NT hashes"),
             ParamSpec("kerberos", bool, default=False, help_text="Enable -k"),

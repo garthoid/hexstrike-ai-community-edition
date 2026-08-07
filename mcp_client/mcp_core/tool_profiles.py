@@ -141,7 +141,6 @@ TOOL_PROFILES = {
     #Tools for web vulnerability scanning and assessment (e.g., Nikto, WPScan, SQLMap, Jaeles, Dalfox, ZAP, Burp Suite, XSSer).
     "web_scan": [
         lambda mcp, client, logger: register_toolspec_category(mcp, client, logger, "web_scan"),
-        lambda mcp, client, logger: register_burpsuite_tool(mcp, client, logger, CliColors),
     ],
 
     #Tools for web probing and technology detection (e.g., httpx).

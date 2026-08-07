@@ -191,7 +191,7 @@ def initialize_attack_patterns() -> Dict[str, List[Dict[str, Any]]]:
             {"tool": "nxc", "priority": 6, "params": {"protocol": "smb"}},
             {"tool": "enum4linux", "priority": 7, "params": {"additional_args": "-a"}},
             {"tool": "ldapdomaindump", "priority": 7, "params": {"authtype": "NTLM"}},
-            {"tool": "impacket-ad-enum", "priority": 8, "params": {}},
+            {"tool": "impacket_ad_enum", "priority": 8, "params": {}},
             {"tool": "responder", "priority": 9, "params": {"wpad": True, "duration": 180}},
             {"tool": "evil-winrm", "priority": 10, "params": {}},
         ],

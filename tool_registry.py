@@ -1088,7 +1088,7 @@ TOOLS: Dict[str, dict] = {
         "optional": {"username": "", "password": "", "authtype" : "NTLM"},
         "effectiveness": 0.85,
     },
-    "impacket-scripts": {
+    "impacket_run": {
         "desc": "Execute Impacket scripts with dynamic arguments (e.g. GetADUsers, secretsdump, smbclient, psexec)",
         "endpoint": "/api/tool/active_directory/impacket",
         "method": "POST",
@@ -1102,7 +1102,7 @@ TOOLS: Dict[str, dict] = {
         },
         "effectiveness": 0.90
     },
-    "impacket-spec": {
+    "impacket_get_spec": {
         "desc": "Retrieve argument specification and usage for a given Impacket script",
         "endpoint": "/api/tool/active_directory/impacket/spec",
         "method": "POST",
@@ -1112,9 +1112,9 @@ TOOLS: Dict[str, dict] = {
         },
         "optional": {},
         "effectiveness": 0.85,
-        "parent_tool": "impacket-scripts"
+        "parent_tool": "impacket_run"
     },
-    "impacket-ad-enum": {
+    "impacket_ad_enum": {
         "desc": "Convenience wrapper for Active Directory enumeration Impacket scripts such as GetADUsers, GetNPUsers, GetUserSPNs, lookupsid, and findDelegation",
         "endpoint": "/api/tool/active_directory/impacket",
         "method": "POST",
@@ -1136,13 +1136,13 @@ TOOLS: Dict[str, dict] = {
             "extra_args": ""
         },
         "effectiveness": 0.92,
-        "parent_tool": "impacket-scripts"
+        "parent_tool": "impacket_run"
     },
-    "impacket-remote-exec": {
+    "impacket_remote_exec": {
         "desc": "Convenience wrapper for remote execution Impacket scripts such as psexec, wmiexec, smbexec, dcomexec, and atexec",
         "endpoint": "/api/tool/active_directory/impacket",
         "method": "POST",
-        "category": "lateral_movement",
+        "category": "active_directory",
         "params": {
             "script": {"required": True},
             "target": {"required": True}
@@ -1162,7 +1162,7 @@ TOOLS: Dict[str, dict] = {
             "extra_args": ""
         },
         "effectiveness": 0.91,
-        "parent_tool": "impacket-scripts"
+        "parent_tool": "impacket_run"
     },
     # ---- OSINT ----
     "parsero": {
