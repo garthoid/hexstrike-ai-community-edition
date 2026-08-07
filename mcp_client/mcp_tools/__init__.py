@@ -1,5 +1,4 @@
 from mcp_client.mcp_tools.gateway import *
-from mcp_client.mcp_tools.ai_assist import *
 from mcp_client.mcp_tools.ops import *
 from mcp_client.mcp_tools.ai_payload import *
 from mcp_client.mcp_tools.bugbounty_workflow import *

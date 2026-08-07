@@ -166,7 +166,7 @@ SPECS = [
     ToolSpec(
         name="impacket_ad_enum",
         mcp_tool_name="impacket_ad_enum",
-        endpoint="/api/tool/active_directory/impacket",
+        endpoint="/api/tool/active_directory/impacket/ad-enum",
         category="active_directory",
         description=(
             "Convenience wrapper for common AD enumeration Impacket scripts: GetADUsers, "
@@ -193,7 +193,7 @@ SPECS = [
     ToolSpec(
         name="impacket_remote_exec",
         mcp_tool_name="impacket_remote_exec",
-        endpoint="/api/tool/active_directory/impacket",
+        endpoint="/api/tool/active_directory/impacket/remote-exec",
         category="active_directory",
         description=(
             "Convenience wrapper for remote execution / interaction style scripts: psexec, "

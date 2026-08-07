@@ -1116,7 +1116,7 @@ TOOLS: Dict[str, dict] = {
     },
     "impacket_ad_enum": {
         "desc": "Convenience wrapper for Active Directory enumeration Impacket scripts such as GetADUsers, GetNPUsers, GetUserSPNs, lookupsid, and findDelegation",
-        "endpoint": "/api/tool/active_directory/impacket",
+        "endpoint": "/api/tool/active_directory/impacket/ad-enum",
         "method": "POST",
         "category": "active_directory",
         "params": {
@@ -1140,7 +1140,7 @@ TOOLS: Dict[str, dict] = {
     },
     "impacket_remote_exec": {
         "desc": "Convenience wrapper for remote execution Impacket scripts such as psexec, wmiexec, smbexec, dcomexec, and atexec",
-        "endpoint": "/api/tool/active_directory/impacket",
+        "endpoint": "/api/tool/active_directory/impacket/remote-exec",
         "method": "POST",
         "category": "active_directory",
         "params": {
