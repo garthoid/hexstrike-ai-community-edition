@@ -482,6 +482,26 @@ TOOLS: Dict[str, dict] = {
         "effectiveness": 0.92,
     },
 
+    "select-tools": {
+        "desc": "Select optimal security tools based on target analysis and testing objective",
+        "endpoint": "/api/intelligence/select-tools",
+        "method": "POST",
+        "category": "intelligence",
+        "params": {"target": {"required": True}},
+        "optional": {"objective": "comprehensive", "planner_mode": ""},
+        "effectiveness": 0.90,
+    },
+
+    "optimize-parameters": {
+        "desc": "Optimize tool parameters based on target profile and context",
+        "endpoint": "/api/intelligence/optimize-parameters",
+        "method": "POST",
+        "category": "intelligence",
+        "params": {"target": {"required": True}, "tool": {"required": True}},
+        "optional": {"context": {}},
+        "effectiveness": 0.88,
+    },
+
     "create-attack-chain": {
         "desc": "Create an intelligent attack chain based on target profile",
         "endpoint": "/api/intelligence/create-attack-chain",
@@ -520,6 +540,36 @@ TOOLS: Dict[str, dict] = {
         "params": {"target": {"required": True}},
         "optional": {},
         "effectiveness": 0.90,
+    },
+
+    "reconnaissance-workflow": {
+        "desc": "Execute AI-driven reconnaissance workflow with intelligent tool chaining",
+        "endpoint": "/api/intelligence/reconnaissance-workflow",
+        "method": "POST",
+        "category": "intelligence",
+        "params": {"target": {"required": True}},
+        "optional": {"depth": "standard"},
+        "effectiveness": 0.91,
+    },
+
+    "vulnerability-assessment": {
+        "desc": "Perform AI-driven vulnerability assessment with intelligent prioritization",
+        "endpoint": "/api/intelligence/vulnerability-assessment",
+        "method": "POST",
+        "category": "intelligence",
+        "params": {"target": {"required": True}},
+        "optional": {"focus_areas": "all"},
+        "effectiveness": 0.91,
+    },
+
+    "follow-up-session": {
+        "desc": "Produce a prioritised follow-up action plan for an existing NyxStrike session",
+        "endpoint": "/api/intelligence/follow-up-session",
+        "method": "POST",
+        "category": "intelligence",
+        "params": {"session_id": {"required": True}},
+        "optional": {"save_to_notes": True},
+        "effectiveness": 0.87,
     },
 
     # "cve-monitor": {

@@ -1,11 +1,7 @@
 import json
 import logging
 import time
-from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime
-
-from flask import current_app
-from werkzeug.local import LocalProxy
 
 from backend.server_core.singletons import decision_engine
 from backend.server_core.tool_spec import ParamSpec, ToolSpec, ToolValidationError
@@ -13,6 +9,10 @@ from shared.target_types import TechnologyStack
 
 logger = logging.getLogger(__name__)
 
+
+# ============================================================================
+# SHARED RESPONSE WRAPPERS
+# ============================================================================
 
 def _wrap_success(payload: dict, stdout_payload: dict, start_time: float) -> dict:
     return {
@@ -41,6 +41,10 @@ def _wrap_failure(exc: Exception, start_time: float) -> dict:
         "timestamp": datetime.now().isoformat(),
     }
 
+
+# ============================================================================
+# TARGET ANALYSIS HANDLERS
+# ============================================================================
 
 def _analyze_target_handler(p: dict) -> dict:
     start_time = time.time()
@@ -93,194 +97,37 @@ def _select_optimal_tools_handler(p: dict) -> dict:
 
 
 def _optimize_tool_parameters_handler(p: dict) -> dict:
+    start_time = time.time()
     target = p["target"]
     tool = p["tool"]
     context = p.get("context") or {}
 
-    logger.info(f"Optimizing parameters for {tool} against {target}")
-
-    profile = decision_engine.analyze_target(target)
-    optimized_params = decision_engine.optimize_parameters(tool, profile, context)
-
-    logger.info(f"Parameters optimized for {tool}")
-
-    return {
-        "success": True,
-        "target": target,
-        "tool": tool,
-        "context": context,
-        "target_profile": profile.to_dict(),
-        "optimized_parameters": optimized_params,
-        "timestamp": datetime.now().isoformat(),
-    }
-
-
-def _create_attack_chain_handler(p: dict) -> dict:
-    start_time = time.time()
-    target = p["target"]
-    objective = p["objective"]
-
-    from backend.server_api.ops.vulnerability_intelligence import _build_attack_chain_response
-
     try:
-        payload = _build_attack_chain_response(
-            target=target, objective=objective, persist=True, origin="api/intelligence/create-attack-chain"
-        )
-        return _wrap_success(payload, dict(payload), start_time)
-    except Exception as e:
-        logger.error(f"Error creating attack chain: {e}")
-        return _wrap_failure(e, start_time)
+        logger.info(f"Optimizing parameters for {tool} against {target}")
 
+        profile = decision_engine.analyze_target(target)
+        optimized_params = decision_engine.optimize_parameters(tool, profile, context)
 
-def _preview_attack_chain_handler(p: dict) -> dict:
-    start_time = time.time()
-    target = p["target"]
-    objective = p["objective"]
+        logger.info(f"Parameters optimized for {tool}")
 
-    from backend.server_api.ops.vulnerability_intelligence import _build_attack_chain_response
-
-    try:
-        payload = _build_attack_chain_response(
-            target=target, objective=objective, persist=False, origin="api/intelligence/preview-attack-chain"
-        )
-        return _wrap_success(payload, dict(payload), start_time)
-    except Exception as e:
-        logger.error(f"Error previewing attack chain: {e}")
-        return _wrap_failure(e, start_time)
-
-
-def _run_smart_scan(target: str, objective: str, planner_mode, session_id, max_tools: int) -> dict:
-    from backend.server_api.ops.vulnerability_intelligence import execute_tool_via_registered_endpoint
-
-    profile = decision_engine.analyze_target(target)
-    selected_tools = decision_engine.select_optimal_tools(
-        profile, objective, planner_mode=planner_mode, session_id=session_id
-    )[:max_tools]
-
-    scan_results = {
-        "target": target,
-        "objective": objective,
-        "planner_mode": planner_mode if planner_mode else decision_engine.get_planner_mode(),
-        "target_profile": profile.to_dict(),
-        "tools_executed": [],
-        "total_vulnerabilities": 0,
-        "execution_summary": {},
-        "combined_output": "",
-    }
-
-    combined_output_parts = []
-    app = current_app._get_current_object() if isinstance(current_app, LocalProxy) else current_app
-
-    def execute_single_tool(tool_name, target, profile):
-        try:
-            logger.info(f"Executing {tool_name} with optimized parameters")
-
-            optimized_params = decision_engine.optimize_parameters(tool_name, profile)
-            optimized_params.setdefault("target", target)
-            result = execute_tool_via_registered_endpoint(app, tool_name, optimized_params)
-
-            vuln_count = 0
-            if result.get("success") and result.get("stdout"):
-                output = result.get("stdout", "")
-                vuln_indicators = ["CRITICAL", "HIGH", "MEDIUM", "VULNERABILITY", "EXPLOIT", "SQL injection", "XSS", "CSRF"]
-                vuln_count = sum(1 for indicator in vuln_indicators if indicator.lower() in output.lower())
-
-            return {
-                "tool": tool_name,
-                "parameters": optimized_params,
-                "status": "success" if result.get("success") else "failed",
-                "timestamp": datetime.now().isoformat(),
-                "execution_time": result.get("execution_time", 0),
-                "stdout": result.get("stdout", ""),
-                "stderr": result.get("stderr", ""),
-                "vulnerabilities_found": vuln_count,
-                "command": result.get("command", ""),
-                "success": result.get("success", False),
-            }
-        except Exception as e:
-            logger.error(f"Error executing {tool_name}: {e}")
-            return {
-                "tool": tool_name,
-                "status": "failed",
-                "timestamp": datetime.now().isoformat(),
-                "error": str(e),
-                "success": False,
-            }
-
-    with ThreadPoolExecutor(max_workers=min(len(selected_tools), 5)) as executor:
-        future_to_tool = {
-            executor.submit(execute_single_tool, tool, target, profile): tool
-            for tool in selected_tools
+        profile_dict = profile.to_dict()
+        payload = {
+            "target": target,
+            "tool": tool,
+            "context": context,
+            "target_profile": profile_dict,
+            "optimized_parameters": optimized_params,
         }
-
-        for future in as_completed(future_to_tool):
-            tool_result = future.result()
-            scan_results["tools_executed"].append(tool_result)
-
-            if tool_result.get("vulnerabilities_found"):
-                scan_results["total_vulnerabilities"] += tool_result["vulnerabilities_found"]
-
-            if tool_result.get("stdout"):
-                combined_output_parts.append(f"\n=== {tool_result['tool'].upper()} OUTPUT ===\n")
-                combined_output_parts.append(tool_result["stdout"])
-                combined_output_parts.append("\n" + "=" * 50 + "\n")
-
-    scan_results["combined_output"] = "".join(combined_output_parts)
-
-    successful_tools = [t for t in scan_results["tools_executed"] if t.get("success")]
-    failed_tools = [t for t in scan_results["tools_executed"] if not t.get("success")]
-
-    scan_results["execution_summary"] = {
-        "total_tools": len(selected_tools),
-        "successful_tools": len(successful_tools),
-        "failed_tools": len(failed_tools),
-        "success_rate": len(successful_tools) / len(selected_tools) * 100 if selected_tools else 0,
-        "total_execution_time": sum(t.get("execution_time", 0) for t in scan_results["tools_executed"]),
-        "tools_used": [t["tool"] for t in successful_tools],
-    }
-
-    return scan_results
-
-
-def _smart_scan_handler(p: dict) -> dict:
-    start_time = time.time()
-    target = p["target"]
-    objective = p["objective"]
-    planner_mode = p.get("planner_mode") or None
-    session_id = p.get("session_id") or None
-
-    try:
-        max_tools = int(p.get("max_tools", 5))
-    except (TypeError, ValueError):
-        raise ToolValidationError("max_tools must be an integer", success=False)
-
-    if max_tools < 1:
-        raise ToolValidationError("max_tools must be >= 1", success=False)
-
-    max_tools = min(max_tools, 50)
-
-    logger.info(f"Starting intelligent smart scan for {target}")
-
-    try:
-        scan_results = _run_smart_scan(target, objective, planner_mode, session_id, max_tools)
+        stdout_payload = {
+            "target": target,
+            "tool": tool,
+            "optimized_parameters": optimized_params,
+            "target_profile": profile_dict,
+        }
+        return _wrap_success(payload, stdout_payload, start_time)
     except Exception as e:
-        logger.error(f"Error in intelligent smart scan: {e}")
+        logger.error(f"Error optimizing parameters for {tool}: {e}")
         return _wrap_failure(e, start_time)
-
-    logger.info(f"Intelligent smart scan completed for {target}")
-    stdout_text = scan_results.get("combined_output", "") or json.dumps(scan_results, indent=2)
-
-    return {
-        "success": True,
-        "scan_results": scan_results,
-        "stdout": stdout_text,
-        "stderr": "",
-        "return_code": 0,
-        "timed_out": False,
-        "partial_results": False,
-        "execution_time": time.time() - start_time,
-        "timestamp": datetime.now().isoformat(),
-    }
 
 
 def _detect_technologies_handler(p: dict) -> dict:
@@ -325,7 +172,97 @@ def _detect_technologies_handler(p: dict) -> dict:
         return _wrap_failure(e, start_time)
 
 
+# ============================================================================
+# ATTACK CHAIN HANDLERS
+# ============================================================================
+
+def _create_attack_chain_handler(p: dict) -> dict:
+    start_time = time.time()
+    target = p["target"]
+    objective = p["objective"]
+
+    from backend.server_api.ops.vulnerability_intelligence import _build_attack_chain_response
+
+    try:
+        payload = _build_attack_chain_response(
+            target=target, objective=objective, persist=True, origin="api/intelligence/create-attack-chain"
+        )
+        return _wrap_success(payload, dict(payload), start_time)
+    except Exception as e:
+        logger.error(f"Error creating attack chain: {e}")
+        return _wrap_failure(e, start_time)
+
+
+def _preview_attack_chain_handler(p: dict) -> dict:
+    start_time = time.time()
+    target = p["target"]
+    objective = p["objective"]
+
+    from backend.server_api.ops.vulnerability_intelligence import _build_attack_chain_response
+
+    try:
+        payload = _build_attack_chain_response(
+            target=target, objective=objective, persist=False, origin="api/intelligence/preview-attack-chain"
+        )
+        return _wrap_success(payload, dict(payload), start_time)
+    except Exception as e:
+        logger.error(f"Error previewing attack chain: {e}")
+        return _wrap_failure(e, start_time)
+
+
+# ============================================================================
+# SMART SCAN HANDLER
+# ============================================================================
+
+def _smart_scan_handler(p: dict) -> dict:
+    start_time = time.time()
+    target = p["target"]
+    objective = p["objective"]
+    planner_mode = p.get("planner_mode") or None
+    session_id = p.get("session_id") or None
+
+    try:
+        max_tools = int(p.get("max_tools", 5))
+    except (TypeError, ValueError):
+        raise ToolValidationError("max_tools must be an integer", success=False)
+
+    if max_tools < 1:
+        raise ToolValidationError("max_tools must be >= 1", success=False)
+
+    max_tools = min(max_tools, 50)
+
+    logger.info(f"Starting intelligent smart scan for {target}")
+
+    from backend.server_api.ops.vulnerability_intelligence import _run_smart_scan
+
+    try:
+        scan_results = _run_smart_scan(target, objective, planner_mode, session_id, max_tools)
+    except Exception as e:
+        logger.error(f"Error in intelligent smart scan: {e}")
+        return _wrap_failure(e, start_time)
+
+    logger.info(f"Intelligent smart scan completed for {target}")
+    stdout_text = scan_results.get("combined_output", "") or json.dumps(scan_results, indent=2)
+
+    return {
+        "success": True,
+        "scan_results": scan_results,
+        "stdout": stdout_text,
+        "stderr": "",
+        "return_code": 0,
+        "timed_out": False,
+        "partial_results": False,
+        "execution_time": time.time() - start_time,
+        "timestamp": datetime.now().isoformat(),
+    }
+
+
+# ============================================================================
+# AI WORKFLOW HANDLERS
+# ============================================================================
+
 def _ai_reconnaissance_workflow_handler(p: dict) -> dict:
+    start_time = time.time()
     target = p["target"]
     depth = p["depth"]
 
@@ -333,11 +270,11 @@ def _ai_reconnaissance_workflow_handler(p: dict) -> dict:
         profile = decision_engine.analyze_target(target)
     except Exception as e:
         logger.error(f"Error analyzing target: {e}")
-        return {"success": False, "error": f"Server error: {e}"}
+        return _wrap_failure(e, start_time)
 
     objective = "comprehensive" if depth == "deep" else "quick" if depth == "surface" else "comprehensive"
 
-    from backend.server_api.ops.vulnerability_intelligence import _build_attack_chain_response
+    from backend.server_api.ops.vulnerability_intelligence import _build_attack_chain_response, _run_smart_scan
 
     try:
         chain_payload = _build_attack_chain_response(
@@ -345,7 +282,7 @@ def _ai_reconnaissance_workflow_handler(p: dict) -> dict:
         )
     except Exception as e:
         logger.error(f"Error creating attack chain: {e}")
-        return {"success": False, "error": f"Server error: {e}"}
+        return _wrap_failure(e, start_time)
 
     max_tools = 8 if depth == "deep" else 3 if depth == "surface" else 5
 
@@ -353,22 +290,30 @@ def _ai_reconnaissance_workflow_handler(p: dict) -> dict:
         scan_results = _run_smart_scan(target, objective, None, None, max_tools)
     except Exception as e:
         logger.error(f"Error in intelligent smart scan: {e}")
-        return {"success": False, "error": f"Server error: {e}"}
+        return _wrap_failure(e, start_time)
 
     logger.info(f"AI reconnaissance workflow completed for {target}")
 
-    return {
-        "success": True,
+    profile_dict = profile.to_dict()
+    payload = {
         "target": target,
         "depth": depth,
-        "target_analysis": profile.to_dict(),
+        "target_analysis": profile_dict,
         "attack_chain": chain_payload.get("attack_chain", {}),
         "scan_results": scan_results,
-        "timestamp": datetime.now().isoformat(),
     }
+    stdout_payload = {
+        "target": target,
+        "depth": depth,
+        "total_vulnerabilities": scan_results.get("total_vulnerabilities", 0),
+        "target_analysis": profile_dict,
+        "scan_results": scan_results,
+    }
+    return _wrap_success(payload, stdout_payload, start_time)
 
 
 def _ai_vulnerability_assessment_handler(p: dict) -> dict:
+    start_time = time.time()
     target = p["target"]
     focus_areas = p["focus_areas"]
 
@@ -376,7 +321,7 @@ def _ai_vulnerability_assessment_handler(p: dict) -> dict:
         profile = decision_engine.analyze_target(target)
     except Exception as e:
         logger.error(f"Error analyzing target: {e}")
-        return {"success": False, "error": f"Server error: {e}"}
+        return _wrap_failure(e, start_time)
 
     profile_dict = profile.to_dict()
     target_type = profile_dict.get("target_type", "unknown")
@@ -390,16 +335,17 @@ def _ai_vulnerability_assessment_handler(p: dict) -> dict:
     else:
         objective = "quick"
 
+    from backend.server_api.ops.vulnerability_intelligence import _run_smart_scan
+
     try:
         scan_results = _run_smart_scan(target, objective, None, None, 6)
     except Exception as e:
         logger.error(f"Error in intelligent smart scan: {e}")
-        return {"success": False, "error": f"Server error: {e}"}
+        return _wrap_failure(e, start_time)
 
     logger.info(f"AI vulnerability assessment completed for {target}")
 
-    return {
-        "success": True,
+    payload = {
         "target": target,
         "focus_areas": focus_areas,
         "target_analysis": profile_dict,
@@ -409,9 +355,20 @@ def _ai_vulnerability_assessment_handler(p: dict) -> dict:
             "attack_surface_score": profile_dict.get("attack_surface_score", 0),
             "confidence_score": profile_dict.get("confidence_score", 0),
         },
-        "timestamp": datetime.now().isoformat(),
     }
+    stdout_payload = {
+        "target": target,
+        "focus_areas": focus_areas,
+        "total_vulnerabilities": scan_results.get("total_vulnerabilities", 0),
+        "risk_assessment": payload["risk_assessment"],
+        "vulnerability_scan": scan_results,
+    }
+    return _wrap_success(payload, stdout_payload, start_time)
 
+
+# ============================================================================
+# TOOL SPECS
+# ============================================================================
 
 SPECS = [
     ToolSpec(

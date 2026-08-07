@@ -203,6 +203,8 @@ SPECS = [
             ParamSpec("script", str, required=True, help_text="Script name without 'impacket-' prefix"),
             ParamSpec("target", str, required=True, help_text="Full target string"),
             ParamSpec("command", str, default="", help_text="Optional command to execute if supported by the script"),
+            ParamSpec("username", str, default="", help_text="Username for authentication"),
+            ParamSpec("password", str, default="", help_text="Password for authentication"),
             ParamSpec("hashes", str, default="", help_text="LM:NT hashes"),
             ParamSpec("kerberos", bool, default=False, help_text="Enable -k"),
             ParamSpec("no_pass", bool, default=False, help_text="Enable -no-pass"),
