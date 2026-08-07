@@ -15,11 +15,14 @@ uses internally to generate __init__.
 
 import asyncio
 import importlib
+import re
 from typing import Any, Dict
 
 from backend.server_core.tool_spec import ToolSpec
 
 _TYPE_NAMES = {str: "str", bool: "bool", int: "int", float: "float", list: "list", dict: "dict"}
+_PATH_PARAM_RE = re.compile(r"<(?:\w+:)?(\w+)>")
+_SAFE_METHODS = {"GET": "safe_get", "POST": "safe_post", "DELETE": "safe_delete"}
 
 
 def _build_signature_src(spec: ToolSpec) -> str:
@@ -43,17 +46,24 @@ def _build_docstring(spec: ToolSpec) -> str:
 
 def register_tool_from_spec(mcp, api_client, logger, spec: ToolSpec):
     param_src = _build_signature_src(spec)
-    arg_names = [p.name for p in spec.params]
     docstring = _build_docstring(spec)
-    data_literal = ", ".join(f"{n!r}: {n}" for n in arg_names)
+
+    endpoint_template = spec.endpoint.lstrip("/")
+    path_param_names = set(_PATH_PARAM_RE.findall(endpoint_template))
+    endpoint_template = _PATH_PARAM_RE.sub(r"{\1}", endpoint_template)
+
+    body_arg_names = [p.name for p in spec.params if p.name not in path_param_names]
+    data_literal = ", ".join(f"{n!r}: {n}" for n in body_arg_names)
+    safe_method = _SAFE_METHODS.get(spec.method, "safe_post")
 
     src = (
         f"async def {spec.mcp_tool_name}({param_src}) -> Dict[str, Any]:\n"
         f'    """{docstring}\n    """\n'
+        f"    _endpoint = f{endpoint_template!r}\n"
         f"    data = {{{data_literal}}}\n"
         f"    loop = asyncio.get_running_loop()\n"
         f"    return await loop.run_in_executor(\n"
-        f"        None, lambda: api_client.safe_post(_endpoint, data)\n"
+        f"        None, lambda: api_client.{safe_method}(_endpoint, data)\n"
         f"    )\n"
     )
 
@@ -62,7 +72,6 @@ def register_tool_from_spec(mcp, api_client, logger, spec: ToolSpec):
         "Any": Any,
         "asyncio": asyncio,
         "api_client": api_client,
-        "_endpoint": spec.endpoint.lstrip("/"),
     }
     exec(compile(src, f"<toolspec:{spec.name}>", "exec"), namespace)
     fn = namespace[spec.mcp_tool_name]

@@ -81,6 +81,20 @@ class ApiClient:
             logging.debug(f"Unexpected error: {str(e)}")
             return {"error": f"Unexpected error: {str(e)}", "success": False}
 
+    def safe_delete(self, endpoint: str, json_data: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+        url = f"{self.server_url}/{endpoint}"
+        try:
+            logging.debug(f"📡 DELETE {url} with data: {json_data}")
+            response = self.session.delete(url, json=json_data or {}, timeout=self.timeout)
+            response.raise_for_status()
+            return response.json()
+        except requests.exceptions.RequestException as e:
+            logging.debug(f"Request failed: {str(e)}")
+            return {"error": f"Request failed: {str(e)}", "success": False}
+        except Exception as e:
+            logging.debug(f"Unexpected error: {str(e)}")
+            return {"error": f"Unexpected error: {str(e)}", "success": False}
+
     def execute_command(self, command: str, use_cache: bool = True) -> Dict[str, Any]:
         return self.safe_post("api/command", {"command": command, "use_cache": use_cache})
 

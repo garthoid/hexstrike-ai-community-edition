@@ -24,7 +24,6 @@ def register_blueprints(app):
 
   # OPS — System Monitoring & File Ops
   app.register_blueprint(api_system_monitoring_bp)
-  app.register_blueprint(api_file_ops_and_payload_gen_bp)
   app.register_blueprint(api_logs_bp)
   app.register_blueprint(api_web_dashboard_bp)
   app.register_blueprint(api_runs_bp)
@@ -50,7 +49,6 @@ def register_blueprints(app):
   app.register_blueprint(api_process_resource_usage_bp)
   app.register_blueprint(api_process_performance_dashboard_bp)
   app.register_blueprint(api_process_terminate_gracefully_bp)
-  app.register_blueprint(api_wordlist_store_bp)
   app.register_blueprint(api_ops_python_env_bp)
   app.register_blueprint(api_process_auto_scaling_bp)
   app.register_blueprint(api_process_scale_pool_bp)
@@ -65,15 +63,9 @@ def register_blueprints(app):
 
   # AI Payload
   app.register_blueprint(api_ai_payload_generate_payload_bp)
-  app.register_blueprint(api_ai_payload_test_payload_bp)
 
   # Vulnerability Intelligence
   app.register_blueprint(api_vulnerability_intelligence_bp)
-  app.register_blueprint(api_vuln_intel_cve_monitor_bp)
-  app.register_blueprint(api_vuln_intel_exploit_generate_bp)
-  app.register_blueprint(api_vuln_intel_attack_chains_bp)
-  app.register_blueprint(api_vuln_intel_threat_feeds_bp)
-  app.register_blueprint(api_vuln_intel_zero_day_research_bp)
   app.register_blueprint(api_vuln_intel_cve_exploit_chain_bp)
 
   # Bug Bounty Workflow
@@ -81,7 +73,6 @@ def register_blueprints(app):
 
   # AI Assist
   app.register_blueprint(api_chat_bp)
-  app.register_blueprint(api_ai_assist_advanced_payload_generation_bp)
   app.register_blueprint(api_ai_assist_llm_agent_bp)
   app.register_blueprint(api_ai_assist_ai_recon_session_bp)
   app.register_blueprint(api_ai_assist_ai_profiling_session_bp)
@@ -114,8 +105,6 @@ def register_blueprints(app):
   app.register_blueprint(api_burp_agent_bp)
 
   # Intelligent Error Handling
-  app.register_blueprint(api_error_handling_statistics_bp)
-  app.register_blueprint(api_error_handling_test_recovery_bp)
   app.register_blueprint(api_error_handling_fallback_chains_bp)
   app.register_blueprint(api_error_handling_execute_with_recovery_bp)
   app.register_blueprint(api_error_handling_classify_error_bp)

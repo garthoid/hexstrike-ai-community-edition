@@ -36,89 +36,6 @@ def _json_safe_process(info: dict) -> dict:
     safe.pop("process", None)
     return safe
 
-@api_process_management_bp.route("/api/processes/list", methods=["GET"])
-def list_processes():
-    """List all active processes"""
-    try:
-        processes = ProcessManager.list_active_processes()
-
-        # Add calculated fields for each process
-        safe_processes = {}
-        for pid, info in processes.items():
-            _annotate_process(info)
-            safe_processes[str(pid)] = _json_safe_process(info)
-
-        # Merge in-process AI tasks so the frontend running-step check sees them
-        ai_tasks = AITaskManager.list_active_tasks()
-        for task_id, info in ai_tasks.items():
-            safe_processes[f"ai:{task_id}"] = {
-                "pid": None,
-                "task_id": task_id,
-                "command": info.get("label", "ai_task"),
-                "status": info.get("status", "running"),
-                "start_time": info.get("start_time", 0),
-                "progress": 0.0,
-                "last_output": "",
-                "bytes_processed": 0,
-                "session_id": info.get("session_id", ""),
-                "ai_task": True,
-            }
-
-        return jsonify({
-            "success": True,
-            "active_processes": safe_processes,
-            "total_count": len(safe_processes)
-        })
-    except Exception as e:
-        logger.error(f"💥 Error listing processes: {str(e)}")
-        return jsonify({"error": f"Server error: {str(e)}"}), 500
-
-@api_process_management_bp.route("/api/processes/status/<int:pid>", methods=["GET"])
-def get_process_status(pid):
-    """Get status of a specific process"""
-    try:
-        process_info = ProcessManager.get_process_status(pid)
-
-        if process_info:
-            # Add calculated fields
-            _annotate_process(process_info)
-
-            return jsonify({
-                "success": True,
-                "process": _json_safe_process(process_info)
-            })
-        else:
-            return jsonify({
-                "success": False,
-                "error": f"Process {pid} not found"
-            }), 404
-
-    except Exception as e:
-        logger.error(f"💥 Error getting process status: {str(e)}")
-        return jsonify({"error": f"Server error: {str(e)}"}), 500
-
-@api_process_management_bp.route("/api/processes/terminate/<int:pid>", methods=["POST"])
-def terminate_process(pid):
-    """Terminate a specific process"""
-    try:
-        success = ProcessManager.terminate_process(pid)
-
-        if success:
-            logger.info(f"🛑 Process {pid} terminated successfully")
-            return jsonify({
-                "success": True,
-                "message": f"Process {pid} terminated successfully"
-            })
-        else:
-            return jsonify({
-                "success": False,
-                "error": f"Failed to terminate process {pid} or process not found"
-            }), 404
-
-    except Exception as e:
-        logger.error(f"💥 Error terminating process {pid}: {str(e)}")
-        return jsonify({"error": f"Server error: {str(e)}"}), 500
-
 @api_process_management_bp.route("/api/processes/cancel-ai-task/<task_id>", methods=["POST"])
 def cancel_ai_task(task_id: str):
     """Cancel an in-process AI task by its task_id (e.g. ai_analyze_xxxxxxxx).
@@ -135,50 +52,6 @@ def cancel_ai_task(task_id: str):
         return jsonify({"success": False, "error": f"AI task {task_id} not found"}), 404
     except Exception as e:
         logger.error(f"💥 Error cancelling AI task {task_id}: {str(e)}")
-        return jsonify({"error": f"Server error: {str(e)}"}), 500
-
-@api_process_management_bp.route("/api/processes/pause/<int:pid>", methods=["POST"])
-def pause_process(pid):
-    """Pause a specific process"""
-    try:
-        success = ProcessManager.pause_process(pid)
-
-        if success:
-            logger.info(f"⏸️ Process {pid} paused successfully")
-            return jsonify({
-                "success": True,
-                "message": f"Process {pid} paused successfully"
-            })
-        else:
-            return jsonify({
-                "success": False,
-                "error": f"Failed to pause process {pid} or process not found"
-            }), 404
-
-    except Exception as e:
-        logger.error(f"💥 Error pausing process {pid}: {str(e)}")
-        return jsonify({"error": f"Server error: {str(e)}"}), 500
-
-@api_process_management_bp.route("/api/processes/resume/<int:pid>", methods=["POST"])
-def resume_process(pid):
-    """Resume a paused process"""
-    try:
-        success = ProcessManager.resume_process(pid)
-
-        if success:
-            logger.info(f"▶️ Process {pid} resumed successfully")
-            return jsonify({
-                "success": True,
-                "message": f"Process {pid} resumed successfully"
-            })
-        else:
-            return jsonify({
-                "success": False,
-                "error": f"Failed to resume process {pid} or process not found"
-            }), 404
-
-    except Exception as e:
-        logger.error(f"💥 Error resuming process {pid}: {str(e)}")
         return jsonify({"error": f"Server error: {str(e)}"}), 500
 
 def _build_dashboard_payload() -> dict:
@@ -243,15 +116,6 @@ def _build_dashboard_payload() -> dict:
         }
     }
 
-
-@api_process_management_bp.route("/api/processes/dashboard", methods=["GET"])
-def process_dashboard():
-    """Get enhanced process dashboard with visual status using ModernVisualEngine"""
-    try:
-        return jsonify(_build_dashboard_payload())
-    except Exception as e:
-        logger.error(f"💥 Error getting process dashboard: {str(e)}")
-        return jsonify({"error": f"Server error: {str(e)}"}), 500
 
 # --- STREAMING ENDPOINTS ---
 @api_process_management_bp.route("/api/processes/dashboard/stream", methods=["GET"])

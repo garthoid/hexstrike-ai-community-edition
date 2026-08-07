@@ -44,7 +44,7 @@ def _post(client, url, json_body):
 # nmap
 # ---------------------------------------------------------------------------
 
-_NMAP_PATCH = "server_api._generic.blueprint_factory.execute_command"
+_NMAP_PATCH = "backend.server_api._generic.blueprint_factory.execute_command"
 
 
 class TestNmapCommandBuilder:
@@ -101,7 +101,7 @@ class TestNmapCommandBuilder:
 # hydra
 # ---------------------------------------------------------------------------
 
-_HYDRA_PATCH = "server_api._generic.blueprint_factory.execute_command"
+_HYDRA_PATCH = "backend.server_api._generic.blueprint_factory.execute_command"
 
 
 class TestHydraCommandBuilder:
@@ -165,7 +165,7 @@ class TestHydraCommandBuilder:
 # hashcat
 # ---------------------------------------------------------------------------
 
-_HASHCAT_PATCH = "server_api._generic.blueprint_factory.execute_command"
+_HASHCAT_PATCH = "backend.server_api._generic.blueprint_factory.execute_command"
 
 
 class TestHashcatCommandBuilder:
@@ -216,7 +216,7 @@ class TestHashcatCommandBuilder:
 # nuclei
 # ---------------------------------------------------------------------------
 
-_NUCLEI_PATCH = "server_api._generic.blueprint_factory.execute_command"
+_NUCLEI_PATCH = "backend.server_api._generic.blueprint_factory.execute_command"
 
 
 class TestNucleiCommandBuilder:
@@ -270,7 +270,7 @@ class TestNucleiCommandBuilder:
 # sqlmap
 # ---------------------------------------------------------------------------
 
-_SQLMAP_PATCH = "server_api._generic.blueprint_factory.execute_command"
+_SQLMAP_PATCH = "backend.server_api._generic.blueprint_factory.execute_command"
 
 
 class TestSqlmapCommandBuilder:

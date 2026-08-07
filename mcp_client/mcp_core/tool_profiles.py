@@ -203,8 +203,7 @@ TOOL_PROFILES = {
     
     #Tools for error handling and statistics collection to improve reliability and debugging.
     "error_handling": [
-        lambda mcp, client, logger: register_error_handling_statistics_tool(mcp, client, logger, CliColors),
-        lambda mcp, client, logger: register_test_error_recovery_tool(mcp, client, logger, CliColors),
+        lambda mcp, client, logger: register_toolspec_category(mcp, client, logger, "error_handling"),
     ],
 
     #Tools for cloud assessment and auditing (e.g., Prowler, Scout Suite).
@@ -250,28 +249,31 @@ TOOL_PROFILES = {
 
     #Tools for file operations and AI-powered payload generation
     "file_payload": [
-        lambda mcp, client, logger: register_file_ops_and_payload_gen_tools(mcp, client, logger),
+        lambda mcp, client, logger: register_toolspec_category(mcp, client, logger, "file_payload"),
     ],
 
     #Tools for wordlist management
     "wordlist": [
-        lambda mcp, client, logger: register_wordlist_tools(mcp, client),
+        lambda mcp, client, logger: register_toolspec_category(mcp, client, logger, "wordlist"),
     ],
 
     #Tools for bug bounty workflows and recon automation
     "bug_bounty": [
         lambda mcp, client, logger: register_bug_bounty_recon_tools(mcp, client, logger),
+        lambda mcp, client, logger: register_toolspec_category(mcp, client, logger, "bug_bounty"),
     ],
 
     #Tools for AI-powered payload generation and testing
     "ai_payload": [
         lambda mcp, client, logger: register_ai_payload_generation_tools(mcp, client, logger),
+        lambda mcp, client, logger: register_toolspec_category(mcp, client, logger, "ai_payload"),
     ],
 
     #Tools for intelligent decision making and tool selection based on task context and goals
     "ai_assist": [
         lambda mcp, client, logger: register_intelligent_decision_engine_tools(mcp, client, logger, CliColors),
         lambda mcp, client, logger: register_llm_agent_tools(mcp, client, logger, CliColors),
+        lambda mcp, client, logger: register_toolspec_category(mcp, client, logger, "ai_assist"),
     ],
 
     #Tools for vulnerability intelligence gathering and analysis
@@ -283,17 +285,19 @@ TOOL_PROFILES = {
     #Tools for visual output and reporting
     "visual": [
         lambda mcp, client, logger: register_visual_output_tools(mcp, client, logger),
+        lambda mcp, client, logger: register_toolspec_category(mcp, client, logger, "visual"),
     ],
 
     #Tools for system monitoring
     "monitoring": [
-        lambda mcp, client, logger: register_system_monitoring_tools(mcp, client, logger),
+        lambda mcp, client, logger: register_toolspec_category(mcp, client, logger, "monitoring"),
         lambda mcp, client, logger: register_session_handover_tools(mcp, client, logger),
     ],
 
     #Tools for process management
     "process_management": [
         lambda mcp, client, logger: register_process_management_tools(mcp, client, logger),
+        lambda mcp, client, logger: register_toolspec_category(mcp, client, logger, "process_management"),
     ],
 }
 

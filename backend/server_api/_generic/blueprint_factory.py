@@ -10,7 +10,7 @@ import logging
 from flask import Blueprint, jsonify, request
 
 from backend.server_core.command_executor import execute_command
-from backend.server_core.tool_spec import ToolSpec, ToolValidationError
+from backend.server_core.tool_spec import ToolNotFoundError, ToolSpec, ToolValidationError
 
 logger = logging.getLogger(__name__)
 
@@ -18,16 +18,23 @@ logger = logging.getLogger(__name__)
 def make_blueprint(spec: ToolSpec) -> Blueprint:
     bp = Blueprint(f"api_{spec.category}_{spec.name}", __name__)
 
-    @bp.route(spec.endpoint, methods=["POST"], endpoint=spec.name)
-    def _view():
+    @bp.route(spec.endpoint, methods=[spec.method], endpoint=spec.name)
+    def _view(**path_kwargs):
         try:
-            data = request.get_json(force=True, silent=True) or {}
+            body = request.get_json(force=True, silent=True) or {}
+            data = {**request.args.to_dict(), **body, **path_kwargs}
+
             params = {}
             for p in spec.params:
                 value = data.get(p.name, p.default if not p.required else "")
                 if p.required and not value:
                     return jsonify({"error": f"{p.name} parameter is required"}), 400
                 params[p.name] = value
+
+            if spec.handler:
+                raw = spec.handler(params)
+                result = spec.postprocess(raw, params) if spec.postprocess else raw
+                return jsonify(result)
 
             timeout = spec.timeout
             if spec.timeout_param:
@@ -59,6 +66,8 @@ def make_blueprint(spec: ToolSpec) -> Blueprint:
             return jsonify(result)
         except ToolValidationError as e:
             return jsonify({"error": e.error, **e.extra}), 400
+        except ToolNotFoundError as e:
+            return jsonify({"error": e.error, **e.extra}), 404
         except Exception as e:
             logger.error(f"💥 Error in {spec.name} endpoint: {e}")
             return jsonify({"error": f"Server error: {e}"}), 500

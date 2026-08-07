@@ -14,7 +14,6 @@ import traceback
 import backend.server_core.config_core as config_core
 from backend.server_core.command_executor import execute_command
 from backend.server_core.modern_visual_engine import ModernVisualEngine
-from backend.server_core.singletons import cache, telemetry
 
 from backend.server_core.tool_constants import (
     BUILT_IN_TOOLS, REQUIRE_DPKG_CHECK, REQUIRE_GO_CHECK, REQUIRE_PIP_CHECK,
@@ -211,41 +210,6 @@ def _get_plugin_install_hints() -> Dict[str, str]:
         if check.get("install")
     }
 
-@api_system_monitoring_bp.route("/health", methods=["GET"])
-def health_check():
-    """Health check endpoint with comprehensive tool detection"""
-    tools_status = _get_tool_availability()
-
-    essential_tools = HEALTH_TOOL_CATEGORIES["essential"]
-    all_essential_tools_available = all(tools_status.get(t, False) for t in essential_tools)
-
-    category_stats = {
-        cat: {
-            "total": len(tools),
-            "available": sum(1 for t in tools if tools_status.get(t, False)),
-        }
-        for cat, tools in HEALTH_TOOL_CATEGORIES.items()
-    }
-
-    all_tools_count = len(tools_status)
-
-    return jsonify({
-        "status": "healthy",
-        "message": "NyxStrike Tools API Server is operational",
-        "version": config_core.get("VERSION", "unknown"),
-        "tools_status": tools_status,
-        "all_essential_tools_available": all_essential_tools_available,
-        "total_tools_available": sum(1 for available in tools_status.values() if available),
-        "total_tools_count": all_tools_count,
-        "category_stats": category_stats,
-        "plugin_install_hints": _get_plugin_install_hints(),
-        "cache_stats": cache.get_stats(),
-        "telemetry": telemetry.get_stats(),
-        "uptime": time.time() - telemetry.stats["start_time"],
-        "tool_availability_age_seconds": round(time.time() - _tool_availability_last_refresh, 1),
-    })
-
-
 @api_system_monitoring_bp.route("/ping", methods=["GET"])
 def ping():
     return jsonify({
@@ -279,25 +243,6 @@ def generic_command():
             "error": f"Server error: {str(e)}"
         }), 500
 
-
-@api_system_monitoring_bp.route("/api/cache/stats", methods=["GET"])
-def cache_stats():
-    """Get cache statistics"""
-    return jsonify(cache.get_stats())
-
-
-@api_system_monitoring_bp.route("/api/cache/clear", methods=["POST"])
-def clear_cache():
-    """Clear the cache"""
-    cache.clear()
-    logger.info("Cache cleared")
-    return jsonify({"success": True, "message": "Cache cleared"})
-
-
-@api_system_monitoring_bp.route("/api/telemetry", methods=["GET"])
-def get_telemetry():
-    """Get system telemetry"""
-    return jsonify(telemetry.get_stats())
 
 @api_system_monitoring_bp.route("/api/tools/categories", methods=["GET"])
 def get_tool_categories():

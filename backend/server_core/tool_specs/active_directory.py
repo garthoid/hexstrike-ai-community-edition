@@ -27,8 +27,37 @@ def _impacket_run_build_command(p: dict) -> str:
             supported_scripts=sorted(IMPACKET_SCRIPTS),
         )
 
+    options = {}
+    options.update(p.get("options") or {})
+    options.update(p.get("extra_options") or {})
+    if p.get("dc_ip"):
+        options["dc-ip"] = p["dc_ip"]
+    if p.get("hashes"):
+        options["hashes"] = p["hashes"]
+    if p.get("kerberos"):
+        options["k"] = True
+    if p.get("no_pass"):
+        options["no-pass"] = True
+    if p.get("aes_key"):
+        options["aesKey"] = p["aes_key"]
+    if p.get("debug"):
+        options["debug"] = True
+    if p.get("share"):
+        options["share"] = p["share"]
+    if p.get("shell_type"):
+        options["shell-type"] = p["shell_type"]
+    if p.get("command"):
+        options["command"] = p["command"]
+    if p.get("username"):
+        options.setdefault("username", p["username"])
+    if p.get("password"):
+        options.setdefault("password", p["password"])
+
+    payload = dict(p)
+    payload["options"] = options
+
     try:
-        argv, _spec = _build_impacket_command(script_name, p)
+        argv, _spec = _build_impacket_command(script_name, payload)
     except ValueError as e:
         raise ToolValidationError(str(e)) from e
 
@@ -85,6 +114,18 @@ SPECS = [
             ParamSpec("positional", list, default=[], help_text="Extra positional arguments as a list, e.g. ['input.kirbi', 'output.ccache']"),
             ParamSpec("positional_map", dict, default={}, help_text="Named positional arguments if the script supports them"),
             ParamSpec("extra_args", str, default="", help_text="Raw extra CLI args for edge cases"),
+            ParamSpec("extra_options", dict, default={}, help_text="Base dict of script flags/options, merged under 'options'"),
+            ParamSpec("dc_ip", str, default="", help_text="Domain controller IP (shortcut for options['dc-ip'])"),
+            ParamSpec("username", str, default="", help_text="Username (shortcut for options['username'])"),
+            ParamSpec("password", str, default="", help_text="Password (shortcut for options['password'])"),
+            ParamSpec("hashes", str, default="", help_text="LM:NT hashes (shortcut for options['hashes'])"),
+            ParamSpec("kerberos", bool, default=False, help_text="Enable Kerberos auth (shortcut for options['k'])"),
+            ParamSpec("no_pass", bool, default=False, help_text="Enable -no-pass (shortcut for options['no-pass'])"),
+            ParamSpec("aes_key", str, default="", help_text="AES key for Kerberos auth (shortcut for options['aesKey'])"),
+            ParamSpec("debug", bool, default=False, help_text="Enable -debug (shortcut for options['debug'])"),
+            ParamSpec("share", str, default="", help_text="SMB share if supported (shortcut for options['share'])"),
+            ParamSpec("shell_type", str, default="", help_text="Shell type if supported (shortcut for options['shell-type'])"),
+            ParamSpec("command", str, default="", help_text="Command to execute if supported by the script (shortcut for options['command'])"),
         ],
         build_command=_impacket_run_build_command,
         postprocess=_impacket_run_postprocess,

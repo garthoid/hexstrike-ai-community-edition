@@ -27,7 +27,9 @@ class ToolSpec:
     category: str
     description: str
     params: List[ParamSpec] = field(default_factory=list)
+    method: str = "POST"
     build_command: Optional[Callable[[Dict[str, Any]], Union[str, List[str]]]] = None
+    handler: Optional[Callable[[Dict[str, Any]], Any]] = None
     postprocess: Optional[Callable[[Any, Dict[str, Any]], dict]] = None
     use_cache: bool = True
     timeout: Optional[int] = None
@@ -47,6 +49,18 @@ class ToolValidationError(Exception):
         self.extra = extra
 
 
+class ToolNotFoundError(Exception):
+    """Raised by a handler/build_command to signal a 404 response (e.g. a lookup
+    by ID that doesn't exist), matching the hand-written Flask views this system
+    replaces that returned 404 for missing resources.
+    """
+
+    def __init__(self, error: str, **extra: Any):
+        super().__init__(error)
+        self.error = error
+        self.extra = extra
+
+
 def to_tool_definition(spec: ToolSpec) -> dict:
     """Emit a tool_registry.py-compatible ToolDefinition dict from a ToolSpec.
 
@@ -56,7 +70,7 @@ def to_tool_definition(spec: ToolSpec) -> dict:
     """
     return {
         "endpoint": spec.endpoint,
-        "method": "POST",
+        "method": spec.method,
         "desc": spec.description.strip().splitlines()[0] if spec.description else "",
         "params": {p.name: {"required": True} for p in spec.params if p.required},
         "optional": {p.name: p.default for p in spec.params if not p.required},

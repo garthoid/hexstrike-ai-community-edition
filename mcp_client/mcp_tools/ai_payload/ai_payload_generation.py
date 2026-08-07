@@ -50,44 +50,6 @@ def register_ai_payload_generation_tools(mcp, api_client, logger):
         return result
 
     @mcp.tool()
-    async def ai_test_payload(payload: str, target_url: str, method: str = "GET") -> Dict[str, Any]:
-        """
-        Test generated payload against target with AI analysis.
-
-        Args:
-            payload: The payload to test
-            target_url: Target URL to test against
-            method: HTTP method (GET, POST)
-
-        Returns:
-            Test results with AI analysis and vulnerability assessment
-        """
-        data = {
-            "payload": payload,
-            "target_url": target_url,
-            "method": method
-        }
-        logger.info(f"🧪 Testing AI payload against {target_url}")
-        loop = asyncio.get_running_loop()
-        result = await loop.run_in_executor(
-            None, lambda: api_client.safe_post("api/ai/test_payload", data)
-        )
-
-        if result.get("success"):
-            analysis = result.get("ai_analysis", {})
-            potential_vuln = analysis.get("potential_vulnerability", False)
-            logger.info(f"🔍 Payload test completed | Vulnerability detected: {potential_vuln}")
-
-            if potential_vuln:
-                logger.warning("⚠️  Potential vulnerability found! Review the response carefully.")
-            else:
-                logger.info("✅ No obvious vulnerability indicators detected")
-        else:
-            logger.error("❌ Payload testing failed")
-
-        return result
-
-    @mcp.tool()
     async def ai_generate_attack_suite(target_url: str, attack_types: str = "xss,sqli,lfi") -> Dict[str, Any]:
         """
         Generate comprehensive attack suite with multiple payload types.

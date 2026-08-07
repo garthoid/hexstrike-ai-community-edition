@@ -216,7 +216,7 @@ class TestToolRegistryToolSpecConsistency:
 
         by_endpoint = {}
         for key, definition in TOOLS.items():
-            by_endpoint.setdefault(definition["endpoint"], []).append((key, definition))
+            by_endpoint.setdefault((definition["endpoint"], definition["method"]), []).append((key, definition))
         return by_endpoint
 
     def test_every_toolspec_endpoint_has_a_registry_entry(self):
@@ -224,9 +224,9 @@ class TestToolRegistryToolSpecConsistency:
 
         registry_by_endpoint = self._registry_by_endpoint()
         missing = sorted(
-            spec.endpoint
+            f"{spec.endpoint} [{spec.method}]"
             for spec in iter_all_specs()
-            if spec.endpoint not in registry_by_endpoint
+            if (spec.endpoint, spec.method) not in registry_by_endpoint
         )
         assert missing == [], (
             f"ToolSpec endpoints with no tool_registry.py entry at all — "
@@ -240,7 +240,7 @@ class TestToolRegistryToolSpecConsistency:
         problems = []
 
         for spec in iter_all_specs():
-            entries = registry_by_endpoint.get(spec.endpoint)
+            entries = registry_by_endpoint.get((spec.endpoint, spec.method))
             if not entries:
                 continue  # covered by test_every_toolspec_endpoint_has_a_registry_entry
 

@@ -5,6 +5,5 @@ from mcp_client.mcp_tools.web_scan import *
 from mcp_client.mcp_tools.ai_payload import *
 from mcp_client.mcp_tools.bugbounty_workflow import *
 from mcp_client.mcp_tools.web_framework import *
-from mcp_client.mcp_tools.error_handling import *
 from mcp_client.mcp_tools.api_audit import *
 from mcp_client.mcp_tools.active_directory import *

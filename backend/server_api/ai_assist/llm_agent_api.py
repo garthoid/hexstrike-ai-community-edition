@@ -195,33 +195,6 @@ def follow_up_session_endpoint():
     return jsonify({"success": False, "error": str(exc)}), 500
 
 
-@api_ai_assist_llm_agent_bp.route(
-  "/api/intelligence/llm-agent-scan/<session_id>",
-  methods=["GET"],
-)
-def llm_agent_scan_result(session_id: str):
-  """Retrieve a past LLM agent scan session and its findings."""
-  try:
-    if db is None:
-      return jsonify({"success": False, "error": "Database not available"}), 503
-
-    session = db.get_llm_session(session_id)
-    if not session:
-      return jsonify({"success": False, "error": f"Session '{session_id}' not found"}), 404
-
-    vulnerabilities = db.get_llm_vulnerabilities(session_id)
-
-    return jsonify({
-      "success": True,
-      "session": session,
-      "vulnerabilities": vulnerabilities,
-    })
-
-  except Exception as exc:
-    logger.exception("llm_agent_api: error fetching session %r", session_id)
-    return jsonify({"success": False, "error": str(exc)}), 500
-
-
 @api_ai_assist_llm_agent_bp.route("/api/intelligence/llm-agent-sessions", methods=["GET"])
 def llm_agent_sessions():
   """List recent LLM agent scan sessions."""
@@ -238,12 +211,3 @@ def llm_agent_sessions():
     return jsonify({"success": False, "error": str(exc)}), 500
 
 
-@api_ai_assist_llm_agent_bp.route("/api/intelligence/llm-status", methods=["GET"])
-def llm_status():
-  """Report LLM backend availability and configuration."""
-  try:
-    status = llm_client.status()
-    return jsonify({"success": True, **status})
-  except Exception as exc:
-    logger.exception("llm_agent_api: error in /llm-status")
-    return jsonify({"success": False, "error": str(exc)}), 500
