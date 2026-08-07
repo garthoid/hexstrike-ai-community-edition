@@ -27,7 +27,6 @@ TOOL_PROFILES = {
 
     "active_directory": [
         lambda mcp, client, logger: register_toolspec_category(mcp, client, logger, "active_directory"),
-        lambda mcp, client, logger: register_impacket(mcp, client, logger, CliColors),
     ],
 
     "api_audit": [

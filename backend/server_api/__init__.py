@@ -13,7 +13,6 @@ from .ops import *
 from .vuln_intel import *
 from .web_framework import *
 from .web_scan import *
-from .active_directory import *
 from .burp_agent import *
 from .workbench import *
 
@@ -34,9 +33,6 @@ def register_blueprints(app):
   app.register_blueprint(api_credentials_bp)
   app.register_blueprint(api_loot_bp)
   app.register_blueprint(api_topology_bp)
-
-  #Active Directory
-  app.register_blueprint(api_tools_impacket_bp)
 
   # OPS — General
   app.register_blueprint(api_visual_bp)

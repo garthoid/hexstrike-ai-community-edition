@@ -1,8 +1,7 @@
 """Shared Impacket script introspection and command-building logic.
 
-Used by both the hand-written /impacket/spec Flask route
-(server_api/active_directory/impacket_scripts.py) and the declarative
-impacket_run ToolSpec (server_core/tool_specs/active_directory.py).
+Used by the declarative impacket_run / impacket_get_spec / impacket_ad_enum /
+impacket_remote_exec ToolSpecs (server_core/tool_specs/active_directory.py).
 """
 
 import re
