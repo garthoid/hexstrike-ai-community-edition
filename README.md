@@ -5,8 +5,6 @@
 
 ### AI-powered offensive security orchestration engine
 
-*⚡ From target → recon → exploit chain in minutes*
-
 </div>
 
 ## What is NyxStrike?
