@@ -168,7 +168,7 @@ class EnhancedCommandExecutor:
                     self._stdout_chunks.append(line)
                     self.last_output_time = time.time()
                     # Real-time output display
-                    logger.info(f"📤 STDOUT: {_strip_ansi(line).strip()}")
+                    logger.info(f"{_strip_ansi(line).strip()}")
         except Exception as e:
             logger.error(f"Error reading stdout: {e}")
         finally:
@@ -184,7 +184,7 @@ class EnhancedCommandExecutor:
                     self._stderr_chunks.append(line)
                     self.last_output_time = time.time()
                     # Real-time error output display
-                    logger.warning(f"📥 STDERR: {_strip_ansi(line).strip()}")
+                    logger.warning(f"{_strip_ansi(line).strip()}")
         except Exception as e:
             logger.error(f"Error reading stderr: {e}")
         finally:
