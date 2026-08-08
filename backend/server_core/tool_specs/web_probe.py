@@ -197,7 +197,8 @@ def _testssl_command(p: dict) -> str:
             args.extend(shlex.split(additional_args))
 
         if target:
-            args.append(target)
+            parsed_target = urlparse(target)
+            args.append(parsed_target.netloc if parsed_target.netloc else target)
 
     return " ".join(shlex.quote(arg) for arg in args)
 
