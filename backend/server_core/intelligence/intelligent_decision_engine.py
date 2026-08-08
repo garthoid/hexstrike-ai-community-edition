@@ -554,6 +554,10 @@ class IntelligentDecisionEngine(LegacyParameterOptimizers):
             return self._optimize_ffuf_params(profile, context)
         if tool == "hydra":
             return self._optimize_hydra_params(profile, context)
+        if tool == "medusa":
+            return self._optimize_medusa_params(profile, context)
+        if tool == "patator":
+            return self._optimize_patator_params(profile, context)
         if tool == "rustscan":
             return self._optimize_rustscan_params(profile, context)
         if tool == "masscan":

@@ -1,3 +1,4 @@
+import functools
 from typing import Any, Dict, List, Optional
 from datetime import datetime
 from backend.server_core.technology_detector import TechnologyDetector
@@ -5,6 +6,33 @@ from backend.server_core.rate_limit_detector import RateLimitDetector
 from backend.server_core.failure_recovery_system import FailureRecoverySystem
 from backend.server_core.performance_monitor import PerformanceMonitor
 from shared.target_profile import TargetProfile
+
+_TARGET_PARAM_CANDIDATES = [
+    "target", "url", "domain", "hostname", "binary", "file_path",
+    "input_file", "memory_file", "cover_file", "image",
+]
+
+
+@functools.lru_cache(maxsize=1)
+def _specs_by_endpoint() -> Dict[str, Any]:
+    from backend.server_core.tool_spec import iter_all_specs
+    return {spec.endpoint: spec for spec in iter_all_specs()}
+
+
+def _resolve_target_param_name(tool: str) -> str:
+    import tool_registry
+
+    meta = tool_registry.TOOLS.get(tool)
+    spec = _specs_by_endpoint().get(meta["endpoint"]) if meta else None
+    if not spec:
+        return "target"
+
+    param_names = {p.name for p in spec.params}
+    for candidate in _TARGET_PARAM_CANDIDATES:
+        if candidate in param_names:
+            return candidate
+    return "target"
+
 
 class ParameterOptimizer:
     """Advanced parameter optimization system with intelligent context-aware selection"""
@@ -113,7 +141,7 @@ class ParameterOptimizer:
 
     def _get_base_parameters(self, tool: str, profile: TargetProfile) -> Dict[str, Any]:
         """Get base parameters for a tool"""
-        base_params = {"target": profile.target}
+        base_params = {_resolve_target_param_name(tool): profile.target}
 
         # Tool-specific base parameters
         if tool == "nmap":

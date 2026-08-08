@@ -115,6 +115,34 @@ class LegacyParameterOptimizers:
         params["additional_args"] = "-t 4 -w 30"
         return params
 
+    def _optimize_medusa_params(self, profile: TargetProfile, context: Dict[str, Any]) -> Dict[str, Any]:
+        params = {"target": profile.target}
+
+        if 22 in profile.open_ports:
+            params["module"] = "ssh"
+        elif 21 in profile.open_ports:
+            params["module"] = "ftp"
+        elif 80 in profile.open_ports or 443 in profile.open_ports:
+            params["module"] = "http"
+        else:
+            params["module"] = "ssh"
+
+        return params
+
+    def _optimize_patator_params(self, profile: TargetProfile, context: Dict[str, Any]) -> Dict[str, Any]:
+        params = {"target": profile.target}
+
+        if 22 in profile.open_ports:
+            params["module"] = "ssh_login"
+        elif 21 in profile.open_ports:
+            params["module"] = "ftp_login"
+        elif 80 in profile.open_ports or 443 in profile.open_ports:
+            params["module"] = "http_get"
+        else:
+            params["module"] = "ssh_login"
+
+        return params
+
     def _optimize_rustscan_params(self, profile: TargetProfile, context: Dict[str, Any]) -> Dict[str, Any]:
         """Optimize Rustscan parameters."""
         params = {"target": profile.target}

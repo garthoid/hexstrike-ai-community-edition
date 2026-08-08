@@ -65,12 +65,21 @@ def _resolve_config_local_path() -> str:
 
 _CONFIG_LOCAL_PATH = _resolve_config_local_path()
 
+
+def _deep_merge(base: dict, overrides: dict) -> None:
+    for key, value in overrides.items():
+        if isinstance(value, dict) and isinstance(base.get(key), dict):
+            _deep_merge(base[key], value)
+        else:
+            base[key] = value
+
+
 # Load overrides from config_local.json if it exists
 if os.path.exists(_CONFIG_LOCAL_PATH):
     try:
         with open(_CONFIG_LOCAL_PATH, "r", encoding="utf-8") as f:
             overrides = json.load(f)
-            _config.update(overrides)
+            _deep_merge(_config, overrides)
     except Exception as e:
         logger.warning("Failed to load config_local.json: %r", e)
 
