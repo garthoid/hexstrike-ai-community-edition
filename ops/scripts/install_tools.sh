@@ -142,7 +142,7 @@ print_list() {
   echo -e "${CYAN}🌐 WEB APPLICATION SECURITY (40+)${RESET}"
   echo "   gobuster, ffuf, feroxbuster, dirsearch, dirb, httpx, katana,"
   echo "   hakrawler, gau, waybackurls, nikto, sqlmap, wpscan, arjun,"
-  echo "   paramspider, dalfox, wafw00f, whatweb, jwt-tool, wfuzz, commix"
+  echo "   paramspider, dalfox, wafw00f, whatweb, wfuzz, commix"
   echo ""
   echo -e "${CYAN}🔐 AUTH / PASSWORD (12+)${RESET}"
   echo "   hydra, john, hashcat, medusa, patator, evil-winrm, hash-identifier"
@@ -154,7 +154,7 @@ print_list() {
   echo -e "${MAGENTA}   ⊕ MANUAL INSTALL REQUIRED: ghidra, ida-free, binary-ninja${RESET}"
   echo ""
   echo -e "${CYAN}☁️  CLOUD / CONTAINER (20+)${RESET}"
-  echo "   prowler, trivy, kube-hunter, kube-bench, checkov, aws-cli,"
+  echo "   trivy, kube-hunter, kube-bench, checkov, aws-cli,"
   echo "   kubectl, helm, docker-bench-security"
   echo ""
   echo -e "${CYAN}🏆 CTF / FORENSICS (20+)${RESET}"
@@ -1013,10 +1013,6 @@ install_web() {
     "pkg:whatweb" \
     "gem:whatweb"
 
-  # jwt-tool — pip (package is jwt_tool)
-  install_tool_multi "jwt-tool" "jwt_tool" \
-    "pip:jwt_tool"
-
   # wfuzz — pip or apt
   install_tool_multi "wfuzz" "wfuzz" \
     "pip:wfuzz" \
@@ -1195,11 +1191,6 @@ install_binary() {
 # ─── Category: Cloud & Container Security ────────────────────────────────────
 install_cloud() {
   section "☁️  Cloud & Container Security Tools"
-
-  # prowler — pip (heavy deps, needs Python 3.9+)
-  FAIL_HINT="heavy Python deps; try: pip3 install prowler (needs Python 3.9+)"
-  install_tool_multi "prowler" "prowler" \
-    "pip:prowler"
 
   # trivy — brew or apt (Aqua Security repo on Linux)
   if [[ "$OS" == "macos" ]]; then
@@ -1502,10 +1493,6 @@ install_osint() {
   # social-analyzer
   install_tool_multi "social-analyzer" "social-analyzer" \
     "pip:social-analyzer"
-
-  # trufflehog
-  install_tool_multi "trufflehog" "trufflehog" \
-    "go:github.com/trufflesecurity/trufflehog/v3@latest"
 
   # Maltego — GUI, skip
   skip_manual_install "Maltego (GUI)"  "https://www.maltego.com/downloads/"
