@@ -19,11 +19,16 @@ set -euo pipefail
 #   ./nyxstrike.sh -y                     # Force reinstall Python requirements
 #   ./nyxstrike.sh -ai                    # Install Ollama + 9b model
 #   ./nyxstrike.sh -ai-small              # Install Ollama + 4b model
+#
+# Note: -t/-b are sticky — once used, later `-a` runs keep re-installing
+# those Python extras too. Delete .nyxstrike_data/installed_extras to reset.
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 VENV_DIR="${ROOT_DIR}/nyxstrike-env"
 PYTHON_BIN="python3"
 GIT_TOOLS_DIR="${ROOT_DIR}/git_tools"
+EXTRAS_STATE_DIR="${NYXSTRIKE_DATA_DIR:-${ROOT_DIR}/.nyxstrike_data}"
+EXTRAS_STATE_FILE="${EXTRAS_STATE_DIR}/installed_extras"
 
 # --- install flags ---
 INSTALL_TOOLS=false
@@ -104,11 +109,25 @@ ensure_uv_ready() {
 sync_python_deps() {
   ensure_uv_ready
 
+  # `-t`/`-b` are sticky across runs: once opted into, `uv sync` keeps
+  # re-requesting these extras.
+  local sync_install_tools="${INSTALL_TOOLS}"
+  local sync_install_big="${INSTALL_BIG_PACKAGES}"
+  if [[ -f "${EXTRAS_STATE_FILE}" ]]; then
+    if grep -qx "tools" "${EXTRAS_STATE_FILE}" 2>/dev/null; then
+      sync_install_tools=true
+    fi
+    if grep -qx "big" "${EXTRAS_STATE_FILE}" 2>/dev/null; then
+      sync_install_big=true
+      sync_install_tools=true
+    fi
+  fi
+
   local -a extra_flags=()
-  if [[ "${INSTALL_TOOLS}" == true ]]; then
+  if [[ "${sync_install_tools}" == true ]]; then
     extra_flags+=(--extra tools)
   fi
-  if [[ "${INSTALL_BIG_PACKAGES}" == true ]]; then
+  if [[ "${sync_install_big}" == true ]]; then
     extra_flags+=(--extra big)
   fi
 
@@ -122,6 +141,15 @@ sync_python_deps() {
 
   echo "Syncing Python deps${extra_flags:+ (${extra_flags[*]})}..."
   uv sync "${extra_flags[@]}"
+
+  mkdir -p "${EXTRAS_STATE_DIR}"
+  : > "${EXTRAS_STATE_FILE}"
+  if [[ "${sync_install_tools}" == true ]]; then
+    echo "tools" >> "${EXTRAS_STATE_FILE}"
+  fi
+  if [[ "${sync_install_big}" == true ]]; then
+    echo "big" >> "${EXTRAS_STATE_FILE}"
+  fi
 }
 
 write_model_to_config_local() {
@@ -298,6 +326,8 @@ while [[ $# -gt 0 ]]; do
       echo "  -t, --install-tools     Install security tools via ops/scripts/install_tools.sh"
       echo "                          (run ops/scripts/install_tools.sh --help for category/dry-run options)"
       echo "  -b, --install-big-packages  Install heavy optional Python extras (implies -t)"
+      echo "                          -t/-b are sticky: once used, later -a runs keep those"
+      echo "                          Python extras installed. Delete .nyxstrike_data/installed_extras to reset."
       echo "  -u, --update-git-tools  Pull latest for already-cloned git_tools repos (implies -t)"
       echo "  -y, --update-python-packages  Upgrade the uv lockfile and re-sync Python deps"
       echo "  -p, --python <bin>      Python binary to use (default: python3)"
