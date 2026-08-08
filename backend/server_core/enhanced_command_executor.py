@@ -135,6 +135,8 @@ logger = logging.getLogger(__name__)
 COMMAND_TIMEOUT = config_core.get("COMMAND_TIMEOUT", 300)  # Default to 5 minutes if not set
 COMMAND_INACTIVITY_TIMEOUT = config_core.get("COMMAND_INACTIVITY_TIMEOUT", 900)
 COMMAND_MAX_RUNTIME = config_core.get("COMMAND_MAX_RUNTIME", 86400)
+HEARTBEAT_INTERVAL = 10
+
 class EnhancedCommandExecutor:
     """Enhanced command executor with caching, progress tracking, and better output handling"""
 
@@ -189,27 +191,20 @@ class EnhancedCommandExecutor:
             self.stderr_data = "".join(self._stderr_chunks)
 
     def _show_progress(self):
-        """Show enhanced progress indication for long-running commands"""
-        progress_chars = ModernVisualEngine.PROGRESS_STYLES['dots']
+        """Update live-progress state for long-running commands and, when a
+        tool goes quiet for a while, log a plain proof-of-life line so it's
+        clear the tool is still running rather than stuck."""
         start = time.time()
-        i = 0
+        last_heartbeat = start
         while self.process and self.process.poll() is None:
             elapsed = time.time() - start
-            char = progress_chars[i % len(progress_chars)]
 
             # Calculate progress percentage (rough estimate)
             progress_base = self.timeout if isinstance(self.timeout, int) and self.timeout > 0 else COMMAND_MAX_RUNTIME
             progress_percent = min((elapsed / progress_base) * 100, 99.9)
             progress_fraction = progress_percent / 100
 
-            # Calculate ETA
-            eta = 0
-            if progress_percent > 5:  # Only show ETA after 5% progress
-                eta = ((elapsed / progress_percent) * 100) - elapsed
-
-            # Calculate speed
             bytes_processed = sum(len(c) for c in self._stdout_chunks) + sum(len(c) for c in self._stderr_chunks)
-            speed = f"{bytes_processed/elapsed:.0f} B/s" if elapsed > 0 else "0 B/s"
 
             # Update process manager with progress, preferring real captured
             # output over the synthetic elapsed-time placeholder
@@ -221,19 +216,13 @@ class EnhancedCommandExecutor:
                 bytes_processed
             )
 
-            # Create beautiful progress bar using ModernVisualEngine
-            progress_bar = ModernVisualEngine.render_progress_bar(
-                progress_fraction,
-                width=30,
-                style='cyber',
-                label=f"⚡ PROGRESS {char}",
-                eta=eta,
-                speed=speed
-            )
+            now = time.time()
+            silence = now - self.last_output_time
+            if silence >= HEARTBEAT_INTERVAL and now - last_heartbeat >= HEARTBEAT_INTERVAL:
+                logger.info(f"⏳ STILL RUNNING: PID {self.process.pid} | {elapsed:.0f}s elapsed | no new output for {silence:.0f}s")
+                last_heartbeat = now
 
-            logger.info(f"{progress_bar} | {elapsed:.1f}s | PID: {self.process.pid}")
             time.sleep(0.8)
-            i += 1
             if isinstance(self.timeout, int) and self.timeout > 0 and elapsed > self.timeout:
                 break
 
@@ -354,6 +343,8 @@ class EnhancedCommandExecutor:
                     self.process.kill()
 
                 self.return_code = -1
+                _tool_bin = ""
+                _findings_exit = False
                 telemetry.record_execution(False, execution_time)
 
             # Always consider it a success if we have output, even with timeout
