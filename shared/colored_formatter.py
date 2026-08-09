@@ -1,4 +1,5 @@
 import logging
+import re
 
 # ANSI color codes (inlined to avoid importing from mcp_core)
 _COLORS = {
@@ -10,6 +11,17 @@ _COLORS = {
 }
 _BRIGHT_WHITE = '\033[97m'
 _RESET = '\033[0m'
+
+# Almost everything logs at INFO, so leaving it all bright green makes the
+# console unreadable at a glance. Recolor by content so HTTP noise, cache
+# events, and process lifecycle lines are visually distinct from each other
+# and from genuine success/summary lines (which keep the default green).
+_INFO_CATEGORY_COLORS = (
+    (re.compile(r'"[A-Z]+ \S+ HTTP/1\.\d" \d{3}'), '\033[38;5;240m'),  # HTTP access logs — dim gray
+    (re.compile(r'Cache (HIT|MISS)'), '\033[38;5;129m'),               # cache events — purple
+    (re.compile(r'EXECUTING:|PROCESS:|PID |Task submitted to pool|Process pool worker'), '\033[38;5;51m'),  # process/task lifecycle — cyan
+    (re.compile(r'TIMEOUT:'), '\033[38;5;208m'),                       # timeouts — orange
+)
 
 class ColoredFormatter(logging.Formatter):
     """Enhanced formatter with colors and emojis - matches server styling"""
@@ -29,6 +41,13 @@ class ColoredFormatter(logging.Formatter):
         record = logging.makeLogRecord(record.__dict__)
         emoji = self.EMOJIS.get(record.levelname, '📝')
         color = self.COLORS.get(record.levelname, _BRIGHT_WHITE)
+
+        if record.levelname == 'INFO':
+            msg_text = str(record.msg)
+            for pattern, cat_color in _INFO_CATEGORY_COLORS:
+                if pattern.search(msg_text):
+                    color = cat_color
+                    break
 
         # Only apply ANSI codes if the handler stream is a real TTY
         stream = getattr(self, '_stream', None)

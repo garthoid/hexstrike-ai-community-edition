@@ -1,20 +1,23 @@
 import logging
 import re
 import sys
+import backend.server_core.config_core as config_core
 from shared.colored_formatter import ColoredFormatter
 
 _ANSI_ESCAPE = re.compile(r'\x1B[@-_][0-?]*[ -/]*[@-~]')
 _CLF_ACCESS = re.compile(r' - \[\d{2}/\w+/\d{4} \d{2}:\d{2}:\d{2}\]| -\s*$')
 
-_STATUS_304 = re.compile(r'"[A-Z]+ [^ ]+ HTTP/1.1[^"]+" 304\b')
+_HTTP_ACCESS_LINE = re.compile(r'"[A-Z]+ [^ ]+ HTTP/1\.1[^"]*"\s*\d{3}\b')
+_STATUS_304 = re.compile(r'"[A-Z]+ [^ ]+ HTTP/1\.1[^"]*" 304\b')
 
 class _StripCLFNoise(logging.Filter):
-    """Remove redundant CLF timestamp and trailing dash from Werkzeug access log lines.
-    Also suppresses noisy 304 Not Modified responses."""
+    """Remove redundant CLF timestamp and trailing dash from Werkzeug access log lines."""
 
     def filter(self, record: logging.LogRecord) -> bool:
         msg = record.getMessage()
         if _STATUS_304.search(msg):
+            return False
+        if _HTTP_ACCESS_LINE.search(msg) and not config_core.get("SHOW_HTTP_ACCESS_LOGS", False):
             return False
         clean = _CLF_ACCESS.sub('', msg)
         record.msg = clean

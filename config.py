@@ -25,6 +25,7 @@ _config = {
         "amass": 1800,
     },
     "CLEAN_TOOL_OUTPUT": True,
+    "SHOW_HTTP_ACCESS_LOGS": False,  # Werkzeug request logs (GET/POST ... HTTP/1.1" 200) are hidden by default; set True to show them
     "CPU_NICE_THRESHOLD": 85,  # CPU% above which tool commands are niced down (nice -n 10)
     "LLM_KEEP_ALIVE": 300,    # Seconds to keep the Ollama model in VRAM after each inference (default 5 min)
     "CACHE_SIZE": 1000,
