@@ -2,7 +2,7 @@ import logging
 import re
 import sys
 import backend.server_core.config_core as config_core
-from shared.colored_formatter import ColoredFormatter
+from backend.server_core.colored_formatter import ColoredFormatter
 
 _ANSI_ESCAPE = re.compile(r'\x1B[@-_][0-?]*[ -/]*[@-~]')
 _CLF_ACCESS = re.compile(r' - \[\d{2}/\w+/\d{4} \d{2}:\d{2}:\d{2}\]| -\s*$')
