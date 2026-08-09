@@ -5,7 +5,7 @@ from datetime import datetime
 
 from backend.server_core.singletons import decision_engine
 from backend.server_core.tool_spec import ParamSpec, ToolSpec, ToolValidationError
-from shared.target_types import TechnologyStack
+from backend.server_core.target_types import TechnologyStack
 
 logger = logging.getLogger(__name__)
 

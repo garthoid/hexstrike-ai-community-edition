@@ -1,6 +1,6 @@
 from typing import Any, Dict, List
 
-from shared.target_types import TargetType, TechnologyStack
+from backend.server_core.target_types import TargetType, TechnologyStack
 
 
 def initialize_tool_effectiveness() -> Dict[str, Dict[str, float]]:

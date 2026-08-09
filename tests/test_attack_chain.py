@@ -8,10 +8,10 @@ No subprocess, no Flask, no server calls.
 
 import pytest
 
-from shared.attack_chain import AttackChain
-from shared.attack_step import AttackStep
-from shared.target_profile import TargetProfile
-from shared.target_types import TargetType
+from backend.server_core.attack_chain import AttackChain
+from backend.server_core.attack_step import AttackStep
+from backend.server_core.target_profile import TargetProfile
+from backend.server_core.target_types import TargetType
 
 
 def _make_profile(target="https://example.invalid"):

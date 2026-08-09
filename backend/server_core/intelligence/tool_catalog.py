@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from typing import Dict, List, Set
 
-from shared.target_types import TargetType, TechnologyStack
+from backend.server_core.target_types import TargetType, TechnologyStack
 
 
 @dataclass(frozen=True)

@@ -1,6 +1,6 @@
 from typing import Dict, List, Optional, Set, Tuple
 
-from shared.target_profile import TargetProfile
+from backend.server_core.target_profile import TargetProfile
 
 from .decision_engine_constants import TIME_ESTIMATES
 from .tool_catalog import ToolSpec, objective_alias, objective_settings, required_capabilities, tech_values_from_profile

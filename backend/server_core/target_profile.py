@@ -1,6 +1,6 @@
 from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional
-from shared.target_types import TargetType, TechnologyStack
+from backend.server_core.target_types import TargetType, TechnologyStack
 
 @dataclass
 class TargetProfile:

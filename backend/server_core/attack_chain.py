@@ -1,7 +1,7 @@
 
 from typing import List, Set, Dict, Any
-from shared.target_profile import TargetProfile
-from shared.attack_step import AttackStep
+from backend.server_core.target_profile import TargetProfile
+from backend.server_core.attack_step import AttackStep
 
 class AttackChain:
     """Represents a sequence of attacks for maximum impact"""

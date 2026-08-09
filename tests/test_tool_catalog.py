@@ -18,7 +18,7 @@ from backend.server_core.intelligence.tool_catalog import (
     validate_tool_catalog,
     DEFAULT_OBJECTIVE,
 )
-from shared.target_types import TargetType, TechnologyStack
+from backend.server_core.target_types import TargetType, TechnologyStack
 
 
 # ---------------------------------------------------------------------------

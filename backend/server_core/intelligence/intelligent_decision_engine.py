@@ -6,9 +6,9 @@ from typing import Any, Dict, List, Optional, Tuple
 
 import requests as _requests
 
-from shared.attack_chain import AttackChain, AttackStep
-from shared.target_profile import TargetProfile
-from shared.target_types import TargetType, TechnologyStack
+from backend.server_core.attack_chain import AttackChain, AttackStep
+from backend.server_core.target_profile import TargetProfile
+from backend.server_core.target_types import TargetType, TechnologyStack
 from backend.server_core.parameter_optimizer import ParameterOptimizer
 from backend.server_core.tool_stats_store import ToolStatsStore
 import backend.server_core.config_core as _config_core

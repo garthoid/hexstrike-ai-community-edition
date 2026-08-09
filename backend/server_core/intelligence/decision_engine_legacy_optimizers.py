@@ -1,8 +1,8 @@
 import os
 from typing import Any, Dict
 
-from shared.target_profile import TargetProfile
-from shared.target_types import TargetType, TechnologyStack
+from backend.server_core.target_profile import TargetProfile
+from backend.server_core.target_types import TargetType, TechnologyStack
 
 
 class LegacyParameterOptimizers:

@@ -5,7 +5,7 @@ from backend.server_core.technology_detector import TechnologyDetector
 from backend.server_core.rate_limit_detector import RateLimitDetector
 from backend.server_core.failure_recovery_system import FailureRecoverySystem
 from backend.server_core.performance_monitor import PerformanceMonitor
-from shared.target_profile import TargetProfile
+from backend.server_core.target_profile import TargetProfile
 
 _TARGET_PARAM_CANDIDATES = [
     "target", "url", "domain", "hostname", "binary", "file_path",
