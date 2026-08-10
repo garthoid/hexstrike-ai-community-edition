@@ -50,7 +50,6 @@ def register_blueprints(app):
 
   # Web Framework
   app.register_blueprint(api_web_framework_http_framework_bp)
-  app.register_blueprint(api_web_framework_browser_agent_bp)
 
   # AI Payload
   app.register_blueprint(api_ai_payload_generate_payload_bp)
