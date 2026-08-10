@@ -7,7 +7,6 @@ from .settings import *
 from .ctf import *
 from .process import *
 from .api_audit import *
-from .bugbounty_workflow import *
 from .error_handling import *
 from .ops import *
 from .vuln_intel import *
@@ -51,15 +50,9 @@ def register_blueprints(app):
   # Web Framework
   app.register_blueprint(api_web_framework_http_framework_bp)
 
-  # AI Payload
-  app.register_blueprint(api_ai_payload_generate_payload_bp)
-
   # Vulnerability Intelligence
   app.register_blueprint(api_vulnerability_intelligence_bp)
   app.register_blueprint(api_vuln_intel_cve_exploit_chain_bp)
-
-  # Bug Bounty Workflow
-  app.register_blueprint(api_bugbounty_workflow_bug_bounty_recon_bp)
 
   # AI Assist
   app.register_blueprint(api_chat_bp)

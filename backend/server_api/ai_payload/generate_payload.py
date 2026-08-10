@@ -1,11 +1,7 @@
-from flask import Blueprint, request, jsonify
 import logging
-from datetime import datetime
 from typing import Dict, Any
 
 logger = logging.getLogger(__name__)
-
-api_ai_payload_generate_payload_bp = Blueprint("api_ai_payload_generate_payload", __name__)
 
 
 # ============================================================================
@@ -221,34 +217,3 @@ class AIPayloadGenerator:
 
 # Global AI payload generator
 ai_payload_generator = AIPayloadGenerator()
-
-
-@api_ai_payload_generate_payload_bp.route("/api/ai/generate_payload", methods=["POST"])
-def ai_generate_payload():
-    """Generate AI-powered contextual payloads for security testing"""
-    try:
-        params = request.json
-        target_info = {
-            "attack_type": params.get("attack_type", "xss"),
-            "complexity": params.get("complexity", "basic"),
-            "technology": params.get("technology", ""),
-            "url": params.get("url", "")
-        }
-
-        logger.info(f"🤖 Generating AI payloads for {target_info['attack_type']} attack")
-        result = ai_payload_generator.generate_contextual_payload(target_info)
-
-        logger.info(f"✅ Generated {result['payload_count']} contextual payloads")
-
-        return jsonify({
-            "success": True,
-            "ai_payload_generation": result,
-            "timestamp": datetime.now().isoformat()
-        })
-
-    except Exception as e:
-        logger.error(f"💥 Error in AI payload generation: {str(e)}")
-        return jsonify({
-            "success": False,
-            "error": f"Server error: {str(e)}"
-        }), 500

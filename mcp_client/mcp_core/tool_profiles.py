@@ -256,13 +256,11 @@ TOOL_PROFILES = {
 
     #Tools for bug bounty workflows and recon automation
     "bug_bounty": [
-        lambda mcp, client, logger: register_bug_bounty_recon_tools(mcp, client, logger),
         lambda mcp, client, logger: register_toolspec_category(mcp, client, logger, "bug_bounty"),
     ],
 
     #Tools for AI-powered payload generation and testing
     "ai_payload": [
-        lambda mcp, client, logger: register_ai_payload_generation_tools(mcp, client, logger),
         lambda mcp, client, logger: register_toolspec_category(mcp, client, logger, "ai_payload"),
     ],
 
