@@ -44,7 +44,6 @@ def register_blueprints(app):
   app.register_blueprint(api_process_resource_usage_bp)
   app.register_blueprint(api_process_performance_dashboard_bp)
   app.register_blueprint(api_process_terminate_gracefully_bp)
-  app.register_blueprint(api_ops_python_env_bp)
   app.register_blueprint(api_process_auto_scaling_bp)
   app.register_blueprint(api_process_scale_pool_bp)
   app.register_blueprint(api_process_health_check_bp)

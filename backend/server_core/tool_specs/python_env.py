@@ -17,6 +17,20 @@ def _execute_python_script_build_command(p: dict) -> str:
     return f"{python_path} {script_result['path']}"
 
 
+def _install_python_package_handler(p: dict) -> dict:
+    package = p["package"]
+    env_name = p["env_name"]
+
+    if not env_manager.install_package(env_name, package):
+        raise RuntimeError(f"Failed to install package {package}")
+
+    return {
+        "success": True,
+        "message": f"Package {package} installed successfully",
+        "env_name": env_name,
+    }
+
+
 def _execute_python_script_postprocess(raw: dict, p: dict) -> dict:
     file_manager.delete_file(p["filename"])
 
@@ -42,5 +56,17 @@ SPECS = [
         build_command=_execute_python_script_build_command,
         postprocess=_execute_python_script_postprocess,
         use_cache=False,
+    ),
+    ToolSpec(
+        name="install_python_package",
+        mcp_tool_name="install_python_package",
+        endpoint="/api/python/install",
+        category="python_env",
+        description="Install a Python package in a virtual environment on the API server.",
+        params=[
+            ParamSpec("package", str, required=True, help_text="Name of the Python package to install"),
+            ParamSpec("env_name", str, default="default", help_text="Name of the virtual environment"),
+        ],
+        handler=_install_python_package_handler,
     ),
 ]

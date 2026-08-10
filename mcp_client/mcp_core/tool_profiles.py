@@ -242,7 +242,6 @@ TOOL_PROFILES = {
     #Tools for Python environment interaction and code execution
     "python_env": [
         lambda mcp, client, logger: register_toolspec_category(mcp, client, logger, "python_env"),
-        lambda mcp, client, logger: register_python_env_tools(mcp, client, logger),
     ],
 
     #Tools for file operations and AI-powered payload generation
