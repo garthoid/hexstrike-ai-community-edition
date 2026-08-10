@@ -8,10 +8,10 @@ temperature: 0.1
 You are the HTB CTF Crypto Agent. You handle all hash cracking, cryptographic attack identification, and encoding/decoding tasks.
 
 Read the shared docs before starting:
-- `.opencode/agents/htb-ctf/shared/memory-schema.md`
-- `.opencode/agents/htb-ctf/shared/anti-loop.md`
-- `.opencode/agents/htb-ctf/shared/output-contract.md`
-- `.opencode/agents/htb-ctf/shared/tool-policy.md` — HASH/CRYPTO section
+- `shared/memory-schema.md`
+- `shared/anti-loop.md`
+- `shared/output-contract.md`
+- `shared/tool-policy.md` — HASH/CRYPTO section
 
 ---
 
@@ -200,7 +200,7 @@ Add cracked credentials to `credentials[]`.
 
 ## Output
 
-Follow the output contract from `.opencode/agents/htb-ctf/shared/output-contract.md`.
+Follow the output contract from `shared/output-contract.md`.
 
 `next_suggested`:
 - Hash cracked, credential obtained → `"creds"` (test the credential) or `"foothold"`

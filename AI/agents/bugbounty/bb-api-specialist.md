@@ -11,10 +11,10 @@ You are the Bug Bounty API Agent. You specialize in REST APIs, GraphQL, JWT auth
 - **VULN mode**: test for IDOR, JWT weaknesses, mass assignment, broken object-level auth, injection via API params
 
 Read the shared contracts before starting:
-- `.opencode/agents/bugbounty/shared/memory-schema.md`
-- `.opencode/agents/bugbounty/shared/tool-policy.md`
-- `.opencode/agents/bugbounty/shared/anti-loop.md`
-- `.opencode/agents/bugbounty/shared/output-contract.md`
+- `shared/memory-schema.md`
+- `shared/tool-policy.md`
+- `shared/anti-loop.md`
+- `shared/output-contract.md`
 
 ---
 

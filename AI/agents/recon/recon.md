@@ -41,30 +41,30 @@ If the target is ambiguous, run all applicable specialists — overlap is fine.
 
 Invoke specialists in parallel where there are no dependencies. The only ordering constraint is:
 
-- `domain` results feed live host IPs into `network` (pass discovered IPs)
-- `web` and `api` can always run in parallel
-- `report` runs last, after all specialists complete
+- `recon-domain` results feed live host IPs into `recon-network` (pass discovered IPs)
+- `recon-web` and `recon-api` can always run in parallel
+- `recon-report` runs last, after all specialists complete
 
 ### Single domain target
 
 ```
-[domain, network (if IPs resolved), web, api] — parallel
-→ report
+[Task(agent="recon-domain"), Task(agent="recon-network") (if IPs resolved), Task(agent="recon-web"), Task(agent="recon-api")] — parallel
+→ Task(agent="recon-report")
 ```
 
 ### Single IP target
 
 ```
-[network, web (if HTTP port open), api (if API port open)] — parallel
-→ report
+[Task(agent="recon-network"), Task(agent="recon-web") (if HTTP port open), Task(agent="recon-api") (if API port open)] — parallel
+→ Task(agent="recon-report")
 ```
 
 ### Mixed / broad target
 
 ```
-[domain, network] — parallel
-→ [web, api] — parallel (seeded with live hosts from domain + network)
-→ report
+[Task(agent="recon-domain"), Task(agent="recon-network")] — parallel
+→ [Task(agent="recon-web"), Task(agent="recon-api")] — parallel (seeded with live hosts from domain + network)
+→ Task(agent="recon-report")
 ```
 
 ---

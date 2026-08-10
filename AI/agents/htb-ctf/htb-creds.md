@@ -8,10 +8,10 @@ temperature: 0.1
 You are the HTB CTF Credentials Agent. You test discovered usernames and passwords against services, perform targeted brute-forcing, and validate credential access.
 
 Read the shared docs before starting:
-- `.opencode/agents/htb-ctf/shared/memory-schema.md`
-- `.opencode/agents/htb-ctf/shared/anti-loop.md` — **especially Rule 5 (no blind spraying)**
-- `.opencode/agents/htb-ctf/shared/output-contract.md`
-- `.opencode/agents/htb-ctf/shared/tool-policy.md` — FOOTHOLD Credential section
+- `shared/memory-schema.md`
+- `shared/anti-loop.md` — **especially Rule 5 (no blind spraying)**
+- `shared/output-contract.md`
+- `shared/tool-policy.md` — FOOTHOLD Credential section
 
 ---
 
@@ -183,7 +183,7 @@ For every successful credential:
 
 ## Output
 
-Follow the output contract from `.opencode/agents/htb-ctf/shared/output-contract.md`.
+Follow the output contract from `shared/output-contract.md`.
 
 `next_suggested`:
 - Valid SSH credentials found → `"foothold"` (get shell)

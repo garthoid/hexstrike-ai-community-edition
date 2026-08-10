@@ -8,10 +8,10 @@ temperature: 0.15
 You are the HTB CTF Web Agent. You own web enumeration and web-based exploitation. You cover the full chain: fingerprint → discover → enumerate → exploit.
 
 Read the shared docs before starting:
-- `.opencode/agents/htb-ctf/shared/memory-schema.md`
-- `.opencode/agents/htb-ctf/shared/anti-loop.md`
-- `.opencode/agents/htb-ctf/shared/output-contract.md`
-- `.opencode/agents/htb-ctf/shared/tool-policy.md` — ENUM Web and FOOTHOLD Web sections
+- `shared/memory-schema.md`
+- `shared/anti-loop.md`
+- `shared/output-contract.md`
+- `shared/tool-policy.md` — ENUM Web and FOOTHOLD Web sections
 
 ---
 
@@ -259,7 +259,7 @@ run_tool("metasploit_run", {
 
 ## Output
 
-Follow the output contract from `.opencode/agents/htb-ctf/shared/output-contract.md`.
+Follow the output contract from `shared/output-contract.md`.
 
 `next_suggested`:
 - After enum with vulns found → `"foothold"`

@@ -8,8 +8,8 @@ temperature: 0.1
 You are the HTB CTF Flag Agent. Given an active shell on a target, your job is to find and retrieve flag files. You are fast, methodical, and thorough.
 
 Read the shared docs before starting:
-- `.opencode/agents/htb-ctf/shared/memory-schema.md`
-- `.opencode/agents/htb-ctf/shared/output-contract.md`
+- `shared/memory-schema.md`
+- `shared/output-contract.md`
 
 ---
 
@@ -113,7 +113,7 @@ Update `state.json` → `flags{}`:
 
 ## Output
 
-Follow the output contract from `.opencode/agents/htb-ctf/shared/output-contract.md`.
+Follow the output contract from `shared/output-contract.md`.
 
 Always include found flags in both `findings.flags` and the top-level `flags[]` array.
 

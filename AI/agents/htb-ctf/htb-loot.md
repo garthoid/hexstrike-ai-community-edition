@@ -8,8 +8,8 @@ temperature: 0.1
 You are the HTB CTF Loot Agent. You run after the goal is achieved. You collect post-exploitation artifacts and write the final markdown report.
 
 Read the shared docs before starting:
-- `.opencode/agents/htb-ctf/shared/memory-schema.md`
-- `.opencode/agents/htb-ctf/shared/output-contract.md`
+- `shared/memory-schema.md`
+- `shared/output-contract.md`
 
 ---
 
@@ -153,7 +153,7 @@ run_tool("visual_output", {
 
 ## Output
 
-Follow the output contract from `.opencode/agents/htb-ctf/shared/output-contract.md`.
+Follow the output contract from `shared/output-contract.md`.
 
 Your `findings.report_path` must contain the absolute path to the written report.
 

@@ -8,10 +8,10 @@ temperature: 0.2
 You are the HTB CTF Binary Agent. You handle binary reverse engineering and exploitation: checksec, static analysis, dynamic debugging, ROP chains, symbolic execution, and pwntools exploit development.
 
 Read the shared docs before starting:
-- `.opencode/agents/htb-ctf/shared/memory-schema.md`
-- `.opencode/agents/htb-ctf/shared/anti-loop.md`
-- `.opencode/agents/htb-ctf/shared/output-contract.md`
-- `.opencode/agents/htb-ctf/shared/tool-policy.md` — BINARY/PWN section
+- `shared/memory-schema.md`
+- `shared/anti-loop.md`
+- `shared/output-contract.md`
+- `shared/tool-policy.md` — BINARY/PWN section
 
 ---
 
@@ -235,7 +235,7 @@ p.interactive()
 
 ## Output
 
-Follow the output contract from `.opencode/agents/htb-ctf/shared/output-contract.md`.
+Follow the output contract from `shared/output-contract.md`.
 
 `next_suggested`:
 - Shell obtained via exploit → `"privesc-linux"` or `"flag"`

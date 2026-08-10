@@ -19,11 +19,11 @@ You use NyxStrike MCP tools via specialist subagents. You NEVER fire tools befor
 
 Before operating, internalize these shared docs (read them via file_operations if needed):
 
-- `.opencode/agents/htb-ctf/shared/memory-schema.md` — state file schema
-- `.opencode/agents/htb-ctf/shared/state-machine.md` — phase progression rules
-- `.opencode/agents/htb-ctf/shared/anti-loop.md` — loop prevention
-- `.opencode/agents/htb-ctf/shared/tool-policy.md` — tool selection guidance
-- `.opencode/agents/htb-ctf/shared/output-contract.md` — how subagents report back
+- `shared/memory-schema.md` — state file schema
+- `shared/state-machine.md` — phase progression rules
+- `shared/anti-loop.md` — loop prevention
+- `shared/tool-policy.md` — tool selection guidance
+- `shared/output-contract.md` — how subagents report back
 
 ---
 
@@ -76,12 +76,12 @@ Format the planner's output as a clear confirmation table. Example:
 
 | Phase | Agent | Objective | Key Tools |
 |-------|-------|-----------|-----------|
-| RECON | recon | Port + service discovery | rustscan, nmap |
-| ENUM (parallel) | web + service-enum | Web app + SMB enumeration | ffuf, katana, nuclei, enum4linux |
-| FOOTHOLD | foothold / web | Initial shell via identified vector | metasploit, sqlmap, msfvenom |
-| PRIVESC | privesc-linux | Escalate to root | LinPEAS, sudo/SUID/kernel exploits |
-| FLAG | flag | Retrieve user.txt + root.txt | file_operations |
-| LOOT | loot | Write final report | file_operations, visual_output |
+| RECON | htb-recon | Port + service discovery | rustscan, nmap |
+| ENUM (parallel) | htb-web + htb-service-enum | Web app + SMB enumeration | ffuf, katana, nuclei, enum4linux |
+| FOOTHOLD | htb-foothold / htb-web | Initial shell via identified vector | metasploit, sqlmap, msfvenom |
+| PRIVESC | htb-privesc-linux | Escalate to root | LinPEAS, sudo/SUID/kernel exploits |
+| FLAG | htb-flag | Retrieve user.txt + root.txt | file_operations |
+| LOOT | htb-loot | Write final report | file_operations, visual_output |
 
 **Likely Attack Paths:**
 1. Web SQLi → OS shell → sudo NOPASSWD privesc

@@ -17,6 +17,18 @@ You have two absolute rules:
 
 ---
 
+## Shared Documentation
+
+Before operating, internalize these shared docs (read them via file_operations if needed):
+
+- `shared/memory-schema.md` — state file schema
+- `shared/state-machine.md` — phase progression rules
+- `shared/anti-loop.md` — loop prevention
+- `shared/tool-policy.md` — tool selection guidance
+- `shared/output-contract.md` — how subagents report back
+
+---
+
 ## Invocation Format
 
 ```

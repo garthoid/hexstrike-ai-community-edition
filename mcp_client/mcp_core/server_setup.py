@@ -20,7 +20,7 @@ def _register_skills(mcp: FastMCP, logger) -> None:
     if SkillsDirectoryProvider is None:
         logger.warning("fastmcp SkillsDirectoryProvider not available; skipping skills registration")
         return
-    skills_dir = Path(__file__).parent.parent / "skills"
+    skills_dir = Path(__file__).parent.parent.parent / "AI/skills"
     if not skills_dir.exists():
         return
     
