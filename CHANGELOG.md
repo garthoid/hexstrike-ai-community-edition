@@ -1,6 +1,6 @@
 # Changelog
 
-## 1.8.0 - exploitotter (NEXT)
+## 1.8.0 - exploitotter (2026-08-13)
 
 ### Workbench
 - New "Workbench" page — local data-transform toolkit, no target or network required: 40+ operations spanning encoding, hashing, AES/RSA crypto, ciphers, compression, JWT/X.509/regex analysis, text utilities, networking calculators, and diff/compare. Chain operations into a recipe, piping one output into the next.
