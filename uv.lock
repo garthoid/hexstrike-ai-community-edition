@@ -3043,7 +3043,7 @@ wheels = [
 
 [[package]]
 name = "nyxstrike"
-version = "1.8.0"
+version = "1.9.0"
 source = { virtual = "." }
 dependencies = [
     { name = "aiohttp", marker = "sys_platform == 'linux'" },
