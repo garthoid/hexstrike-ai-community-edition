@@ -1,0 +1,136 @@
+/* Styles are in App.css as shared, except for the widget customize/add/reorder
+   UI below, which is specific to this page. */
+
+.dashboard-toolbar {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.dashboard-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 40px 0;
+  color: var(--text-dim);
+  font-size: 13px;
+}
+
+/* ── Widget frame (shown while customizing) ─────────────────────────────── */
+.dashboard-widget-frame {
+  position: relative;
+  border: 1px dashed color-mix(in srgb, var(--accent) 40%, var(--border));
+  border-radius: var(--radius);
+  padding: 8px;
+  cursor: grab;
+}
+
+.dashboard-widget-frame.drag-reorder-item--dragging {
+  cursor: grabbing;
+}
+
+.dashboard-widget-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 6px 8px;
+}
+
+.dashboard-widget-grip {
+  display: flex;
+  align-items: center;
+  color: var(--text-dim);
+}
+
+.dashboard-widget-frame-label {
+  flex: 1;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text-dim);
+}
+
+.dashboard-widget-remove:hover {
+  color: var(--danger);
+  border-color: color-mix(in srgb, var(--danger) 48%, var(--border));
+}
+
+/* ── Add Widget picker (inside InformationModal) ────────────────────────── */
+.dashboard-add-widget-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 12px;
+}
+
+.dashboard-add-widget-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  background: var(--bg-card2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text);
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.12s, border-color 0.12s;
+}
+
+.dashboard-add-widget-item:hover {
+  background: color-mix(in srgb, var(--accent) 11%, var(--bg-card2));
+  border-color: color-mix(in srgb, var(--accent) 48%, var(--border));
+}
+
+.dashboard-add-widget-icon {
+  display: flex;
+  color: var(--accent);
+  flex-shrink: 0;
+}
+
+.dashboard-add-widget-text {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.dashboard-add-widget-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-h);
+}
+
+.dashboard-add-widget-desc {
+  font-size: 11px;
+  color: var(--text-dim);
+}
+
+/* ── Generic small-list rows used by dashboard "recent N" widgets ──────── */
+.section-title-icon {
+  flex-shrink: 0;
+}
+
+.widget-list {
+  padding: 8px 0;
+}
+
+.widget-list-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 18px;
+  border-bottom: 1px solid var(--border);
+  font-size: 12px;
+}
+.widget-list-row:last-child { border-bottom: none; }
+
+.widget-list-row-main {
+  flex: 1;
+  color: var(--text-h);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

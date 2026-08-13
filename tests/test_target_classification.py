@@ -11,8 +11,8 @@ The engine is instantiated directly — it performs no I/O during __init__.
 
 import pytest
 
-from server_core.intelligence.intelligent_decision_engine import IntelligentDecisionEngine
-from shared.target_types import TargetType, TechnologyStack
+from backend.server_core.intelligence.intelligent_decision_engine import IntelligentDecisionEngine
+from backend.server_core.target_types import TargetType, TechnologyStack
 
 
 @pytest.fixture(scope="module")

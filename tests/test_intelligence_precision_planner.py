@@ -1,5 +1,5 @@
-from server_core.intelligence.tool_catalog import build_tool_catalog, validate_tool_catalog
-from server_core.singletons import decision_engine
+from backend.server_core.intelligence.tool_catalog import build_tool_catalog, validate_tool_catalog
+from backend.server_core.singletons import decision_engine
 
 
 def _tools_for(target: str, objective: str):

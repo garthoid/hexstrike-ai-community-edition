@@ -8,7 +8,7 @@ No subprocess, no Flask, no server calls.
 
 import pytest
 
-from server_core.error_handling import ErrorType, IntelligentErrorHandler
+from backend.server_core.error_handling import ErrorType, IntelligentErrorHandler
 
 
 @pytest.fixture(scope="module")

@@ -1,0 +1,98 @@
+/* ── Boxed layout (replaces .stat-card) ─────────────────────────────────── */
+.ui-card--boxed {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px 18px;
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+  transition: border-color var(--t-base), transform var(--t-base) var(--ease-out-expressive), box-shadow var(--t-base) var(--ease-out-expressive);
+}
+.ui-card--boxed:hover {
+  border-color: var(--text-dim);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-sm);
+}
+
+.ui-card-icon { flex-shrink: 0; margin-top: 2px; }
+
+.ui-card-body { min-width: 0; }
+
+.ui-card-label {
+  font-size: 11px;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+}
+
+.ui-card-value {
+  font-size: 22px;
+  font-weight: 600;
+  font-family: var(--mono);
+  line-height: 1.2;
+  margin: 2px 0;
+}
+
+.ui-card-sub { font-size: 11px; color: var(--text-dim); }
+
+.ui-card-group--boxed {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 12px;
+}
+
+/* ── Flat layout (replaces .kpi-strip) ──────────────────────────────────── */
+.ui-card-group--flat {
+  display: flex;
+  align-items: stretch;
+  gap: 22px;
+  padding: 6px 0;
+  flex-wrap: wrap;
+}
+
+.ui-card--flat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  flex: 1 1 0;
+  min-width: 160px;
+}
+
+.ui-card-flat-top {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  line-height: 1.2;
+}
+
+.ui-card-flat-value {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-h);
+  font-family: var(--mono);
+}
+
+.ui-card-flat-label {
+  font-size: 10.5px;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.ui-card-group-divider {
+  width: 1px;
+  align-self: stretch;
+  background: var(--border);
+  flex-shrink: 0;
+}
+
+@media (max-width: 780px) {
+  .ui-card-group-divider {
+    display: none;
+  }
+}

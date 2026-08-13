@@ -1,0 +1,31 @@
+.session-topology {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.session-topology-canvas {
+  height: 600px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+  background: var(--bg-main, var(--bg-card));
+}
+
+.session-topology-canvas .react-flow__minimap {
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.topology-node-label {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 2px 4px;
+}
+
+.topology-node-label strong {
+  color: var(--text-h);
+  font-size: 13px;
+}

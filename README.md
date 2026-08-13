@@ -1,20 +1,9 @@
 <div align="center">
-
 <img src="assets/nyxstrike-logo.png" alt="NyxStrike" width="220"/>
 
 # NyxStrike
-*Previously: Hexstrike AI Community Edition*
 
 ### AI-powered offensive security orchestration engine
-
-### ⚡ From target → recon → exploit chain in minutes
-
-⭐ If NyxStrike improves your workflow, consider starring the repo — it helps others discover it.
-
-[![Python](https://img.shields.io/badge/Python-3.13%2B-blue.svg)](https://www.python.org/)
-[![License](https://img.shields.io/badge/License-AGPLv3-green.svg)](LICENSE)
-[![Security](https://img.shields.io/badge/Security-Penetration%20Testing-red.svg)](https://github.com/CommonHuman-Lab/nyxstrike)
-[![MCP](https://img.shields.io/badge/MCP-Compatible-purple.svg)](https://github.com/CommonHuman-Lab/nyxstrike)
 
 </div>
 
@@ -33,12 +22,7 @@ git clone https://github.com/CommonHuman-Lab/nyxstrike.git
 cd nyxstrike
 
 ./nyxstrike.sh -a               # Setup + start server
-./nyxstrike.sh -a -ai           # + local AI model (~8.4 GB RAM)
-./nyxstrike.sh -a -ai-small     # + smaller AI model (~2.5 GB RAM)
-
-# Docker
-docker compose up --build -d    # Build + start
-docker compose down             # Stop
+./nyxstrike.sh -a -t            # + install external tools
 
 ```
 
@@ -55,6 +39,8 @@ Open [http://localhost:8888](http://localhost:8888) to access the dashboard.
 ## 🔌 AI Agent Integrations (MCP)
 
 Connect NyxStrike to any MCP-compatible AI client — OpenCode, Cursor, Claude Desktop, VS Code Copilot, Roo Code, and more.
+
+> Open [http://localhost:8888/#/help](http://localhost:8888/#/help) for help with configurations.
 
 ### Universal MCP Command
 

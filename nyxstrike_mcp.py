@@ -11,9 +11,9 @@ Framework: FastMCP integration for tool orchestration
 
 import sys
 import logging
-from shared.colored_formatter import ColoredFormatter
-from mcp_core.mcp_entry import run_mcp
-from mcp_core.args import parse_args
+from backend.server_core.colored_formatter import ColoredFormatter
+from mcp_client.mcp_core.mcp_entry import run_mcp
+from mcp_client.mcp_core.args import parse_args
 
 # Setup logging
 logging.basicConfig(

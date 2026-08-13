@@ -1,6 +1,31 @@
 # Changelog
 
-## 1.7.0 - phishfalcon (NEXT)
+## 1.8.0 - exploitotter (2026-08-13)
+
+### Workbench
+- New "Workbench" page — local data-transform toolkit, no target or network required: 40+ operations spanning encoding, hashing, AES/RSA crypto, ciphers, compression, JWT/X.509/regex analysis, text utilities, networking calculators, and diff/compare. Chain operations into a recipe, piping one output into the next.
+- Recipes save, load, and export/import as JSON; favorite, hide, and reorder operations and categories in the sidebar; binary/image output downloads straight to a file.
+
+### Evidence chain-of-custody
+- Every tool run is now hash-chained (tamper-evident), including one-off runs made outside any session.
+- New "Verify" page — look up the exact run behind a given hash, or check any session's evidence chain by ID. Session reports also show integrity inline.
+
+### Topology map
+- Added a network topology map — export a completed nmap/nmap-advanced run to a live host/port graph, auto-creating a session if needed.
+- Toggle on the Run page to auto-export scan results, plus manual "Export to Topology" buttons on the Run page and session tool runs.
+- New "Topology" tab on the session detail page renders the graph.
+
+### Dependencies
+- Migrated Python dependency management from `dependencies/requirements*.txt` to `pyproject.toml` + `uv.lock`.
+
+### Security & hardening
+- Server now refuses to start if bound to a non-loopback host with no API token configured.
+- Closed command-injection risk across ~35 tool builders — commands are now built as safely-quoted argv lists instead of raw string interpolation.
+- Closed a Python source-injection risk in the Pwntools exploit generator.
+- Added rate limiting to NyxStrike's own API.
+- Fixed a race where concurrent browser-agent requests could stomp on the same Selenium driver.
+
+## 1.7.0 - phishfalcon (2026-07-28)
 
 ### Navigation
 - Replaced the top nav tab bar with a collapsible sidebar — icon-only rail on desktop (state persists across reloads), slide-out drawer on mobile.

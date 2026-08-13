@@ -13,7 +13,7 @@ Patched paths
 3.  server_core.enhanced_process_manager.subprocess        — process manager gateway
 4.  server_core.python_env_manager.subprocess              — pip-install gateway
 5.  server_api.wifi_pentest.hcxdumptool.subprocess         — direct hcxdumptool BPF calls
-6.  server_api.active_directory.impacket_scripts.subprocess — impacket direct calls
+6.  server_core.impacket_helpers.subprocess                — impacket direct calls
 7.  server_api.ops.system_monitoring.subprocess            — tool-availability probes
 8.  server_core.ai_exploit_generator — imports subprocess locally; covered by module patches above
 9.  server_core.singletons.cache                           — cache singleton
@@ -66,7 +66,7 @@ _patches = [
     patch("server_core.enhanced_process_manager.subprocess", _MOCK_SUBPROCESS),
     patch("server_core.python_env_manager.subprocess", _MOCK_SUBPROCESS),
     patch("server_core.tool_specs.wifi_pentest.subprocess", _MOCK_SUBPROCESS),
-    patch("server_api.active_directory.impacket_scripts.subprocess", _MOCK_SUBPROCESS),
+    patch("server_core.impacket_helpers.subprocess", _MOCK_SUBPROCESS),
     patch("server_api.ops.system_monitoring.subprocess", _MOCK_SUBPROCESS),
     patch("server_core.singletons.cache", _CACHE_MOCK),
     patch("server_core.singletons.telemetry", _TELEMETRY_MOCK),
@@ -79,7 +79,7 @@ def pytest_configure(config):
         p.start()
 
     from nyxstrike_server import app as _app
-    from server_core.plugin_loader import _load_tool_plugin
+    from backend.server_core.plugin_loader import _load_tool_plugin
 
     if "_plugin_tool_server_api_h2csmuggler" not in sys.modules:
         _load_tool_plugin(_app, "h2csmuggler", set(), set())

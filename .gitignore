@@ -8,7 +8,7 @@ git_tools/
 .pytest_cache/
 
 # Web UI build output
-ui/node_modules/
+frontend/ui/node_modules/
 
 # Claude worktrees
 .claude/worktrees/
@@ -23,6 +23,7 @@ install_log.txt
 .opencode/.gitignore
 
 # Screenshot/demo-content tooling output
-/scripts/screenshots/
-/scripts/themes/
-/scripts/content/
+/ops/scripts/screenshots/
+/ops/scripts/themes/
+/ops/scripts/content/
+/ops/scripts/package-lock.json

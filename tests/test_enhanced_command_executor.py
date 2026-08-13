@@ -87,8 +87,8 @@ def _exec(command="echo hello", timeout=10, subprocess_mock=None):
         proc = _make_process()
         subprocess_mock = _make_subprocess_mock(proc)
 
-    with patch("server_core.enhanced_command_executor.subprocess", subprocess_mock):
-        from server_core.enhanced_command_executor import EnhancedCommandExecutor
+    with patch("backend.server_core.enhanced_command_executor.subprocess", subprocess_mock):
+        from backend.server_core.enhanced_command_executor import EnhancedCommandExecutor
         executor = EnhancedCommandExecutor(command, timeout=timeout)
         return executor.execute()
 
@@ -119,8 +119,8 @@ class TestBasicExecution:
     def test_popen_called_with_shell_true(self):
         proc = _make_process()
         sub = _make_subprocess_mock(proc)
-        with patch("server_core.enhanced_command_executor.subprocess", sub):
-            from server_core.enhanced_command_executor import EnhancedCommandExecutor
+        with patch("backend.server_core.enhanced_command_executor.subprocess", sub):
+            from backend.server_core.enhanced_command_executor import EnhancedCommandExecutor
             EnhancedCommandExecutor("ls", timeout=5).execute()
         sub.Popen.assert_called_once()
         _, kwargs = sub.Popen.call_args
@@ -162,10 +162,10 @@ class TestTimeoutEnforcement:
 
         # Patch COMMAND_INACTIVITY_TIMEOUT and COMMAND_MAX_RUNTIME to large values
         # so only our configured timeout fires.
-        with patch("server_core.enhanced_command_executor.subprocess", sub), \
-             patch("server_core.enhanced_command_executor.COMMAND_INACTIVITY_TIMEOUT", 9999), \
-             patch("server_core.enhanced_command_executor.COMMAND_MAX_RUNTIME", 9999):
-            from server_core.enhanced_command_executor import EnhancedCommandExecutor
+        with patch("backend.server_core.enhanced_command_executor.subprocess", sub), \
+             patch("backend.server_core.enhanced_command_executor.COMMAND_INACTIVITY_TIMEOUT", 9999), \
+             patch("backend.server_core.enhanced_command_executor.COMMAND_MAX_RUNTIME", 9999):
+            from backend.server_core.enhanced_command_executor import EnhancedCommandExecutor
             executor = EnhancedCommandExecutor("sleep 100", timeout=1)
 
             # Monkey-patch start_time so elapsed is immediately > timeout
@@ -177,7 +177,7 @@ class TestTimeoutEnforcement:
                 return result
 
             # Actually just call with mocked time
-            with patch("server_core.enhanced_command_executor.time") as mock_time:
+            with patch("backend.server_core.enhanced_command_executor.time") as mock_time:
                 mock_time.time.side_effect = [
                     0,    # start_time
                     0,    # last_output_time
@@ -203,11 +203,11 @@ class TestTimeoutEnforcement:
         ]
 
         sub = _make_subprocess_mock(proc)
-        with patch("server_core.enhanced_command_executor.subprocess", sub), \
-             patch("server_core.enhanced_command_executor.COMMAND_INACTIVITY_TIMEOUT", 9999), \
-             patch("server_core.enhanced_command_executor.COMMAND_MAX_RUNTIME", 9999):
-            from server_core.enhanced_command_executor import EnhancedCommandExecutor
-            with patch("server_core.enhanced_command_executor.time") as mock_time:
+        with patch("backend.server_core.enhanced_command_executor.subprocess", sub), \
+             patch("backend.server_core.enhanced_command_executor.COMMAND_INACTIVITY_TIMEOUT", 9999), \
+             patch("backend.server_core.enhanced_command_executor.COMMAND_MAX_RUNTIME", 9999):
+            from backend.server_core.enhanced_command_executor import EnhancedCommandExecutor
+            with patch("backend.server_core.enhanced_command_executor.time") as mock_time:
                 import time as _time
                 mock_time.time.side_effect = [0, 0, 0, 2, 2, 2, 2, 2, 2, 2]
                 mock_time.sleep = _time.sleep
@@ -230,12 +230,12 @@ class TestOutputCleaning:
     def test_clean_output_disabled_preserves_ansi(self):
         proc = _make_process(stdout_lines=["\x1b[32mGREEN\x1b[0m"])
         sub = _make_subprocess_mock(proc)
-        with patch("server_core.enhanced_command_executor.subprocess", sub), \
-             patch("server_core.enhanced_command_executor.config_core") as mock_cfg:
+        with patch("backend.server_core.enhanced_command_executor.subprocess", sub), \
+             patch("backend.server_core.enhanced_command_executor.config_core") as mock_cfg:
             mock_cfg.get.side_effect = lambda key, default=None: (
                 False if key == "CLEAN_TOOL_OUTPUT" else default
             )
-            from server_core.enhanced_command_executor import EnhancedCommandExecutor
+            from backend.server_core.enhanced_command_executor import EnhancedCommandExecutor
             result = EnhancedCommandExecutor("cmd", timeout=5).execute()
         # When CLEAN_TOOL_OUTPUT is False, ANSI may remain (not stripped)
         # Just ensure no crash and stdout is present
@@ -255,8 +255,8 @@ class TestErrorHandling:
         sub.TimeoutExpired = subprocess.TimeoutExpired
         sub.CalledProcessError = subprocess.CalledProcessError
 
-        with patch("server_core.enhanced_command_executor.subprocess", sub):
-            from server_core.enhanced_command_executor import EnhancedCommandExecutor
+        with patch("backend.server_core.enhanced_command_executor.subprocess", sub):
+            from backend.server_core.enhanced_command_executor import EnhancedCommandExecutor
             result = EnhancedCommandExecutor("nonexistent_binary", timeout=5).execute()
 
         assert result["success"] is False
@@ -275,26 +275,26 @@ class TestErrorHandling:
 
 class TestBuildLastOutput:
     def test_falls_back_to_synthetic_string_when_no_output_yet(self):
-        from server_core.enhanced_command_executor import _build_last_output
+        from backend.server_core.enhanced_command_executor import _build_last_output
 
         result = _build_last_output([], [], elapsed=2.3)
         assert result == "Running for 2.3s"
 
     def test_returns_real_captured_output_once_available(self):
-        from server_core.enhanced_command_executor import _build_last_output
+        from backend.server_core.enhanced_command_executor import _build_last_output
 
         result = _build_last_output(["line one\n", "line two\n"], [], elapsed=1.0)
         assert result == "line one\nline two\n"
         assert "Running for" not in result
 
     def test_combines_stdout_and_stderr_chunks(self):
-        from server_core.enhanced_command_executor import _build_last_output
+        from backend.server_core.enhanced_command_executor import _build_last_output
 
         result = _build_last_output(["out\n"], ["err\n"], elapsed=1.0)
         assert result == "out\nerr\n"
 
     def test_truncates_to_max_lines(self):
-        from server_core.enhanced_command_executor import _build_last_output, _LAST_OUTPUT_MAX_LINES
+        from backend.server_core.enhanced_command_executor import _build_last_output, _LAST_OUTPUT_MAX_LINES
 
         lines = [f"line {i}\n" for i in range(_LAST_OUTPUT_MAX_LINES + 5)]
         result = _build_last_output(lines, [], elapsed=1.0)
@@ -302,7 +302,7 @@ class TestBuildLastOutput:
         assert f"line {_LAST_OUTPUT_MAX_LINES + 4}\n" in result
 
     def test_strips_ansi_codes(self):
-        from server_core.enhanced_command_executor import _build_last_output
+        from backend.server_core.enhanced_command_executor import _build_last_output
 
         result = _build_last_output(["\x1b[32mgreen text\x1b[0m\n"], [], elapsed=1.0)
         assert result == "green text\n"
