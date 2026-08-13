@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.9.0 (NEXT)
+
+### Payload workbench
+- New "Payload Workbench" — generate and test payloads (SQLi, XSS, etc.) without leaving the UI.
+
 ## 1.8.0 - exploitotter (2026-08-13)
 
 ### Workbench

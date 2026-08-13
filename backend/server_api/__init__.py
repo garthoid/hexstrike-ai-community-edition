@@ -1,6 +1,5 @@
 from backend.server_api._generic.autoload import register_all_toolspec_blueprints
 from .ai_assist import *
-from .ai_payload import *
 from .tools_catalog import *
 from .ui_blueprint import *
 from .settings import *
@@ -13,6 +12,7 @@ from .vuln_intel import *
 from .web_framework import *
 from .burp_agent import *
 from .workbench import *
+from .payload_workbench import *
 
 def register_blueprints(app):
   """Register all API blueprints with the Flask app."""
@@ -96,3 +96,6 @@ def register_blueprints(app):
 
   # Workbench
   app.register_blueprint(api_workbench_bp)
+
+  # Payload Workbench
+  app.register_blueprint(api_payload_workbench_bp)

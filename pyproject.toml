@@ -1,6 +1,6 @@
 [project]
 name = "nyxstrike"
-version = "1.8.0"
+version = "1.9.0"
 requires-python = ">=3.10"
 dependencies = [
     "flask>=2.3.0,<4.0.0",
@@ -20,6 +20,7 @@ dependencies = [
     "stingxss>=0.1.0,<1.0.0",
     "breachsql>=0.1.0,<1.0.0",
     "vaultrip>=0.1.0,<1.0.0",
+    "commonhuman-payloads>=0.1.7,<1.0.0",
 ]
 
 [project.optional-dependencies]

@@ -86,6 +86,15 @@ import type {
   WorkbenchRunRecipeOptions,
   WorkbenchRunRecipeResponse,
   WorkbenchRunResponse,
+  PayloadWorkbenchOperationsResponse,
+  PayloadWorkbenchRecipeDeleteResponse,
+  PayloadWorkbenchRecipeMutationResponse,
+  PayloadWorkbenchRecipesResponse,
+  PayloadWorkbenchRecipeStepInput,
+  PayloadWorkbenchRunRecipeOptions,
+  PayloadWorkbenchRunRecipeResponse,
+  PayloadWorkbenchRunResponse,
+  TestPayloadAgainstTargetResponse,
 } from './types';
 
 type ProcessActionResponse = { success: boolean; message?: string; error?: string };
@@ -355,4 +364,32 @@ export const api = {
     patch<WorkbenchRecipeMutationResponse>(`/api/workbench/recipes/${recipeId}`, payload),
   deleteWorkbenchRecipe: (recipeId: string) =>
     del<WorkbenchRecipeDeleteResponse>(`/api/workbench/recipes/${recipeId}`),
+
+  // ── Payload Workbench ────────────────────────────────────────────────────
+  payloadWorkbenchOperations: () => get<PayloadWorkbenchOperationsResponse>('/api/payload-workbench/operations'),
+  payloadWorkbenchRun: (operationId: string, params: Record<string, unknown>) =>
+    post<PayloadWorkbenchRunResponse>(`/api/payload-workbench/run/${operationId}`, params),
+  payloadWorkbenchRunRecipe: (
+    input: string,
+    steps: PayloadWorkbenchRecipeStepInput[],
+    options?: PayloadWorkbenchRunRecipeOptions
+  ) =>
+    post<PayloadWorkbenchRunRecipeResponse>('/api/payload-workbench/run-recipe', {
+      input,
+      steps,
+      continue_on_error: options?.continueOnError,
+      stop_after_step_index: options?.stopAfterStepIndex,
+      step_input_overrides: options?.stepInputOverrides,
+    }),
+  payloadWorkbenchRecipes: () => get<PayloadWorkbenchRecipesResponse>('/api/payload-workbench/recipes'),
+  createPayloadWorkbenchRecipe: (name: string, steps: PayloadWorkbenchRecipeStepInput[]) =>
+    post<PayloadWorkbenchRecipeMutationResponse>('/api/payload-workbench/recipes', { name, steps }),
+  updatePayloadWorkbenchRecipe: (
+    recipeId: string,
+    payload: { name?: string; steps?: PayloadWorkbenchRecipeStepInput[] }
+  ) => patch<PayloadWorkbenchRecipeMutationResponse>(`/api/payload-workbench/recipes/${recipeId}`, payload),
+  deletePayloadWorkbenchRecipe: (recipeId: string) =>
+    del<PayloadWorkbenchRecipeDeleteResponse>(`/api/payload-workbench/recipes/${recipeId}`),
+  testPayloadAgainstTarget: (payload: string, targetUrl: string, method: 'GET' | 'POST') =>
+    post<TestPayloadAgainstTargetResponse>('/api/ai/test_payload', { payload, target_url: targetUrl, method }),
 };

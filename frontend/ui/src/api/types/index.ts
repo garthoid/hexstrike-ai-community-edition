@@ -153,3 +153,19 @@ export type {
   WorkbenchRunResponse,
   WorkbenchSavedRecipe,
 } from './workbench';
+
+export type {
+  PayloadWorkbenchOperation,
+  PayloadWorkbenchOperationsResponse,
+  PayloadWorkbenchParamSpec,
+  PayloadWorkbenchRecipeDeleteResponse,
+  PayloadWorkbenchRecipeMutationResponse,
+  PayloadWorkbenchRecipesResponse,
+  PayloadWorkbenchRecipeStepInput,
+  PayloadWorkbenchRecipeStepResult,
+  PayloadWorkbenchRunRecipeOptions,
+  PayloadWorkbenchRunRecipeResponse,
+  PayloadWorkbenchRunResponse,
+  PayloadWorkbenchSavedRecipe,
+  TestPayloadAgainstTargetResponse,
+} from './payload-workbench';
