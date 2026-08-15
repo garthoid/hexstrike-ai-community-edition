@@ -6,6 +6,7 @@ from urllib.parse import urlparse
 
 from commonhuman_core.js_api_discover import js_api_discover
 from commonhuman_core.source_map import fetch_source_maps
+from commonhuman_core.ws import WEBSOCKET_AVAILABLE, discover_ws_urls, ws_inject
 from backend.server_api.web_framework.browser_agent import browser_agent
 from backend.server_api.web_framework.http_framework import http_framework
 from backend.server_core import ModernVisualEngine
@@ -14,6 +15,16 @@ from backend.server_core.tool_spec import ParamSpec, ToolSpec, ToolValidationErr
 logger = logging.getLogger(__name__)
 
 _SCRIPT_SRC_RE = re.compile(r'<script[^>]+src="([^"]*\.js[^"]*)"', re.IGNORECASE)
+_WS_HOST_CONCAT_RE = re.compile(
+    r"""new\s+WebSocket\s*\(\s*['"`]wss?://['"`]\s*\+\s*(?:window\.)?location\.host\s*\+\s*['"`]([^'"`]+)['"`]""",
+    re.IGNORECASE,
+)
+
+
+def _discover_ws_host_concat(text: str, page_url: str) -> list:
+    parsed = urlparse(page_url)
+    scheme = "wss" if parsed.scheme == "https" else "ws"
+    return [f"{scheme}://{parsed.netloc}{m.group(1)}" for m in _WS_HOST_CONCAT_RE.finditer(text)]
 
 
 def _browser_agent_handler(p: dict) -> dict:
@@ -136,6 +147,80 @@ def _source_map_recover_handler(p: dict) -> dict:
         "total_sources_recovered": len(result),
         "mapping": result.mapping,
         "sources": sources,
+    }
+
+
+def _ws_discover_handler(p: dict) -> dict:
+    url = p["url"]
+    if not url:
+        raise ToolValidationError("URL parameter is required")
+
+    try:
+        page = http_framework.session.get(url, timeout=15)
+    except Exception as e:
+        raise ToolValidationError(f"Failed to fetch {url}: {e}")
+
+    found = discover_ws_urls(page.text, base_url=url)
+    for ws_url in _discover_ws_host_concat(page.text, url):
+        if ws_url not in found:
+            found.append(ws_url)
+
+    parsed = urlparse(url)
+    origin = f"{parsed.scheme}://{parsed.netloc}"
+    js_urls = [
+        src if src.startswith("http") else origin.rstrip("/") + "/" + src.lstrip("/")
+        for src in _SCRIPT_SRC_RE.findall(page.text)
+    ]
+    for js_url in js_urls[: p["max_bundles"]]:
+        try:
+            js_text = http_framework.session.get(js_url, timeout=15).text
+        except Exception:
+            continue
+        for ws_url in discover_ws_urls(js_text, base_url=url):
+            if ws_url not in found:
+                found.append(ws_url)
+        for ws_url in _discover_ws_host_concat(js_text, url):
+            if ws_url not in found:
+                found.append(ws_url)
+
+    return {"success": True, "websocket_urls": found, "total": len(found)}
+
+
+def _ws_inject_handler(p: dict) -> dict:
+    url = p["url"]
+    payloads = p["payloads"]
+    if not url:
+        raise ToolValidationError("url parameter is required")
+    if not payloads:
+        raise ToolValidationError("payloads parameter is required (non-empty list)")
+    if not WEBSOCKET_AVAILABLE:
+        raise ToolValidationError("websocket-client is not installed — pip install 'commonhuman-core[websocket]'")
+
+    cookies = p["cookies"] or "; ".join(f"{k}={v}" for k, v in http_framework.session.cookies.get_dict().items())
+
+    results = ws_inject(
+        url,
+        payloads,
+        cookies=cookies,
+        headers=p["headers"] or None,
+        timeout=p["timeout"],
+        marker=p["marker"],
+        max_recv=p["max_recv"],
+    )
+
+    return {
+        "success": True,
+        "results": [
+            {
+                "payload": r.payload,
+                "responses": r.responses,
+                "reflected": r.reflected,
+                "error": r.error,
+            }
+            for r in results
+        ],
+        "total_tested": len(results),
+        "total_reflected": sum(1 for r in results if r.reflected),
     }
 
 
@@ -265,6 +350,35 @@ SPECS = [
             ParamSpec("max_source_chars", int, default=20000, help_text="Truncate each recovered source file to this many characters"),
         ],
         handler=_source_map_recover_handler,
+    ),
+    ToolSpec(
+        name="ws_discover",
+        mcp_tool_name="ws_discover",
+        endpoint="/api/tools/http-framework/ws-discover",
+        category="web_framework",
+        description="Discover WebSocket endpoints referenced in a page's HTML and JS bundles (new WebSocket(...) calls, ws:// or wss:// literals).",
+        params=[
+            ParamSpec("url", str, required=True, help_text="Page URL to scan for WebSocket references"),
+            ParamSpec("max_bundles", int, default=20, help_text="Maximum number of linked JS bundles to also scan"),
+        ],
+        handler=_ws_discover_handler,
+    ),
+    ToolSpec(
+        name="ws_inject",
+        mcp_tool_name="ws_inject",
+        endpoint="/api/tools/http-framework/ws-inject",
+        category="web_framework",
+        description="Send payloads over a WebSocket connection and collect responses — for XSS/injection testing against WS endpoints (e.g. chat, real-time features).",
+        params=[
+            ParamSpec("url", str, required=True, help_text="WebSocket URL (ws:// or wss://)"),
+            ParamSpec("payloads", list, default=[], help_text="Payloads to send, one connection per payload"),
+            ParamSpec("cookies", str, default="", help_text="Cookie header value; defaults to the shared session's cookies if empty"),
+            ParamSpec("headers", dict, default={}, help_text="Additional WS handshake headers"),
+            ParamSpec("timeout", int, default=10, help_text="Connection + receive timeout in seconds"),
+            ParamSpec("marker", str, default="", help_text="String to search for in responses to flag reflection"),
+            ParamSpec("max_recv", int, default=5, help_text="Maximum response frames to collect per payload"),
+        ],
+        handler=_ws_inject_handler,
     ),
     ToolSpec(
         name="http_authenticate",
