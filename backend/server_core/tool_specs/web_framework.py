@@ -2,6 +2,7 @@ import logging
 import time
 from datetime import datetime
 
+from commonhuman_core.js_api_discover import js_api_discover
 from backend.server_api.web_framework.browser_agent import browser_agent
 from backend.server_api.web_framework.http_framework import http_framework
 from backend.server_core import ModernVisualEngine
@@ -78,6 +79,18 @@ def _http_spider_handler(p: dict) -> dict:
     if not url:
         raise ToolValidationError("URL parameter is required for spider action")
     return http_framework.spider_website(url, p["max_depth"], p["max_pages"])
+
+
+def _js_api_discover_handler(p: dict) -> dict:
+    url = p["url"]
+    if not url:
+        raise ToolValidationError("URL parameter is required")
+    endpoints = js_api_discover(url, session=http_framework.session, max_bundles=p["max_bundles"])
+    return {
+        "success": True,
+        "endpoints": [{"method": m, "url": u, "template": t} for m, u, t in endpoints],
+        "total": len(endpoints),
+    }
 
 
 def _http_authenticate_handler(p: dict) -> dict:
@@ -180,6 +193,18 @@ SPECS = [
             ParamSpec("max_pages", int, default=100, help_text="Maximum pages to discover"),
         ],
         handler=_http_spider_handler,
+    ),
+    ToolSpec(
+        name="js_api_discover",
+        mcp_tool_name="js_api_discover",
+        endpoint="/api/tools/http-framework/js-api-discover",
+        category="web_framework",
+        description="Extract REST/JSON API endpoints from an SPA's JavaScript bundles (React/Vue/Angular) — parses fetch/axios calls and hardcoded paths that a plain crawl won't surface.",
+        params=[
+            ParamSpec("url", str, required=True, help_text="SPA page URL to inspect for JS bundles"),
+            ParamSpec("max_bundles", int, default=20, help_text="Maximum number of JS bundles to fetch and parse"),
+        ],
+        handler=_js_api_discover_handler,
     ),
     ToolSpec(
         name="http_authenticate",
