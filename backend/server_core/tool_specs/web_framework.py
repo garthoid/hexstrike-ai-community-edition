@@ -1,14 +1,19 @@
 import logging
+import re
 import time
 from datetime import datetime
+from urllib.parse import urlparse
 
 from commonhuman_core.js_api_discover import js_api_discover
+from commonhuman_core.source_map import fetch_source_maps
 from backend.server_api.web_framework.browser_agent import browser_agent
 from backend.server_api.web_framework.http_framework import http_framework
 from backend.server_core import ModernVisualEngine
 from backend.server_core.tool_spec import ParamSpec, ToolSpec, ToolValidationError
 
 logger = logging.getLogger(__name__)
+
+_SCRIPT_SRC_RE = re.compile(r'<script[^>]+src="([^"]*\.js[^"]*)"', re.IGNORECASE)
 
 
 def _browser_agent_handler(p: dict) -> dict:
@@ -90,6 +95,47 @@ def _js_api_discover_handler(p: dict) -> dict:
         "success": True,
         "endpoints": [{"method": m, "url": u, "template": t} for m, u, t in endpoints],
         "total": len(endpoints),
+    }
+
+
+def _source_map_recover_handler(p: dict) -> dict:
+    url = p["url"]
+    if not url:
+        raise ToolValidationError("URL parameter is required")
+
+    js_urls = list(p["js_urls"])
+    if not js_urls:
+        try:
+            page = http_framework.session.get(url, timeout=15)
+        except Exception as e:
+            raise ToolValidationError(f"Failed to fetch {url}: {e}")
+        parsed = urlparse(url)
+        origin = f"{parsed.scheme}://{parsed.netloc}"
+        for src in _SCRIPT_SRC_RE.findall(page.text):
+            js_urls.append(src if src.startswith("http") else origin.rstrip("/") + "/" + src.lstrip("/"))
+
+    if not js_urls:
+        return {"success": False, "error": "No JavaScript bundle URLs found on the page or provided explicitly"}
+
+    result = fetch_source_maps(
+        js_urls,
+        fetcher=lambda u: http_framework.session.get(u, timeout=15).text,
+        base_url=url,
+        max_maps=p["max_maps"],
+    )
+
+    max_chars = p["max_source_chars"]
+    sources = {
+        path: (text if len(text) <= max_chars else text[:max_chars] + "...[truncated]")
+        for path, text in result.sources.items()
+    }
+
+    return {
+        "success": len(result) > 0,
+        "js_bundles_probed": len(js_urls),
+        "total_sources_recovered": len(result),
+        "mapping": result.mapping,
+        "sources": sources,
     }
 
 
@@ -205,6 +251,20 @@ SPECS = [
             ParamSpec("max_bundles", int, default=20, help_text="Maximum number of JS bundles to fetch and parse"),
         ],
         handler=_js_api_discover_handler,
+    ),
+    ToolSpec(
+        name="source_map_recover",
+        mcp_tool_name="source_map_recover",
+        endpoint="/api/tools/http-framework/source-map-recover",
+        category="web_framework",
+        description="Recover original pre-minified JS source via sourceMappingURL/.map files — far more useful than minified bundles for DOM-XSS/source review.",
+        params=[
+            ParamSpec("url", str, required=True, help_text="Page URL to inspect for JS bundles (used to auto-discover <script src> tags if js_urls is empty)"),
+            ParamSpec("js_urls", list, default=[], help_text="Explicit list of JS bundle URLs to probe (skips auto-discovery from the page)"),
+            ParamSpec("max_maps", int, default=10, help_text="Maximum number of source maps to fetch"),
+            ParamSpec("max_source_chars", int, default=20000, help_text="Truncate each recovered source file to this many characters"),
+        ],
+        handler=_source_map_recover_handler,
     ),
     ToolSpec(
         name="http_authenticate",
