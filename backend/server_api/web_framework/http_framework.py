@@ -3,8 +3,9 @@ import re
 import requests
 from datetime import datetime
 from typing import Any, Dict, Optional
-from urllib.parse import urljoin, urlparse
-from bs4 import BeautifulSoup
+from urllib.parse import urlparse
+from commonhuman_core.crawler import crawl
+from commonhuman_core.http.client import HttpClient
 from backend.server_core import ModernVisualEngine
 
 logger = logging.getLogger(__name__)
@@ -219,9 +220,10 @@ class HTTPTestingFramework:
 
     def _analyze_response_for_vulns(self, url: str, response):
         """Analyze HTTP response for common vulnerabilities"""
-        vulns = []
+        self._check_security_headers(url, response.headers)
+        self._analyze_body_for_vulns(url, response.text)
 
-        # Check for missing security headers
+    def _check_security_headers(self, url: str, headers) -> None:
         security_headers = {
             'X-Frame-Options': 'Clickjacking protection missing',
             'X-Content-Type-Options': 'MIME type sniffing protection missing',
@@ -230,8 +232,9 @@ class HTTPTestingFramework:
             'Content-Security-Policy': 'Content Security Policy missing'
         }
 
+        vulns = []
         for header, description in security_headers.items():
-            if header not in response.headers:
+            if header not in headers:
                 vulns.append({
                     'type': 'missing_security_header',
                     'severity': 'medium',
@@ -239,6 +242,10 @@ class HTTPTestingFramework:
                     'url': url,
                     'header': header
                 })
+        self.vulnerabilities.extend(vulns)
+
+    def _analyze_body_for_vulns(self, url: str, text: str) -> None:
+        vulns = []
 
         # Check for sensitive information disclosure
         sensitive_patterns = [
@@ -249,7 +256,7 @@ class HTTPTestingFramework:
         ]
 
         for pattern, description in sensitive_patterns:
-            matches = re.findall(pattern, response.text, re.IGNORECASE)
+            matches = re.findall(pattern, text, re.IGNORECASE)
             if matches:
                 vulns.append({
                     'type': 'information_disclosure',
@@ -269,7 +276,7 @@ class HTTPTestingFramework:
         ]
 
         for error in sql_errors:
-            if error.lower() in response.text.lower():
+            if error.lower() in text.lower():
                 vulns.append({
                     'type': 'sql_injection_indicator',
                     'severity': 'high',
@@ -284,81 +291,40 @@ class HTTPTestingFramework:
         return self.vulnerabilities[-limit:] if self.vulnerabilities else []
 
     def spider_website(self, base_url: str, max_depth: int = 3, max_pages: int = 100) -> dict:
-        """Spider website to discover endpoints and forms"""
+        """Spider website to discover endpoints and forms via commonhuman_core.crawler"""
         try:
-            discovered_urls = set()
-            forms = []
-            to_visit = [(base_url, 0)]
-            visited = set()
+            cookie_str = '; '.join(f'{k}={v}' for k, v in self.session.cookies.get_dict().items())
+            client = HttpClient(
+                proxy=self.session.proxies.get('http') or self.session.proxies.get('https'),
+                headers=dict(self.session.headers),
+                cookies=cookie_str or None,
+            )
 
-            while to_visit and len(discovered_urls) < max_pages:
-                current_url, depth = to_visit.pop(0)
+            result = crawl(base_url, injector=client, max_pages=max_pages, max_depth=max_depth)
 
-                if current_url in visited or depth > max_depth:
-                    continue
+            forms = [
+                {
+                    'action': form.action,
+                    'method': form.method,
+                    'inputs': [{'name': name, 'value': value} for name, value in form.params.items()],
+                    'base_data': form.base_data,
+                }
+                for form in result.form_targets
+            ]
 
-                visited.add(current_url)
-
+            for url, html in result.page_sources.items():
                 try:
-                    response = self.session.get(current_url, timeout=10)
-                    if response.status_code == 200:
-                        discovered_urls.add(current_url)
-
-                        # Parse HTML for links and forms
-                        soup = BeautifulSoup(response.text, 'html.parser')
-
-                        # Find all links
-                        for link in soup.find_all('a', href=True):
-                            href_attr = link.get('href')
-                            if isinstance(href_attr, list):
-                                href = href_attr[0] if href_attr else ""
-                            elif isinstance(href_attr, str):
-                                href = href_attr
-                            else:
-                                href = ""
-                            if not href:
-                                continue
-                            full_url = urljoin(current_url, href)
-
-                            if urlparse(full_url).netloc == urlparse(base_url).netloc:
-                                if full_url not in visited and depth < max_depth:
-                                    to_visit.append((full_url, depth + 1))
-
-                        # Find all forms
-                        for form in soup.find_all('form'):
-                            action_attr = form.get('action')
-                            if isinstance(action_attr, list):
-                                action_value = action_attr[0] if action_attr else ''
-                            elif isinstance(action_attr, str):
-                                action_value = action_attr
-                            else:
-                                action_value = ''
-
-                            form_data = {
-                                'url': current_url,
-                                'action': urljoin(current_url, action_value),
-                                'method': str(form.get('method') or 'GET').upper(),
-                                'inputs': []
-                            }
-
-                            for input_tag in form.find_all(['input', 'textarea', 'select']):
-                                form_data['inputs'].append({
-                                    'name': input_tag.get('name', ''),
-                                    'type': input_tag.get('type', 'text'),
-                                    'value': input_tag.get('value', '')
-                                })
-
-                            forms.append(form_data)
-
-                except Exception as e:
-                    logger.warning(f"Error spidering {current_url}: {str(e)}")
-                    continue
+                    head_resp = self.session.head(url, timeout=10, allow_redirects=True)
+                    self._check_security_headers(url, head_resp.headers)
+                except Exception:
+                    pass
+                self._analyze_body_for_vulns(url, html)
 
             return {
                 'success': True,
-                'discovered_urls': list(discovered_urls),
+                'discovered_urls': result.visited_urls,
                 'forms': forms,
-                'total_pages': len(discovered_urls),
+                'total_pages': len(result.visited_urls),
                 'vulnerabilities': self._get_recent_vulns()
             }
 

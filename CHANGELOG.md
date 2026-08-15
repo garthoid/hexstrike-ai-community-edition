@@ -5,6 +5,9 @@
 ### Payload workbench
 - New "Payload Workbench" — generate and test payloads (SQLi, XSS, etc.) without leaving the UI.
 
+### HTTP framework
+- `http_spider` now runs on the `commonhuman-core` crawler — threaded discovery, richer form parsing (select/hidden/required-field handling), and correct handling of redirects and off-origin filtering.
+
 ## 1.8.0 - exploitotter (2026-08-13)
 
 ### Workbench

@@ -21,6 +21,7 @@ dependencies = [
     "breachsql>=0.1.0,<1.0.0",
     "vaultrip>=0.1.0,<1.0.0",
     "commonhuman-payloads>=0.1.7,<1.0.0",
+    "commonhuman-core>=0.1.7,<1.0.0",
 ]
 
 [project.optional-dependencies]
