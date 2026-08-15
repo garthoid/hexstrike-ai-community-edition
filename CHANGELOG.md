@@ -9,6 +9,10 @@
 - `http_spider` now runs on the `commonhuman-core` crawler — threaded discovery, richer form parsing (select/hidden/required-field handling), and correct handling of redirects and off-origin filtering.
 - New `http_authenticate` tool — logs the shared session into a target via form login, OAuth2 client-credentials, or Basic/Digest/NTLM, so subsequent `http_request`/`http_spider`/`http_intruder` calls run authenticated.
 
+### API scanning
+- `api_schema_analyzer` now parses OpenAPI/Swagger specs (JSON or YAML, v2 or v3, `$ref`-resolving) via `commonhuman-core` instead of a bare JSON fetch — every endpoint comes back with a real, scannable URL (path params filled, base URL resolved) ready to hand to breachsql/phaseaccess.
+- New `openapi_discover` tool — probes a target's common paths (`/openapi.json`, Swagger UI, ReDoc, ...) to locate its spec automatically.
+
 ## 1.8.0 - exploitotter (2026-08-13)
 
 ### Workbench
