@@ -30,7 +30,7 @@ TOOL_PROFILES = {
     ],
 
     "api_audit": [
-        lambda mcp, client, logger: register_comprehensive_api_audit_tool(mcp, client, logger), #Uses api_fuzz and api_scan tools internally, so they are needed for this profile as well.
+        lambda mcp, client, logger: register_toolspec_category(mcp, client, logger, "api_audit"), #Uses api_fuzz and api_scan tools internally, so they are needed for this profile as well.
     ],
 
     #OSINT tools for information gathering and reconnaissance e.g. Sherlock)
