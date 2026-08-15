@@ -16,6 +16,9 @@
 - `api_schema_analyzer` now parses OpenAPI/Swagger specs (JSON or YAML, v2 or v3, `$ref`-resolving) via `commonhuman-core` instead of a bare JSON fetch — every endpoint comes back with a real, scannable URL (path params filled, base URL resolved) ready to hand to breachsql/phaseaccess.
 - New `openapi_discover` tool — probes a target's common paths (`/openapi.json`, Swagger UI, ReDoc, ...) to locate its spec automatically.
 
+### Recon
+- New `dork_search` tool — queries DuckDuckGo/Bing/Yahoo for URLs matching a dork query (e.g. `site:target.com inurl:search`), returning only parameter-bearing candidates. No API keys required.
+
 ## 1.8.0 - exploitotter (2026-08-13)
 
 ### Workbench
