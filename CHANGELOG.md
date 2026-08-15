@@ -19,6 +19,12 @@
 ### Recon
 - New `dork_search` tool — queries DuckDuckGo/Bing/Yahoo for URLs matching a dork query (e.g. `site:target.com inurl:search`), returning only parameter-bearing candidates. No API keys required.
 
+### Hardening
+- Smart-scan now re-scores remaining tool candidates between small batches instead of committing to one fixed list up front, so a failure can down-rank a tool before the next round fires.
+- Fixed a shared-driver race in the browser agent — concurrent requests now queue instead of racing on the same Selenium session.
+- Harvested credentials are now encrypted at rest.
+- Plugin loading now logs before executing third-party code, with an opt-in allowlist mode.
+
 ## 1.8.0 - exploitotter (2026-08-13)
 
 ### Workbench

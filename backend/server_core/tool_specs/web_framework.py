@@ -41,11 +41,12 @@ def _browser_agent_handler(p: dict) -> dict:
         if not url:
             raise ToolValidationError("URL parameter is required for navigate action")
 
-        if not browser_agent.driver:
-            if not browser_agent.setup_browser(headless, proxy_port):
-                raise RuntimeError("Failed to setup browser")
+        with browser_agent.lock:
+            if not browser_agent.driver:
+                if not browser_agent.setup_browser(headless, proxy_port):
+                    raise RuntimeError("Failed to setup browser")
 
-        result = browser_agent.navigate_and_inspect(url, wait_time)
+            result = browser_agent.navigate_and_inspect(url, wait_time)
         if result.get("success") and active_tests:
             active_results = browser_agent.run_active_tests(result.get("page_info", {}))
             result["active_tests"] = active_results
@@ -56,29 +57,17 @@ def _browser_agent_handler(p: dict) -> dict:
         return result
 
     elif action == "screenshot":
-        if not browser_agent.driver:
-            raise ToolValidationError("Browser not initialized. Use navigate action first.")
-
-        screenshot_path = f"/tmp/security_screenshot_{int(time.time())}.png"
-        browser_agent.driver.save_screenshot(screenshot_path)
-        return {
-            "success": True,
-            "screenshot": screenshot_path,
-            "current_url": browser_agent.driver.current_url,
-            "timestamp": datetime.now().isoformat(),
-        }
+        result = browser_agent.take_screenshot()
+        if not result.get("success"):
+            raise ToolValidationError(result.get("error", "Browser not initialized. Use navigate action first."))
+        return result
 
     elif action == "close":
         browser_agent.close_browser()
         return {"success": True, "message": "Browser closed successfully"}
 
     elif action == "status":
-        return {
-            "success": True,
-            "browser_active": browser_agent.driver is not None,
-            "screenshots_taken": len(browser_agent.screenshots),
-            "pages_visited": len(browser_agent.page_sources),
-        }
+        return browser_agent.get_status()
 
     raise ToolValidationError(f"Unknown action: {action}")
 

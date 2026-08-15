@@ -32,6 +32,7 @@ from datetime import datetime
 from typing import Any, Dict, List, Optional
 
 import backend.server_core.config_core as config_core
+from backend.server_core import credential_crypto
 
 logger = logging.getLogger(__name__)
 
@@ -462,7 +463,7 @@ class NyxStrikeDB:
           cred_id,
           cred.get("type", "plaintext"),
           cred.get("username", ""),
-          cred.get("secret", ""),
+          credential_crypto.encrypt_secret(cred.get("secret", "")),
           cred.get("hash_type", ""),
           cred.get("service", ""),
           cred.get("host", ""),
@@ -487,6 +488,8 @@ class NyxStrikeDB:
         row["tags"] = json.loads(row["tags"])
       except Exception:
         row["tags"] = []
+    if row and "secret" in row:
+      row["secret"] = credential_crypto.decrypt_secret(row["secret"])
     return row
 
   def list_credentials(
@@ -532,6 +535,8 @@ class NyxStrikeDB:
           row["tags"] = json.loads(row["tags"])
         except Exception:
           row["tags"] = []
+      if "secret" in row:
+        row["secret"] = credential_crypto.decrypt_secret(row["secret"])
     return rows
 
   def update_credential(self, cred_id: str, **fields: Any) -> None:
@@ -545,6 +550,8 @@ class NyxStrikeDB:
       return
     if "tags" in updates and isinstance(updates["tags"], list):
       updates["tags"] = json.dumps(updates["tags"])
+    if "secret" in updates:
+      updates["secret"] = credential_crypto.encrypt_secret(updates["secret"])
     updates["updated_at"] = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
     set_clause = ", ".join(f"{k} = ?" for k in updates)
     values = list(updates.values()) + [cred_id]
