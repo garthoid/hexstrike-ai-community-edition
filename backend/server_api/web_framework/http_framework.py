@@ -1,6 +1,5 @@
 import logging
 import re
-import requests
 from datetime import datetime
 from typing import Any, Dict, Optional
 from urllib.parse import urlparse
@@ -15,10 +14,10 @@ class HTTPTestingFramework:
     """Advanced HTTP testing framework as Burp Suite alternative"""
 
     def __init__(self):
-        self.session = requests.Session()
-        self.session.headers.update({
+        self._client = HttpClient(timeout=30, headers={
             'User-Agent': 'Security-HTTP-Framework/1.0 (Advanced Security Testing)'
         })
+        self.session = self._client._session
         self.proxy_history = []
         self.vulnerabilities = []
         self.match_replace_rules = []  # [{'where':'query|headers|body|url','pattern':'regex','replacement':'str'}]
@@ -47,9 +46,9 @@ class HTTPTestingFramework:
                 send_headers.update(headers)
 
             if method.upper() == 'GET':
-                response = self.session.get(url, params=data, headers=send_headers, timeout=30)
+                response = self._client.get(url, params=data, headers=send_headers)
             elif method.upper() == 'POST':
-                response = self.session.post(url, data=data, headers=send_headers, timeout=30)
+                response = self._client.post(url, data=data, headers=send_headers)
             elif method.upper() == 'PUT':
                 response = self.session.put(url, data=data, headers=send_headers, timeout=30)
             elif method.upper() == 'DELETE':
@@ -293,14 +292,7 @@ class HTTPTestingFramework:
     def spider_website(self, base_url: str, max_depth: int = 3, max_pages: int = 100) -> dict:
         """Spider website to discover endpoints and forms via commonhuman_core.crawler"""
         try:
-            cookie_str = '; '.join(f'{k}={v}' for k, v in self.session.cookies.get_dict().items())
-            client = HttpClient(
-                proxy=self.session.proxies.get('http') or self.session.proxies.get('https'),
-                headers=dict(self.session.headers),
-                cookies=cookie_str or None,
-            )
-
-            result = crawl(base_url, injector=client, max_pages=max_pages, max_depth=max_depth)
+            result = crawl(base_url, injector=self._client, max_pages=max_pages, max_depth=max_depth)
 
             forms = [
                 {
