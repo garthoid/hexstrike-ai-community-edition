@@ -5,6 +5,7 @@ from typing import Any, Dict, Optional
 from urllib.parse import urlparse
 from commonhuman_core.crawler import crawl
 from commonhuman_core.http.client import HttpClient
+from commonhuman_core.auth import form_login, bearer_login, http_auth
 from backend.server_core import ModernVisualEngine
 
 logger = logging.getLogger(__name__)
@@ -30,6 +31,50 @@ class HTTPTestingFramework:
             'http': f'http://127.0.0.1:{proxy_port}',
             'https': f'http://127.0.0.1:{proxy_port}'
         }
+
+    def authenticate(self, auth_type: str, **kwargs) -> Dict[str, Any]:
+        """Authenticate the shared session via form login, OAuth2 client-credentials, or HTTP auth."""
+        try:
+            auth_type = (auth_type or '').lower()
+
+            if auth_type == 'form':
+                result = form_login(
+                    login_url=kwargs['login_url'],
+                    username=kwargs['username'],
+                    password=kwargs['password'],
+                    username_field=kwargs.get('username_field') or 'username',
+                    password_field=kwargs.get('password_field') or 'password',
+                    extra_fields=kwargs.get('extra_fields') or None,
+                    client=self._client,
+                )
+            elif auth_type == 'bearer':
+                result = bearer_login(
+                    token_url=kwargs['token_url'],
+                    client_id=kwargs['client_id'],
+                    client_secret=kwargs['client_secret'],
+                    grant_type=kwargs.get('grant_type') or 'client_credentials',
+                    client=self._client,
+                )
+            elif auth_type in ('basic', 'digest', 'ntlm'):
+                self.session.auth = http_auth(auth_type, kwargs['auth_cred'])
+                return {'success': True, 'auth_type': auth_type}
+            else:
+                return {'success': False, 'error': f'Unknown auth_type: {auth_type}'}
+
+            if result.headers:
+                self.session.headers.update(result.headers)
+
+            return {
+                'success': not result.is_empty(),
+                'auth_type': auth_type,
+                'cookies_set': bool(result.cookies),
+                'authorization_header_set': 'Authorization' in result.headers,
+            }
+        except KeyError as e:
+            return {'success': False, 'error': f'Missing required parameter: {e}'}
+        except Exception as e:
+            logger.error(f"{ModernVisualEngine.format_error_card('ERROR', 'Auth', str(e))}")
+            return {'success': False, 'error': str(e)}
 
     def intercept_request(self, url: str, method: str = 'GET', data: Any = None,
                          headers: Optional[Dict[str, Any]] = None, cookies: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:

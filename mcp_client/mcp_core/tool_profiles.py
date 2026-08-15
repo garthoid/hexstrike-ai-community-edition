@@ -286,7 +286,6 @@ TOOL_PROFILES = {
 
     #Tools for process management
     "process_management": [
-        lambda mcp, client, logger: register_process_management_tools(mcp, client, logger),
         lambda mcp, client, logger: register_toolspec_category(mcp, client, logger, "process_management"),
     ],
 }

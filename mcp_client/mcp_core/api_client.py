@@ -95,8 +95,5 @@ class ApiClient:
             logging.debug(f"Unexpected error: {str(e)}")
             return {"error": f"Unexpected error: {str(e)}", "success": False}
 
-    def execute_command(self, command: str, use_cache: bool = True) -> Dict[str, Any]:
-        return self.safe_post("api/command", {"command": command, "use_cache": use_cache})
-
     def check_health(self) -> Dict[str, Any]:
         return self.safe_get("health")

@@ -7,6 +7,7 @@
 
 ### HTTP framework
 - `http_spider` now runs on the `commonhuman-core` crawler — threaded discovery, richer form parsing (select/hidden/required-field handling), and correct handling of redirects and off-origin filtering.
+- New `http_authenticate` tool — logs the shared session into a target via form login, OAuth2 client-credentials, or Basic/Digest/NTLM, so subsequent `http_request`/`http_spider`/`http_intruder` calls run authenticated.
 
 ## 1.8.0 - exploitotter (2026-08-13)
 

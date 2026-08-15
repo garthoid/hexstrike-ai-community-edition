@@ -80,6 +80,26 @@ def _http_spider_handler(p: dict) -> dict:
     return http_framework.spider_website(url, p["max_depth"], p["max_pages"])
 
 
+def _http_authenticate_handler(p: dict) -> dict:
+    auth_type = p["auth_type"]
+    if not auth_type:
+        raise ToolValidationError("auth_type parameter is required")
+    return http_framework.authenticate(
+        auth_type,
+        login_url=p["login_url"],
+        username=p["username"],
+        password=p["password"],
+        username_field=p["username_field"],
+        password_field=p["password_field"],
+        extra_fields=p["extra_fields"],
+        token_url=p["token_url"],
+        client_id=p["client_id"],
+        client_secret=p["client_secret"],
+        grant_type=p["grant_type"],
+        auth_cred=p["auth_cred"],
+    )
+
+
 def _http_proxy_history_handler(p: dict) -> dict:
     return {
         "success": True,
@@ -160,6 +180,28 @@ SPECS = [
             ParamSpec("max_pages", int, default=100, help_text="Maximum pages to discover"),
         ],
         handler=_http_spider_handler,
+    ),
+    ToolSpec(
+        name="http_authenticate",
+        mcp_tool_name="http_authenticate",
+        endpoint="/api/tools/http-framework/authenticate",
+        category="web_framework",
+        description="Authenticate the shared HTTP framework session via form login, OAuth2 client-credentials, or HTTP Basic/Digest/NTLM — subsequent http_request/http_spider/http_intruder calls reuse the session.",
+        params=[
+            ParamSpec("auth_type", str, required=True, help_text="form | bearer | basic | digest | ntlm"),
+            ParamSpec("login_url", str, default="", help_text="[form] Login page URL"),
+            ParamSpec("username", str, default="", help_text="[form] Username"),
+            ParamSpec("password", str, default="", help_text="[form] Password"),
+            ParamSpec("username_field", str, default="username", help_text="[form] Username field name"),
+            ParamSpec("password_field", str, default="password", help_text="[form] Password field name"),
+            ParamSpec("extra_fields", dict, default={}, help_text="[form] Extra form fields to submit"),
+            ParamSpec("token_url", str, default="", help_text="[bearer] OAuth2 token endpoint"),
+            ParamSpec("client_id", str, default="", help_text="[bearer] OAuth2 client ID"),
+            ParamSpec("client_secret", str, default="", help_text="[bearer] OAuth2 client secret"),
+            ParamSpec("grant_type", str, default="client_credentials", help_text="[bearer] OAuth2 grant type"),
+            ParamSpec("auth_cred", str, default="", help_text="[basic|digest|ntlm] Credentials as 'username:password'"),
+        ],
+        handler=_http_authenticate_handler,
     ),
     ToolSpec(
         name="http_proxy_history",
