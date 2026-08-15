@@ -1,4 +1,4 @@
-# mcp_tools/gateway.py
+# mcp_client/gateway.py
 
 from typing import Dict, Any
 import json

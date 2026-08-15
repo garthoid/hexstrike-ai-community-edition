@@ -1,12 +1,12 @@
 """
-mcp_core/plugin_mcp_loader.py
+mcp_client/plugin_mcp_loader.py
 
 Loads plugin MCP tools from ``plugins/`` into a running FastMCP instance.
 
 Mirrors the type-aware structure of server_core/plugin_loader.py:
   plugins/tools/<name>/mcp_tool.py   — must expose register(mcp, api_client, logger)
 
-Called from ``mcp_core/server_setup.py`` after standard profile tools are
+Called from ``mcp_client/server_setup.py`` after standard profile tools are
 registered.  Problems with individual plugins are logged and skipped.
 """
 
