@@ -2,6 +2,9 @@
 
 ## 1.9.0 (NEXT)
 
+### Run page
+- Boolean params (e.g. `exploit`, `dump_all`) now render as toggle switches instead of free-text true/false fields.
+
 ### Payload workbench
 - New "Payload Workbench" — generate and test payloads (SQLi, XSS, etc.) without leaving the UI.
 
