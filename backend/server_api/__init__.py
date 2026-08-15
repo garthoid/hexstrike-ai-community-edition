@@ -9,7 +9,6 @@ from .api_audit import *
 from .error_handling import *
 from .ops import *
 from .vuln_intel import *
-from .web_framework import *
 from .burp_agent import *
 from .workbench import *
 from .payload_workbench import *
@@ -45,9 +44,6 @@ def register_blueprints(app):
   app.register_blueprint(api_process_auto_scaling_bp)
   app.register_blueprint(api_process_scale_pool_bp)
   app.register_blueprint(api_process_health_check_bp)
-
-  # Web Framework
-  app.register_blueprint(api_web_framework_http_framework_bp)
 
   # Vulnerability Intelligence
   app.register_blueprint(api_vulnerability_intelligence_bp)

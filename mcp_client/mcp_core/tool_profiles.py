@@ -185,7 +185,6 @@ TOOL_PROFILES = {
 
     #Tools for web application security testing frameworks (e.g., HTTP Framework, Browser Agent).
     "web_framework": [
-        lambda mcp, client, logger: register_http_framework_tool(mcp, client, logger, CliColors),
         lambda mcp, client, logger: register_toolspec_category(mcp, client, logger, "web_framework"),
     ],
 

@@ -3,6 +3,7 @@ import time
 from datetime import datetime
 
 from backend.server_api.web_framework.browser_agent import browser_agent
+from backend.server_api.web_framework.http_framework import http_framework
 from backend.server_core import ModernVisualEngine
 from backend.server_core.tool_spec import ParamSpec, ToolSpec, ToolValidationError
 
@@ -65,6 +66,56 @@ def _browser_agent_handler(p: dict) -> dict:
     raise ToolValidationError(f"Unknown action: {action}")
 
 
+def _http_request_handler(p: dict) -> dict:
+    url = p["url"]
+    if not url:
+        raise ToolValidationError("URL parameter is required for request action")
+    return http_framework.intercept_request(url, p["method"], p["data"], p["headers"], p["cookies"])
+
+
+def _http_spider_handler(p: dict) -> dict:
+    url = p["url"]
+    if not url:
+        raise ToolValidationError("URL parameter is required for spider action")
+    return http_framework.spider_website(url, p["max_depth"], p["max_pages"])
+
+
+def _http_proxy_history_handler(p: dict) -> dict:
+    return {
+        "success": True,
+        "history": http_framework.proxy_history[-100:],
+        "total_requests": len(http_framework.proxy_history),
+        "vulnerabilities": http_framework.vulnerabilities,
+    }
+
+
+def _http_set_rules_handler(p: dict) -> dict:
+    rules = p["rules"]
+    http_framework.set_match_replace_rules(rules)
+    return {"success": True, "rules_set": len(rules)}
+
+
+def _http_set_scope_handler(p: dict) -> dict:
+    host = p["host"]
+    if not host:
+        raise ToolValidationError("host parameter required")
+    http_framework.set_scope(host, p["include_subdomains"])
+    return {"success": True, "scope": http_framework.scope}
+
+
+def _http_repeater_handler(p: dict) -> dict:
+    return http_framework.send_custom_request(p["request_spec"])
+
+
+def _http_intruder_handler(p: dict) -> dict:
+    url = p["url"]
+    if not url:
+        raise ToolValidationError("URL parameter required")
+    return http_framework.intruder_sniper(
+        url, p["method"], p["location"], p["params"], p["payloads"], p["base_data"], p["max_requests"]
+    )
+
+
 SPECS = [
     ToolSpec(
         name="browser_agent",
@@ -81,5 +132,96 @@ SPECS = [
             ParamSpec("active_tests", bool, default=False, help_text="Run lightweight active reflected XSS tests (safe GET-only)"),
         ],
         handler=_browser_agent_handler,
+    ),
+    ToolSpec(
+        name="http_framework_test",
+        mcp_tool_name="http_framework_test",
+        endpoint="/api/tools/http-framework/request",
+        category="web_framework",
+        description="Enhanced HTTP testing framework (Burp Suite alternative) for comprehensive web security testing.",
+        params=[
+            ParamSpec("url", str, required=True, help_text="Target URL to test"),
+            ParamSpec("method", str, default="GET", help_text="HTTP method (GET, POST, PUT, DELETE, etc.)"),
+            ParamSpec("data", dict, default={}, help_text="Request data/parameters"),
+            ParamSpec("headers", dict, default={}, help_text="Custom headers"),
+            ParamSpec("cookies", dict, default={}, help_text="Custom cookies"),
+        ],
+        handler=_http_request_handler,
+    ),
+    ToolSpec(
+        name="http_spider",
+        mcp_tool_name="http_spider",
+        endpoint="/api/tools/http-framework/spider",
+        category="web_framework",
+        description="Spider a website to discover endpoints and forms.",
+        params=[
+            ParamSpec("url", str, required=True, help_text="Base URL to spider"),
+            ParamSpec("max_depth", int, default=3, help_text="Maximum crawling depth"),
+            ParamSpec("max_pages", int, default=100, help_text="Maximum pages to discover"),
+        ],
+        handler=_http_spider_handler,
+    ),
+    ToolSpec(
+        name="http_proxy_history",
+        mcp_tool_name="http_proxy_history",
+        endpoint="/api/tools/http-framework/proxy-history",
+        category="web_framework",
+        description="Get the HTTP framework's proxy request/response history and discovered vulnerabilities.",
+        params=[],
+        handler=_http_proxy_history_handler,
+    ),
+    ToolSpec(
+        name="http_set_rules",
+        mcp_tool_name="http_set_rules",
+        endpoint="/api/tools/http-framework/set-rules",
+        category="web_framework",
+        description=(
+            "Set match/replace rules used to rewrite parts of URL/query/headers/body before sending. "
+            "Rule format: {'where':'url|query|headers|body','pattern':'regex','replacement':'string'}"
+        ),
+        params=[
+            ParamSpec("rules", list, required=True, help_text="List of match/replace rule objects"),
+        ],
+        handler=_http_set_rules_handler,
+    ),
+    ToolSpec(
+        name="http_set_scope",
+        mcp_tool_name="http_set_scope",
+        endpoint="/api/tools/http-framework/set-scope",
+        category="web_framework",
+        description="Define in-scope host (and optionally subdomains) so out-of-scope requests are skipped.",
+        params=[
+            ParamSpec("host", str, required=True, help_text="In-scope host"),
+            ParamSpec("include_subdomains", bool, default=True, help_text="Also treat subdomains of host as in-scope"),
+        ],
+        handler=_http_set_scope_handler,
+    ),
+    ToolSpec(
+        name="http_repeater",
+        mcp_tool_name="http_repeater",
+        endpoint="/api/tools/http-framework/repeater",
+        category="web_framework",
+        description="Send a crafted request (Burp Repeater equivalent).",
+        params=[
+            ParamSpec("request_spec", dict, required=True, help_text="Request spec with keys: url, method, headers, cookies, data"),
+        ],
+        handler=_http_repeater_handler,
+    ),
+    ToolSpec(
+        name="http_intruder",
+        mcp_tool_name="http_intruder",
+        endpoint="/api/tools/http-framework/intruder",
+        category="web_framework",
+        description="Simple Intruder (sniper) fuzzing. Iterates payloads over each param individually.",
+        params=[
+            ParamSpec("url", str, required=True, help_text="Target URL"),
+            ParamSpec("method", str, default="GET", help_text="HTTP method"),
+            ParamSpec("location", str, default="query", help_text="Where to inject payloads: query|body|headers|cookie"),
+            ParamSpec("params", list, default=[], help_text="Parameter names to fuzz"),
+            ParamSpec("payloads", list, default=[], help_text="Payloads to try per parameter"),
+            ParamSpec("base_data", dict, default={}, help_text="Base request data/parameters"),
+            ParamSpec("max_requests", int, default=100, help_text="Maximum number of requests to send"),
+        ],
+        handler=_http_intruder_handler,
     ),
 ]

@@ -1,4 +1,3 @@
-from flask import Blueprint, request, jsonify
 import logging
 import re
 import requests
@@ -9,8 +8,6 @@ from bs4 import BeautifulSoup
 from backend.server_core import ModernVisualEngine
 
 logger = logging.getLogger(__name__)
-
-api_web_framework_http_framework_bp = Blueprint("api_web_framework_http_framework", __name__)
 
 
 class HTTPTestingFramework:
@@ -372,98 +369,3 @@ class HTTPTestingFramework:
 
 # Global instance
 http_framework = HTTPTestingFramework()
-
-
-@api_web_framework_http_framework_bp.route("/api/tools/http-framework", methods=["POST"])
-def http_framework_endpoint():
-    """Enhanced HTTP testing framework (Burp Suite alternative)"""
-    try:
-        params = request.json
-        action = params.get("action", "request")  # request, spider, proxy_history, set_rules, set_scope, repeater, intruder
-        url = params.get("url", "")
-        method = params.get("method", "GET")
-        data = params.get("data", {})
-        headers = params.get("headers", {})
-        cookies = params.get("cookies", {})
-
-        if action == "request":
-            if not url:
-                return jsonify({"error": "URL parameter is required for request action"}), 400
-
-            request_command = f"{method} {url}"
-            logger.info(f"{ModernVisualEngine.format_command_execution(request_command, 'STARTING')}")
-            result = http_framework.intercept_request(url, method, data, headers, cookies)
-
-            if result.get("success"):
-                logger.info(f"{ModernVisualEngine.format_tool_status('HTTP-Framework', 'SUCCESS', url)}")
-            else:
-                logger.error(f"{ModernVisualEngine.format_tool_status('HTTP-Framework', 'FAILED', url)}")
-
-            return jsonify(result)
-
-        elif action == "spider":
-            if not url:
-                return jsonify({"error": "URL parameter is required for spider action"}), 400
-
-            max_depth = params.get("max_depth", 3)
-            max_pages = params.get("max_pages", 100)
-
-            spider_command = f"Spider {url}"
-            logger.info(f"{ModernVisualEngine.format_command_execution(spider_command, 'STARTING')}")
-            result = http_framework.spider_website(url, max_depth, max_pages)
-
-            if result.get("success"):
-                total_pages = result.get("total_pages", 0)
-                pages_info = f"{total_pages} pages"
-                logger.info(f"{ModernVisualEngine.format_tool_status('HTTP-Spider', 'SUCCESS', pages_info)}")
-            else:
-                logger.error(f"{ModernVisualEngine.format_tool_status('HTTP-Spider', 'FAILED', url)}")
-
-            return jsonify(result)
-
-        elif action == "proxy_history":
-            return jsonify({
-                "success": True,
-                "history": http_framework.proxy_history[-100:],  # Last 100 requests
-                "total_requests": len(http_framework.proxy_history),
-                "vulnerabilities": http_framework.vulnerabilities,
-            })
-
-        elif action == "set_rules":
-            rules = params.get("rules", [])
-            http_framework.set_match_replace_rules(rules)
-            return jsonify({"success": True, "rules_set": len(rules)})
-
-        elif action == "set_scope":
-            scope_host = params.get("host")
-            include_sub = params.get("include_subdomains", True)
-            if not scope_host:
-                return jsonify({"error": "host parameter required"}), 400
-            http_framework.set_scope(scope_host, include_sub)
-            return jsonify({"success": True, "scope": http_framework.scope})
-
-        elif action == "repeater":
-            request_spec = params.get("request") or {}
-            result = http_framework.send_custom_request(request_spec)
-            return jsonify(result)
-
-        elif action == "intruder":
-            if not url:
-                return jsonify({"error": "URL parameter required"}), 400
-            method = params.get("method", "GET")
-            location = params.get("location", "query")
-            fuzz_params = params.get("params", [])
-            payloads = params.get("payloads", [])
-            base_data = params.get("base_data", {})
-            max_requests = params.get("max_requests", 100)
-            result = http_framework.intruder_sniper(
-                url, method, location, fuzz_params, payloads, base_data, max_requests
-            )
-            return jsonify(result)
-
-        else:
-            return jsonify({"error": f"Unknown action: {action}"}), 400
-
-    except Exception as e:
-        logger.error(f"{ModernVisualEngine.format_error_card('ERROR', 'HTTP-Framework', str(e))}")
-        return jsonify({"error": f"Server error: {str(e)}"}), 500
