@@ -278,7 +278,6 @@ TOOL_PROFILES = {
 
     #Tools for visual output and reporting
     "visual": [
-        lambda mcp, client, logger: register_visual_output_tools(mcp, client, logger),
         lambda mcp, client, logger: register_toolspec_category(mcp, client, logger, "visual"),
     ],
 

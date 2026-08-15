@@ -33,7 +33,6 @@ def register_blueprints(app):
   app.register_blueprint(api_topology_bp)
 
   # OPS — General
-  app.register_blueprint(api_visual_bp)
   app.register_blueprint(api_process_management_bp)
   app.register_blueprint(api_process_execute_async_bp)
   app.register_blueprint(api_process_get_task_result_bp)
