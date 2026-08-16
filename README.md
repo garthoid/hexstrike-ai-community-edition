@@ -88,7 +88,7 @@ NyxStrike does not just run tools — it orchestrates full attack chains using A
 - Full attack workflow: recon → enumeration → exploitation → reporting
 - Local payload & data workbench — 40+ crypto, encoding, and analysis operations, no target required
 - Every tool run hash-chained for tamper-evident, verifiable evidence
-- Real-time session dashboard — live output, network topology maps
+- Real-time dashboard — live output, network topology maps
 - MCP-compatible — plug into any AI client you already use
 
 > [Full feature breakdown](https://github.com/CommonHuman-Lab/nyxstrike/wiki/Features) · [Session & workbench docs](https://github.com/CommonHuman-Lab/nyxstrike/wiki/Dashboard-and-Sessions)
