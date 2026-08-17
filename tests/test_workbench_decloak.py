@@ -38,6 +38,45 @@ class TestRunDecloak:
         result = run_decloak("the quick brown fox jumps over the lazy dog")
         assert result["steps"] == []
 
+    def test_decimal_charcode_to_plaintext(self):
+        result = run_decloak("72 101 108 108 111")
+        assert result["output"] == "Hello"
+        assert [s["operation_id"] for s in result["steps"]] == ["charcode_convert"]
+
+    def test_punycode_domain_to_unicode(self):
+        result = run_decloak("xn--mnchen-3ya.de")
+        assert result["output"] == "münchen.de"
+        assert [s["operation_id"] for s in result["steps"]] == ["punycode"]
+
+    def test_basic_auth_header_to_userpass(self):
+        result = run_decloak("Basic dXNlcjpwYXNz")
+        assert result["output"] == "user:pass"
+        assert [s["operation_id"] for s in result["steps"]] == ["basic_auth"]
+
+    def test_nested_base64_of_binary_charcode(self):
+        import base64
+        nested = base64.b64encode(b"01001000 01101001").decode()
+        result = run_decloak(nested)
+        assert result["output"] == "Hi"
+        assert [s["operation_id"] for s in result["steps"]] == ["base64", "charcode_convert"]
+
+    def test_base58_to_plaintext(self):
+        result = run_decloak("72k1xXWG59fYdzSNoA")
+        assert result["output"] == "Hello, World!"
+        assert [s["operation_id"] for s in result["steps"]] == ["base58"]
+
+    def test_quoted_printable_to_plaintext(self):
+        result = run_decloak("caf=C3=A9 r=C3=A9sum=C3=A9")
+        assert result["output"] == "café résumé"
+        assert [s["operation_id"] for s in result["steps"]] == ["quoted_printable"]
+
+    def test_uuencoded_block_to_plaintext(self):
+        from backend.server_core.workbench.registry import get_operation
+        encoded = get_operation("uuencode").run({"input": "Hello, uuencode!"})["output"]
+        result = run_decloak(encoded)
+        assert result["output"] == "Hello, uuencode!"
+        assert [s["operation_id"] for s in result["steps"]] == ["uuencode"]
+
 
 class TestScore:
     def test_empty_string_scores_zero(self):

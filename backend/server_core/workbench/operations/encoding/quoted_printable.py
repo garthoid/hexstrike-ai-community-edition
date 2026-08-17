@@ -1,11 +1,11 @@
-import binascii
+import quopri
 import re
 
 from backend.server_core.workbench.registry import Operation, ParamSpec
 
 MODES = ["encode", "decode"]
 
-_HEX_RE = re.compile(r'^[0-9a-fA-F\s]+$')
+_QP_ESCAPE_RE = re.compile(r'=[0-9A-Fa-f]{2}')
 _MIN_PRINTABLE_RATIO = 0.9
 
 
@@ -23,39 +23,38 @@ def run(params: dict) -> dict:
         raise ValueError(f"Unsupported mode: {mode}")
 
     if mode == "encode":
-        return {"output": text.encode("utf-8", errors="surrogateescape").hex()}
+        encoded = quopri.encodestring(text.encode("utf-8", errors="surrogateescape"))
+        return {"output": encoded.decode("ascii")}
 
-    stripped = "".join(text.split())
     try:
-        decoded = binascii.unhexlify(stripped)
-    except (binascii.Error, ValueError) as e:
-        raise ValueError(f"Invalid hex input: {e}")
+        decoded = quopri.decodestring(text.encode("ascii", errors="replace"))
+    except ValueError as e:
+        raise ValueError(f"Invalid quoted-printable input: {e}")
     return {"output": decoded.decode("utf-8", errors="replace")}
 
 
 def _decloak_try(text: str) -> "str | None":
-    stripped = "".join(text.split())
-    if len(stripped) < 8 or len(stripped) % 2 != 0 or not _HEX_RE.match(stripped):
+    if not _QP_ESCAPE_RE.search(text):
         return None
     try:
-        output = run({"input": stripped, "mode": "decode"})["output"]
+        output = run({"input": text, "mode": "decode"})["output"]
     except ValueError:
         return None
-    if not output or _printable_ratio(output) < _MIN_PRINTABLE_RATIO:
+    if not output or output == text or _printable_ratio(output) < _MIN_PRINTABLE_RATIO:
         return None
     return output
 
 
 OPERATION = Operation(
-    id="hex",
+    id="quoted_printable",
     category="encoding",
-    name="Hex",
-    description="Encode text as hexadecimal, or decode hex back to text.",
+    name="Quoted-Printable",
+    description="MIME quoted-printable encode text, or decode quoted-printable back to text.",
     run=run,
     params=[
         ParamSpec(name="input", label="Input", type="textarea", required=True),
         ParamSpec(name="mode", label="Mode", type="select", choices=MODES, default="encode"),
     ],
     decloak_try=_decloak_try,
-    decloak_priority=10,
+    decloak_priority=16,
 )

@@ -1,13 +1,20 @@
 import base64
 import binascii
 import re
-import string
 
 from backend.server_core.workbench.registry import Operation, ParamSpec
 
 MODES = ["encode", "decode"]
 
 _B85_RE = re.compile(r'^[!-uz]+$')
+_MIN_PRINTABLE_RATIO = 0.9
+
+
+def _printable_ratio(text: str) -> float:
+    if not text:
+        return 0.0
+    good = sum(1 for c in text if c != "�" and (c.isprintable() or c in " \t\n\r"))
+    return good / len(text)
 
 
 def run(params: dict) -> dict:
@@ -35,10 +42,7 @@ def _decloak_try(text: str) -> "str | None":
         output = run({"input": stripped, "mode": "decode"})["output"]
     except ValueError:
         return None
-    if not output:
-        return None
-    printable_ratio = sum(1 for c in output if c in string.printable) / len(output)
-    if printable_ratio < 0.9:
+    if not output or _printable_ratio(output) < _MIN_PRINTABLE_RATIO:
         return None
     return output
 
