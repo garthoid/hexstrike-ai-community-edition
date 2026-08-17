@@ -140,6 +140,7 @@ export type {
 } from './sessions';
 
 export type {
+  WorkbenchDecloakResponse,
   WorkbenchOperation,
   WorkbenchOperationsResponse,
   WorkbenchParamSpec,

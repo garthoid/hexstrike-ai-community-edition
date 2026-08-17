@@ -78,6 +78,7 @@ import type {
   PluginsManifestResponse,
   PluginToggleResponse,
   ServerRestartResponse,
+  WorkbenchDecloakResponse,
   WorkbenchOperationsResponse,
   WorkbenchRecipeDeleteResponse,
   WorkbenchRecipeMutationResponse,
@@ -357,6 +358,8 @@ export const api = {
       stop_after_step_index: options?.stopAfterStepIndex,
       step_input_overrides: options?.stepInputOverrides,
     }),
+  workbenchDecloak: (input: string, maxDepth?: number) =>
+    post<WorkbenchDecloakResponse>('/api/workbench/decloak', { input, max_depth: maxDepth }),
   workbenchRecipes: () => get<WorkbenchRecipesResponse>('/api/workbench/recipes'),
   createWorkbenchRecipe: (name: string, steps: WorkbenchRecipeStepInput[]) =>
     post<WorkbenchRecipeMutationResponse>('/api/workbench/recipes', { name, steps }),

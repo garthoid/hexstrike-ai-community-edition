@@ -17,6 +17,13 @@ def run(op_id: str, **params) -> dict:
     return op.run(params)
 
 
+def decloak_try(op_id: str, text: str):
+    op = get_operation(op_id)
+    assert op is not None, f"operation {op_id!r} not found in registry"
+    assert op.decloak_try is not None, f"operation {op_id!r} has no decloak_try"
+    return op.decloak_try(text)
+
+
 # ---------------------------------------------------------------------------
 # encoding
 # ---------------------------------------------------------------------------
@@ -42,6 +49,15 @@ class TestBase64:
     def test_round_trip(self):
         encoded = run("base64", input="round trip me", mode="encode")["output"]
         assert run("base64", input=encoded, mode="decode")["output"] == "round trip me"
+
+    def test_decloak_try_matches_valid_base64(self):
+        assert decloak_try("base64", "VG9wU2VjcmV0Q29kZQ==") == "TopSecretCode"
+
+    def test_decloak_try_none_on_non_base64(self):
+        assert decloak_try("base64", "not base64 at all!!!") is None
+
+    def test_decloak_try_none_on_too_short(self):
+        assert decloak_try("base64", "abc") is None
 
 
 class TestBase32:
@@ -73,6 +89,15 @@ class TestHex:
     def test_decode_invalid_raises(self):
         with pytest.raises(ValueError):
             run("hex", input="zz", mode="decode")
+
+    def test_decloak_try_matches_valid_hex(self):
+        assert decloak_try("hex", "68656c6c6f21") == "hello!"
+
+    def test_decloak_try_none_on_non_hex(self):
+        assert decloak_try("hex", "not hex at all!!!") is None
+
+    def test_decloak_try_none_on_too_short(self):
+        assert decloak_try("hex", "6869") is None
 
 
 class TestUrlEncoding:
@@ -236,6 +261,12 @@ class TestRot13:
     def test_self_inverse(self):
         assert run("rot13", input=run("rot13", input="hello")["output"])["output"] == "hello"
 
+    def test_decloak_try_never_returns_none_for_non_empty_input(self):
+        assert decloak_try("rot13", "uryyb jbeyq") == "hello world"
+
+    def test_decloak_try_none_on_empty_input(self):
+        assert decloak_try("rot13", "   ") is None
+
 
 class TestCaesarCipher:
     def test_default_shift(self):
@@ -374,11 +405,27 @@ class TestGzip:
         with pytest.raises(ValueError):
             run("gzip", input="not base64 gzip data", mode="decompress")
 
+    def test_decloak_try_matches_valid_gzip(self):
+        compressed = run("gzip", input="hello gzip world", mode="compress")["output"]
+        assert decloak_try("gzip", compressed) == "hello gzip world"
+
+    def test_decloak_try_none_on_plain_base64_without_gzip_magic(self):
+        plain_b64 = run("base64", input="just base64, not gzip", mode="encode")["output"]
+        assert decloak_try("gzip", plain_b64) is None
+
 
 class TestZlib:
     def test_round_trip(self):
         compressed = run("zlib", input="b" * 200, mode="compress")["output"]
         assert run("zlib", input=compressed, mode="decompress")["output"] == "b" * 200
+
+    def test_decloak_try_matches_valid_zlib(self):
+        compressed = run("zlib", input="hello zlib world", mode="compress")["output"]
+        assert decloak_try("zlib", compressed) == "hello zlib world"
+
+    def test_decloak_try_none_on_plain_base64_without_zlib_header(self):
+        plain_b64 = run("base64", input="just base64, not zlib", mode="encode")["output"]
+        assert decloak_try("zlib", plain_b64) is None
 
     def test_decompress_invalid_raises(self):
         with pytest.raises(ValueError):
@@ -574,6 +621,12 @@ class TestHashIdentify:
     def test_empty_input_raises(self):
         with pytest.raises(ValueError):
             run("hash_identify", input="")
+
+    def test_decloak_try_matches_md5_length_hash(self):
+        assert "MD5" in decloak_try("hash_identify", "5d41402abc4b2a76b9719d911017c592")
+
+    def test_decloak_try_none_on_non_hash_shaped_input(self):
+        assert decloak_try("hash_identify", "not a hash at all") is None
 
 
 class TestUrlParse:
