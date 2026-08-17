@@ -23,7 +23,7 @@ def _decloak_try(text: str) -> "str | None":
     if not _ENTITY_RE.search(text):
         return None
     decoded = html.unescape(text)
-    if decoded == text:
+    if decoded == text or "�" in decoded:
         return None
     return decoded
 

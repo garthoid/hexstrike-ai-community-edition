@@ -1,11 +1,10 @@
-import quopri
 import re
 
 from backend.server_core.workbench.registry import Operation, ParamSpec
 
 MODES = ["encode", "decode"]
 
-_QP_ESCAPE_RE = re.compile(r'=[0-9A-Fa-f]{2}')
+_UTF7_SHIFT_RE = re.compile(r'\+[A-Za-z0-9+/]+')
 _MIN_PRINTABLE_RATIO = 0.9
 
 
@@ -23,40 +22,38 @@ def run(params: dict) -> dict:
         raise ValueError(f"Unsupported mode: {mode}")
 
     if mode == "encode":
-        encoded = quopri.encodestring(text.encode("utf-8", errors="surrogateescape"))
+        encoded = text.encode("utf-7")
         return {"output": encoded.decode("ascii")}
 
     try:
-        decoded = quopri.decodestring(text.encode("ascii", errors="replace"))
-    except ValueError as e:
-        raise ValueError(f"Invalid quoted-printable input: {e}")
-    return {"output": decoded.decode("utf-8", errors="replace")}
+        decoded = text.encode("ascii").decode("utf-7")
+    except (UnicodeDecodeError, UnicodeEncodeError) as e:
+        raise ValueError(f"Invalid UTF-7 input: {e}")
+    return {"output": decoded}
 
 
 def _decloak_try(text: str) -> "str | None":
-    if not _QP_ESCAPE_RE.search(text):
+    if not _UTF7_SHIFT_RE.search(text):
         return None
     try:
         output = run({"input": text, "mode": "decode"})["output"]
     except ValueError:
         return None
-    if not output or output == text or "�" in output:
-        return None
-    if _printable_ratio(output) < _MIN_PRINTABLE_RATIO:
+    if not output or output == text or _printable_ratio(output) < _MIN_PRINTABLE_RATIO:
         return None
     return output
 
 
 OPERATION = Operation(
-    id="quoted_printable",
+    id="utf7",
     category="encoding",
-    name="Quoted-Printable",
-    description="MIME quoted-printable encode text, or decode quoted-printable back to text.",
+    name="UTF-7",
+    description="Encode text as UTF-7, or decode UTF-7 back to text.",
     run=run,
     params=[
         ParamSpec(name="input", label="Input", type="textarea", required=True),
         ParamSpec(name="mode", label="Mode", type="select", choices=MODES, default="encode"),
     ],
     decloak_try=_decloak_try,
-    decloak_priority=16,
+    decloak_priority=19,
 )

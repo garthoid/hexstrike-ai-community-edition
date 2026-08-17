@@ -60,6 +60,47 @@ class TestBase64:
         assert decloak_try("base64", "abc") is None
 
 
+class TestBase64Url:
+    def test_round_trip(self):
+        encoded = run("base64url", input="subjects?x=1&y=2", mode="encode")["output"]
+        assert run("base64url", input=encoded, mode="decode")["output"] == "subjects?x=1&y=2"
+
+    def test_encode_uses_dash_underscore_alphabet(self):
+        assert run("base64url", input="subjects?x=1&y=2", mode="encode")["output"] == "c3ViamVjdHM_eD0xJnk9Mg=="
+
+    def test_default_mode_is_encode(self):
+        assert run("base64url", input="hello") == run("base64url", input="hello", mode="encode")
+
+    def test_decode_invalid_raises(self):
+        with pytest.raises(ValueError):
+            run("base64url", input="not valid!!!", mode="decode")
+
+    def test_decloak_try_matches_dash_underscore_base64(self):
+        encoded = run("base64url", input="subjects?x=1&y=2", mode="encode")["output"]
+        assert decloak_try("base64url", encoded) == "subjects?x=1&y=2"
+
+    def test_decloak_try_none_without_dash_or_underscore(self):
+        assert decloak_try("base64url", "VG9wU2VjcmV0Q29kZQ==") is None
+
+
+class TestUtf7:
+    def test_round_trip(self):
+        encoded = run("utf7", input="Hi Mom ☺!", mode="encode")["output"]
+        assert run("utf7", input=encoded, mode="decode")["output"] == "Hi Mom ☺!"
+
+    def test_encode_known_vector(self):
+        assert run("utf7", input="Hi Mom ☺!", mode="encode")["output"] == "Hi Mom +Jjo!"
+
+    def test_default_mode_is_encode(self):
+        assert run("utf7", input="hello") == run("utf7", input="hello", mode="encode")
+
+    def test_decloak_try_matches_shift_sequence(self):
+        assert decloak_try("utf7", "Hi Mom +Jjo!") == "Hi Mom ☺!"
+
+    def test_decloak_try_none_without_plus(self):
+        assert decloak_try("utf7", "plain ascii text") is None
+
+
 class TestBase32:
     def test_encode(self):
         assert run("base32", input="hello", mode="encode")["output"] == "NBSWY3DP"
@@ -223,6 +264,9 @@ class TestQuotedPrintable:
 
     def test_decloak_try_none_without_escapes(self):
         assert decloak_try("quoted_printable", "plain text, no escapes here") is None
+
+    def test_decloak_try_none_on_coincidental_equals_hex_pair(self):
+        assert decloak_try("quoted_printable", "q=eagle&loc=north gate?") is None
 
 
 class TestUuencode:
@@ -428,6 +472,50 @@ class TestXorCipher:
         key_bytes = b"k3y"
         recovered = bytes(b ^ key_bytes[i % len(key_bytes)] for i, b in enumerate(raw))
         assert recovered.decode("utf-8") == "secret message"
+
+    def test_decloak_try_recovers_single_byte_key(self):
+        hexed = run("xor_cipher", input="Secret message here", key="k")["output"]
+        assert decloak_try("xor_cipher", hexed) == "Secret message here"
+
+    def test_decloak_try_none_on_non_hex(self):
+        assert decloak_try("xor_cipher", "not hex at all!!!") is None
+
+    def test_decloak_try_none_on_uniform_hash_bytes(self):
+        assert decloak_try("xor_cipher", "a" * 64) is None
+
+    def test_decloak_try_none_on_plain_hex_of_text(self):
+        hexed = run("hex", input="hello world", mode="encode")["output"]
+        assert decloak_try("xor_cipher", hexed) is None
+
+
+class TestRot47:
+    def test_encode(self):
+        assert run("rot47", input="Hello, World!")["output"] == "w6==@[ (@C=5P"
+
+    def test_self_inverse(self):
+        encoded = run("rot47", input="Hello, World!")["output"]
+        assert run("rot47", input=encoded)["output"] == "Hello, World!"
+
+    def test_decloak_try_never_returns_none_for_non_empty_input(self):
+        assert decloak_try("rot47", "w6==@[ (@C=5P") == "Hello, World!"
+
+    def test_decloak_try_none_on_empty_input(self):
+        assert decloak_try("rot47", "   ") is None
+
+
+class TestAtbash:
+    def test_encode(self):
+        assert run("atbash", input="Hello, World!")["output"] == "Svool, Dliow!"
+
+    def test_self_inverse(self):
+        encoded = run("atbash", input="Hello, World!")["output"]
+        assert run("atbash", input=encoded)["output"] == "Hello, World!"
+
+    def test_decloak_try_never_returns_none_for_non_empty_input(self):
+        assert decloak_try("atbash", "Svool, Dliow!") == "Hello, World!"
+
+    def test_decloak_try_none_on_empty_input(self):
+        assert decloak_try("atbash", "   ") is None
 
 
 class TestVigenereCipher:

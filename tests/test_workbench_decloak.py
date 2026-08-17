@@ -32,6 +32,24 @@ class TestRunDecloak:
         md5_like = "5d41402abc4b2a76b9719d911017c592"
         result = run_decloak(md5_like)
         assert result["steps"][0]["operation_id"] == "hash_identify"
+        assert result["output"] == result["steps"][0]["output"]
+        assert result["stopped_reason"] == "terminal"
+
+    def test_terminal_output_matches_last_step_not_stale_input(self):
+        jwt = (
+            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9."
+            "eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIn0."
+            "dozjgNryP4J3jVmNHl0w5N_XgL0n3I9PlFUP0THsR8U"
+        )
+        result = run_decloak(jwt)
+        assert result["output"] != jwt
+        assert result["output"] == result["steps"][-1]["output"]
+        assert "John Doe" in result["output"]
+
+    def test_uniform_hash_bytes_not_falsely_xord(self):
+        sha256_like = "a" * 64
+        result = run_decloak(sha256_like)
+        assert result["steps"][0]["operation_id"] == "hash_identify"
         assert result["stopped_reason"] == "terminal"
 
     def test_plain_english_not_falsely_rot13d(self):
@@ -76,6 +94,35 @@ class TestRunDecloak:
         result = run_decloak(encoded)
         assert result["output"] == "Hello, uuencode!"
         assert [s["operation_id"] for s in result["steps"]] == ["uuencode"]
+
+    def test_base64url_to_plaintext(self):
+        from backend.server_core.workbench.registry import get_operation
+        encoded = get_operation("base64url").run({"input": "subjects?x=1&y=2", "mode": "encode"})["output"]
+        result = run_decloak(encoded)
+        assert result["output"] == "subjects?x=1&y=2"
+        assert [s["operation_id"] for s in result["steps"]] == ["base64url"]
+
+    def test_utf7_to_plaintext(self):
+        result = run_decloak("Hi Mom +Jjo!")
+        assert result["output"] == "Hi Mom ☺!"
+        assert [s["operation_id"] for s in result["steps"]] == ["utf7"]
+
+    def test_xor_single_byte_to_plaintext(self):
+        from backend.server_core.workbench.registry import get_operation
+        hexed = get_operation("xor_cipher").run({"input": "Secret message here", "key": "k"})["output"]
+        result = run_decloak(hexed)
+        assert result["output"] == "Secret message here"
+        assert [s["operation_id"] for s in result["steps"]] == ["xor_cipher"]
+
+    def test_atbash_wins_over_rot13_when_both_score_plausible(self):
+        result = run_decloak("Nvvg nv zg gsv low yirwtv glmrtsg zg mrmv")
+        assert result["output"] == "Meet me at the old bridge tonight at nine"
+        assert [s["operation_id"] for s in result["steps"]] == ["atbash"]
+
+    def test_coincidental_query_string_equals_not_mangled_by_quoted_printable(self):
+        result = run_decloak("q=eagle&loc=north gate?")
+        assert result["steps"] == []
+        assert result["output"] == "q=eagle&loc=north gate?"
 
 
 class TestScore:

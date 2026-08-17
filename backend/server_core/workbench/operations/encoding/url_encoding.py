@@ -25,7 +25,7 @@ def _decloak_try(text: str) -> "str | None":
     if not _PERCENT_ESCAPE_RE.search(text):
         return None
     decoded = unquote(text)
-    if decoded == text:
+    if decoded == text or "�" in decoded:
         return None
     return decoded
 
