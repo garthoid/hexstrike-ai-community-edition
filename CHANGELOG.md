@@ -1,6 +1,6 @@
 # Changelog
 
-## 1.9.0 (NEXT)
+## 1.9.0 (2026-08-20)
 
 ### Run page
 - Boolean params (e.g. `exploit`, `dump_all`) now render as toggle switches instead of free-text true/false fields.
